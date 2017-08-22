@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 
 #include "WifiConnector.h"
+#include "WebServerRouter.h"
 
 ESP8266WebServer server(80);
 WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
@@ -43,6 +43,8 @@ void setup(void){
   wifiConnector.connect();
 
   // Build server routes
+  WebServerRouter router(80);
+
   server.on("/", handleRoot);
 
   server.on("/inline", [](){
