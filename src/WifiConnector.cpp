@@ -13,8 +13,7 @@ void WifiConnector::connect() {
       Serial.print(".");
     }
     Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(_ssid.c_str());
+    Serial.printf("Connected to %s\n", _ssid.c_str());
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP()); 
 }
