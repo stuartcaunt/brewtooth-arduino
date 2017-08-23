@@ -1,7 +1,9 @@
 #include <Arduino.h>
+#include <FS.h>
 #include <ESP8266WebServer.h>
 
 #include "WifiConnector.h"
+#include "Properties.h"
 #include "routing/WebServerRouter.h"
 
 ESP8266WebServer server(80);
@@ -11,21 +13,25 @@ WebServerRouter router(&server);
 const int led = 13;
 
 void setup(void){
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
+    pinMode(led, OUTPUT);
+    digitalWrite(led, 0);
 
-  // Initialise serial port
-  Serial.begin(9600);
+    // Initialise serial port
+    Serial.begin(9600);
 
-  // Connect to wifi
-  wifiConnector.connect();
+    // Connect to wifi
+    wifiConnector.connect();
 
-  // Build server routes
-  router.buildRoutes();
+    // Build server routes
+    router.buildRoutes();
  
-  // start the server
-  server.begin();
-  Serial.println("HTTP server started");
+    // Initialise SPIFFS
+    SPIFFS.begin();
+    Properties::getInstance()->init();
+
+    // start the server
+    server.begin();
+    Serial.println("HTTP server started");
 }
 
 void loop(void){
