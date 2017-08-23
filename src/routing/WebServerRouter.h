@@ -9,12 +9,10 @@ class WebServerEndpoint;
 
 class WebServerRouter {
 public:
-    WebServerRouter(int port);
+    WebServerRouter(ESP8266WebServer * server);
     virtual ~WebServerRouter();
 
     void buildRoutes();
-    void begin();
-    void handleClient();
     
 private:
     void addEndpoint(WebServerEndpoint * endpoint);

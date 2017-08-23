@@ -1,5 +1,5 @@
-#ifndef TEMPERATURE_H
-#define TEMPERATURE_H
+#ifndef TEMPERATUREENDPOINT_H
+#define TEMPERATUREENDPOINT_H
 
 #include "WebServerEndpoint.h"
 
@@ -15,4 +15,4 @@ private:
     float _temperature;
 };
 
-#endif /*TEMPERATURE_H*/
+#endif /*TEMPERATUREENDPOINT_H*/

@@ -1,14 +1,15 @@
 #include "WebServerRouter.h"
+#include "Error404Endpoint.h"
+#include "RootEndpoint.h"
 #include "TemperatureEndpoint.h"
 #include <ESP8266WebServer.h>
 
-WebServerRouter::WebServerRouter(int port) :
-    _server(new ESP8266WebServer(port)) {
+WebServerRouter::WebServerRouter(ESP8266WebServer * server) :
+    _server(server) {
 
 }
 
 WebServerRouter::~WebServerRouter() {
-    delete _server;
     _server = NULL;
 
     for (std::vector<WebServerEndpoint *>::iterator it = _endpoints.begin(); it < _endpoints.end(); it++) {
@@ -19,17 +20,10 @@ WebServerRouter::~WebServerRouter() {
 
 void WebServerRouter::buildRoutes() {
     Serial.println("Building all routes");
+    this->addEndpoint(new Error404Endpoint());
+    this->addEndpoint(new RootEndpoint());
     this->addEndpoint(new TemperatureEndpoint());
 }
-
-void WebServerRouter::begin() {
-    _server->begin();
-}
-
-void WebServerRouter::handleClient() {
-    _server->handleClient();
-}
-
 
 void WebServerRouter::addEndpoint(WebServerEndpoint * endpoint) {
     endpoint->buildPaths(_server);

@@ -1,6 +1,4 @@
-#include <Arduino.h>
 #include "TemperatureEndpoint.h"
-#include <sstream>
 
 void TemperatureEndpoint::buildPaths(ESP8266WebServer * server) {
     Serial.println("Building paths for TemperatureEndpoint");
