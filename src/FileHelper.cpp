@@ -26,8 +26,6 @@ bool FileHelper::load(const String & filename, std::string & data) {
     return (size > 0);
 }
 
-void FileHelper::save(const String & filename, const std::string & data) {
 
-}
 
 

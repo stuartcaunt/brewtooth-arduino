@@ -3,30 +3,40 @@
 #include <FS.h>
 #include <ArduinoJson.h>
 
-Configuration * Configuration::_instance = 0;
-
-Configuration * Configuration::getInstance() {
-    if (_instance == 0) {
-        _instance = new Configuration();
-    }
-    return _instance;
-}
+Properties Configuration::properties = Properties();
 
 void Configuration::init() {
-
+    Serial.println("Loading properties file");
+    
     std::string jsonData;
     FileHelper fileHelper;
-    if (fileHelper.load("application.properties", jsonData)) {
+    if (fileHelper.load(PROPERTIES_FILE_NAME, jsonData)) {
         char * jsonBuffer = new char[jsonData.length() + 1];
         strcpy(jsonBuffer, jsonData.c_str());
         
-        this->deserialize(jsonBuffer);
+        deserialize(jsonBuffer);
 
         delete [] jsonBuffer;
 
     } else {
         Serial.println("Could not read properties file");
     }
+}
+
+void Configuration::save() {
+    Serial.println("Saving properties file");
+    
+    StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
+    
+    JsonObject & root = jsonBuffer.createObject();
+    JsonObject & wifiData = root.createNestedObject("wifiData");
+    wifiData["isConfigured"] = properties.wifiData.isConfigured;
+    wifiData["ssid"] = properties.wifiData.ssid;
+    wifiData["password"] = properties.wifiData.password;
+    
+    File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
+    root.printTo(propertiesFile);
+    propertiesFile.close(); 
 }
 
 void Configuration::deserialize(char * json) {
@@ -43,8 +53,6 @@ void Configuration::deserialize(char * json) {
             properties.wifiData.isConfigured = wifiData["isConfigured"];
             properties.wifiData.ssid = wifiData["ssid"].as<String>();
             properties.wifiData.password = wifiData["password"].as<String>();
-        }        
+        }
     }
-
-        
 }

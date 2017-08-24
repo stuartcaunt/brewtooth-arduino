@@ -10,7 +10,6 @@ public:
     virtual ~FileHelper() {}
 
     bool load(const String & filename, std::string & data);
-    void save(const String & filename, const std::string & data);
 
 private:
 };

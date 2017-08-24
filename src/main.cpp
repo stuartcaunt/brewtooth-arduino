@@ -18,22 +18,36 @@ void setup(void){
 
     // Initialise serial port
     Serial.begin(9600);
-
-    // Connect to wifi
-    wifiConnector.connect();
-
-    // Build server routes
-    router.buildRoutes();
  
     // Initialise SPIFFS
     SPIFFS.begin();
-    Configuration::getInstance()->init();
 
-    // start the server
-    server.begin();
-    Serial.println("HTTP server started");
+    // Initialise configuration
+    Configuration::init();
+
+    if (Configuration::properties.wifiData.isConfigured) {
+        Serial.println("Wifi is configured: connecting to wifi and running server");
+    
+        // Connect to wifi
+        wifiConnector.connect();
+    
+        // Build server routes
+        router.buildRoutes();
+    
+        // start the server
+        server.begin();
+        Serial.println("HTTP server started");
+    
+    } else {
+        Serial.println("Setting up wifi station to obtain network details");
+     
+        Configuration::properties.wifiData.isConfigured = true;
+        Configuration::save();
+    }
 }
 
 void loop(void){
-  server.handleClient();
+    if (Configuration::properties.wifiData.isConfigured) {
+        server.handleClient();
+    }
 }

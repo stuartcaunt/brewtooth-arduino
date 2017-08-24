@@ -27,23 +27,18 @@ struct Properties {
 //     }
 // }
 #define PROPERTIES_JSON_SIZE 256
+#define PROPERTIES_FILE_NAME "application.properties"
 
 
 class Configuration {
 public:
-    virtual ~Configuration() {}
-
-    static Configuration * getInstance();
-    void init();
-
-    Properties properties;
+    static void init();
+    static void save();
     
+    static Properties properties;
+
 private:
-    void deserialize(char * jsonBuffer);
-        
-private:
-    Configuration() {}
-    static Configuration * _instance;
+    static void deserialize(char * jsonBuffer);
 
 };
 

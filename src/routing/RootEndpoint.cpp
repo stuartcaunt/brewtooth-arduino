@@ -3,7 +3,7 @@
 void RootEndpoint::buildPaths(ESP8266WebServer * server) {
     Serial.println("Building paths for RootEndpoint");
     
-    server->onNotFound(std::bind(&RootEndpoint::getMessage, this, server));
+    server->on("/", std::bind(&RootEndpoint::getMessage, this, server));
 }
 
 void RootEndpoint::getMessage(ESP8266WebServer * server) {
