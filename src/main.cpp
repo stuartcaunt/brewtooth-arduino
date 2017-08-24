@@ -3,7 +3,7 @@
 #include <ESP8266WebServer.h>
 
 #include "WifiConnector.h"
-#include "Properties.h"
+#include "Configuration.h"
 #include "routing/WebServerRouter.h"
 
 ESP8266WebServer server(80);
@@ -27,7 +27,7 @@ void setup(void){
  
     // Initialise SPIFFS
     SPIFFS.begin();
-    Properties::getInstance()->init();
+    Configuration::getInstance()->init();
 
     // start the server
     server.begin();
