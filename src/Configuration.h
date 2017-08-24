@@ -1,7 +1,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include <string>
+#include <Arduino.h>
 
 struct WifiData {
     WifiData() :
@@ -10,8 +10,8 @@ struct WifiData {
         password("") {}
 
     bool isConfigured;
-    std::string ssid;
-    std::string password;
+    String ssid;
+    String password;
 };
 
 struct Properties {

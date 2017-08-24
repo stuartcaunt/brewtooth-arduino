@@ -41,8 +41,8 @@ void Configuration::deserialize(char * json) {
         if (root.containsKey("wifiData")) {
             JsonObject & wifiData = root["wifiData"];
             properties.wifiData.isConfigured = wifiData["isConfigured"];
-            properties.wifiData.ssid = std::string(wifiData["ssid"].as<const char *>());
-            properties.wifiData.password = std::string(wifiData["password"].as<const char *>());
+            properties.wifiData.ssid = wifiData["ssid"].as<String>();
+            properties.wifiData.password = wifiData["password"].as<String>();
         }        
     }
 
