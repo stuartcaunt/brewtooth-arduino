@@ -12,14 +12,15 @@ bool FileHelper::load(const String & filename, std::string & data) {
     }
 
     size_t size = file.size();
-    Serial.println("File " + filename + " contains " + size + " bytes");
     if (size > 0) {
-        Serial.println("Reading file " + filename);
+        Serial.println("Reading file " + filename + ", containing " + size + " bytes");
         std::unique_ptr<char[]> buf (new char[size]);
         file.readBytes(buf.get(), size);
         
         // copy data into string
         data = std::string(buf.get());
+    } else {
+        Serial.println("File " + filename + " is empty");        
     }
     file.close();
 

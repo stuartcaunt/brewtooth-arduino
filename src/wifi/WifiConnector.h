@@ -1,21 +1,20 @@
 #ifndef WIFICONNECTOR_H
 #define WIFICONNECTOR_H
 
-#include <WiFiClient.h>
+#include <Arduino.h>
 
 class WifiConnector {
 public:
-    WifiConnector(const std::string & ssid, const std::string & password) :
+    WifiConnector(const String & ssid, const String & password) :
         _ssid(ssid),
         _password(password) {}
     virtual ~WifiConnector() {}
 
     void connect();
-    IPAddress getLocalIPAddress();
 
 private:
-    std::string _ssid;
-    std::string _password;   
+    String _ssid;
+    String _password;   
 };
 
 #endif /*WIFICONNECTOR_H*/
