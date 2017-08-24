@@ -1,0 +1,10 @@
+ - Add logging class
+   - handle logging level
+   - write to serial line
+   - write to file
+    - access file through endpoint
+
+- Properties
+  - save wifi details
+
+- Wifi server
