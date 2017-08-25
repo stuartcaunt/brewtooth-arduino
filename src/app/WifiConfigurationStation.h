@@ -3,6 +3,7 @@
 
 #include "ApplicationState.h"
 
+class WiFiManager;
 class ESP8266WebServer;
 
 class WifiConfigurationStation : public ApplicationState {
@@ -15,9 +16,11 @@ public:
 
 private:
     void handleRoot();
-        
+    void callback(WiFiManager * wiFiManager);
+    
 private:
     ESP8266WebServer * _server;
+    WiFiManager * _wifiManager;
     
 };
 
