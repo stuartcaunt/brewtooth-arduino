@@ -1,43 +1,60 @@
 #include <Arduino.h>
-#include <FS.h>
-#include "utils/Configuration.h"
+#include <WiFiManager.h> 
+#include <DoubleResetDetector.h>
 #include "app/BrewtoothMashController.h"
-#include "app/WifiConfigurationStation.h"
 
-ApplicationState * appState = 0;
+// Number of seconds after reset during which a 
+// subseqent reset will be considered a double reset.
+#define DRD_TIMEOUT 10
 
-const int led = 13;
+// RTC Memory Address for the DoubleResetDetector to use
+#define DRD_ADDRESS 0
+
+DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
+BrewtoothMashController * mashController = 0;
 
 void setup(void){
-    pinMode(led, OUTPUT);
-    digitalWrite(led, 0);
 
     // Initialise serial port
     Serial.begin(9600);
     Serial.println("");
- 
-    // Initialise SPIFFS
-    SPIFFS.begin();
 
-    // Initialise configuration
-    Configuration::init();
-
-    if (Configuration::properties.wifiData.isConfigured) {
-        Serial.println("Wifi is configured: connecting to wifi and running server");
-    
-        appState = new BrewtoothMashController();
-    
-    } else {
-        Serial.println("Setting up wifi station to obtain network details");
-     
-        appState = new WifiConfigurationStation();
+    // reset saved settings when double reset occurs
+    WiFiManager wiFiManager;
+    if (doubleResetDetector.detectDoubleReset()) {
+        Serial.println("Double Reset Detected: resetting wifi");
+        wiFiManager.resetSettings();
     }
 
-    // Setup the current app state
-    appState->setup();    
+    // Start wifi connection
+    String macAddress = WiFi.softAPmacAddress();
+    macAddress.replace(":", "");
+    Serial.println("Mac addr = " + macAddress);
+    String ssid = "BREWTOOTH-" + macAddress.substring(0, 4);
+
+    Serial.println("Waiting for wifi setup...");
+    if (!wiFiManager.autoConnect(ssid.c_str())) {
+        Serial.println("Wifi setup failed... retry");
+        
+        delay(3000);
+        //reset and try again, or maybe put it to deep sleep
+        ESP.reset();
+        delay(5000);
+
+    } else {
+        Serial.println("... wifi setup terminated");
+
+        // Create mash controller
+        mashController = new BrewtoothMashController();
+        
+        // Setup the mash controller
+        mashController->setup();    
+    }
 }
 
 void loop(void){
-  // Loop with the current app state
-  appState->loop();
+    if (mashController != 0) {
+        mashController->loop();
+    }
+    doubleResetDetector.loop();
 }
