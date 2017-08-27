@@ -8,3 +8,23 @@ x Properties
 x   save wifi details
 
 x Wifi server
+
+- temperature endpoint
+ - POST to add new TemperatureReader
+   - Specify with a GPIO port
+ - PUT to update a TemperatureReader
+ - GET to read
+ - GET to read temperature
+ - Save TemperatureReaders to Configuration file
+
+- TemperatureReader
+  - initialised with a single reader
+  - configured with a port  
+    - can be modified
+
+- Endpoint to get average temperature ?
+
+- GPIO service
+  - indicates which ports are used
+   - input or output
+  - TemperatureReader will use GPIO service

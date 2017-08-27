@@ -1,14 +1,15 @@
 #include <Arduino.h>
+#include <FS.h>
 #include <WiFiManager.h> 
 #include <DoubleResetDetector.h>
 #include "app/BrewtoothMashController.h"
+#include "utils/WifiConnector.h"
+#include "utils/Configuration.h"
 
-// Number of seconds after reset during which a 
-// subseqent reset will be considered a double reset.
 #define DRD_TIMEOUT 10
-
-// RTC Memory Address for the DoubleResetDetector to use
 #define DRD_ADDRESS 0
+
+#define DEBUG_WIFI_CONNECTION 1
 
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 BrewtoothMashController * mashController = 0;
@@ -17,8 +18,20 @@ void setup(void){
 
     // Initialise serial port
     Serial.begin(9600);
-    Serial.println("");
+ 
+    // Initialise SPIFFS
+    SPIFFS.begin();
+    
+    // Initialise configuration
+    Configuration::init();
 
+    Serial.println("Application started");
+    
+#if (DEBUG_WIFI_CONNECTION == 1)
+    WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
+    wifiConnector.connect();
+
+#else
     // reset saved settings when double reset occurs
     WiFiManager wiFiManager;
     if (doubleResetDetector.detectDoubleReset()) {
@@ -29,7 +42,7 @@ void setup(void){
     // Start wifi connection
     String macAddress = WiFi.softAPmacAddress();
     macAddress.replace(":", "");
-    Serial.println("Mac addr = " + macAddress);
+    Serial.println("Mac addr = " + macAddress;
     String ssid = "BREWTOOTH-" + macAddress.substring(0, 4);
 
     Serial.println("Waiting for wifi setup...");
@@ -41,20 +54,22 @@ void setup(void){
         ESP.reset();
         delay(5000);
 
-    } else {
-        Serial.println("... wifi setup terminated");
-
-        // Create mash controller
-        mashController = new BrewtoothMashController();
-        
-        // Setup the mash controller
-        mashController->setup();    
     }
+    #endif
+    
+    Serial.println("... wifi setup terminated");
+
+    // Create mash controller
+    mashController = new BrewtoothMashController();
+    
+    // Setup the mash controller
+    mashController->setup();    
 }
 
 void loop(void){
-    if (mashController != 0) {
-        mashController->loop();
-    }
+    // Loop over mash controller
+    mashController->loop();
+
+    // Determine if double reset has been done
     doubleResetDetector.loop();
 }
