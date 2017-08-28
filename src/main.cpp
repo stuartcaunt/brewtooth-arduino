@@ -35,7 +35,8 @@ void setup(void){
     // reset saved settings when double reset occurs
     WiFiManager wiFiManager;
     if (doubleResetDetector.detectDoubleReset()) {
-        Serial.println("Double Reset Detected: resetting wifi");
+        Serial.println("Double Reset Detected: resetting device");
+        Configuration::reset();
         wiFiManager.resetSettings();
     }
 

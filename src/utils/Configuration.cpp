@@ -20,6 +20,7 @@ void Configuration::init() {
 
     } else {
         Serial.println("Could not read properties file");
+        makeDefaultConfiguration();
     }
 }
 
@@ -28,17 +29,28 @@ void Configuration::save() {
     
     StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
     
+    // root object
     JsonObject & root = jsonBuffer.createObject();
-    JsonObject & wifiData = root.createNestedObject("wifiData");
-    wifiData["isConfigured"] = properties.wifiData.isConfigured;
-    wifiData["ssid"] = properties.wifiData.ssid;
-    wifiData["password"] = properties.wifiData.password;
+
+    // Array of temperature configs
+    JsonArray & temperatureConfigs = root.createNestedArray("temperatureReaders");
+    
+    // iteratuer over temperature readers
+    for (std::vector<TemperatureReaderConfig>::iterator it = properties.temperatureReaders.begin(); it != properties.temperatureReaders.end(); it++) {
+        TemperatureReaderConfig temperatureReaderConfig = *it;
+        JsonObject & temperatureConfigJson = temperatureConfigs.createNestedObject();
+        temperatureConfigJson["port"] = temperatureReaderConfig.port;
+        temperatureConfigJson["id"] = temperatureReaderConfig.id;
+    }
     
     File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
     root.printTo(propertiesFile);
     propertiesFile.close(); 
 }
 
+void Configuration::makeDefaultConfiguration() {
+}
+    
 void Configuration::deserialize(char * json) {
     StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
     
@@ -48,11 +60,13 @@ void Configuration::deserialize(char * json) {
 
     } else {
         // Deserialize wifiData
-        if (root.containsKey("wifiData")) {
-            JsonObject & wifiData = root["wifiData"];
-            properties.wifiData.isConfigured = wifiData["isConfigured"];
-            properties.wifiData.ssid = wifiData["ssid"].as<String>();
-            properties.wifiData.password = wifiData["password"].as<String>();
+        if (root.containsKey("temperatureReaders")) {
+            // JsonArray & temperatureConfigs = root["temperatureReaders"];
+
+
+            // properties.wifiData.isConfigured = wifiData["isConfigured"];
+            // properties.wifiData.ssid = wifiData["ssid"].as<String>();
+            // properties.wifiData.password = wifiData["password"].as<String>();
         }
     }
 }

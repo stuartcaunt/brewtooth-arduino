@@ -2,29 +2,25 @@
 #define CONFIGURATION_H
 
 #include <Arduino.h>
-
-struct WifiData {
-    WifiData() :
-        isConfigured(false),
-        ssid(""),
-        password("") {}
-
-    bool isConfigured;
-    String ssid;
-    String password;
-};
+#include <vector>
+#include "../model/TemperatureReaderConfig.h"
 
 struct Properties {
-    WifiData wifiData;
+    std::vector<TemperatureReaderConfig> temperatureReaders;
 };
 
 // https://bblanchon.github.io/ArduinoJson/assistant/
 // {
-//     "wifiData": {
-//       "isConfigured": false,
-//       "password": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-//       "ssid": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-//     }
+//     "temperatureReaders": [
+//         {
+//             "port": 0,
+//             "id": "XXXXXXXXXXXXXXXXXXXX"
+//         },
+//         {
+//             "port": 1,
+//             "id": "XXXXXXXXXXXXXXXXXXXX"
+//         }
+//     ]
 // }
 #define PROPERTIES_JSON_SIZE 256
 #define PROPERTIES_FILE_NAME "application.properties"
@@ -34,10 +30,12 @@ class Configuration {
 public:
     static void init();
     static void save();
+    static void reset();
     
     static Properties properties;
 
 private:
+    static void makeDefaultConfiguration();
     static void deserialize(char * jsonBuffer);
 
 };
