@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 #include "BrewtoothMashController.h"
-#include "../routing/WebServerRouter.h"
+#include <routing/WebServerRouter.h>
 
 BrewtoothMashController::BrewtoothMashController() :
     _server(new ESP8266WebServer(80)),
