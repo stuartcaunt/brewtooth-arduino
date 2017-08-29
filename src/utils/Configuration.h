@@ -6,6 +6,10 @@
 #include "../model/TemperatureReaderConfig.h"
 
 struct Properties {
+    Properties() :
+        isFirstUse(true) {}
+        
+    bool isFirstUse;
     std::vector<TemperatureReaderConfig> temperatureReaders;
 };
 

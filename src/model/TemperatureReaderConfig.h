@@ -2,7 +2,7 @@
 #define TEMPERATUREREADERCONFIG_H
 
 struct TemperatureReaderConfig {
-    int port;
+    unsigned int port;
     String id;
 };
 

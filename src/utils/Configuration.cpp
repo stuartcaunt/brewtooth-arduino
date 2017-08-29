@@ -49,6 +49,10 @@ void Configuration::save() {
 }
 
 void Configuration::makeDefaultConfiguration() {
+    Serial.println("Making defaut configuration");
+    properties = Properties();
+
+    save();
 }
     
 void Configuration::deserialize(char * json) {
