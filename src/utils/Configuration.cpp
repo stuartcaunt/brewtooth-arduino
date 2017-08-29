@@ -38,6 +38,9 @@ void Configuration::save() {
     // iteratuer over temperature readers
     for (std::vector<TemperatureReaderConfig>::iterator it = properties.temperatureReaders.begin(); it != properties.temperatureReaders.end(); it++) {
         TemperatureReaderConfig temperatureReaderConfig = *it;
+
+        Serial.println("Saving temperature reader config: id = " + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+        
         JsonObject & temperatureConfigJson = temperatureConfigs.createNestedObject();
         temperatureConfigJson["port"] = temperatureReaderConfig.port;
         temperatureConfigJson["id"] = temperatureReaderConfig.id;
@@ -63,14 +66,27 @@ void Configuration::deserialize(char * json) {
         Serial.println("Failed to read JSON data");
 
     } else {
+        // Set first use to false
+        properties.isFirstUse = false;
+
         // Deserialize wifiData
         if (root.containsKey("temperatureReaders")) {
-            // JsonArray & temperatureConfigs = root["temperatureReaders"];
+            JsonArray & temperatureConfigs = root["temperatureReaders"];
 
+            for (JsonArray::iterator it = temperatureConfigs.begin(); it != temperatureConfigs.end(); ++it) {
+                // Convert to json object
+                JsonObject & temperatureConfigJson = *it;
 
-            // properties.wifiData.isConfigured = wifiData["isConfigured"];
-            // properties.wifiData.ssid = wifiData["ssid"].as<String>();
-            // properties.wifiData.password = wifiData["password"].as<String>();
+                // Create new TemperatureReaderConfig
+                TemperatureReaderConfig temperatureReaderConfig;
+                temperatureReaderConfig.port = temperatureConfigJson["port"];
+                temperatureReaderConfig.id = temperatureConfigJson["id"].as<String>();
+
+                // Add to vector of temperature readers
+                properties.temperatureReaders.push_back(temperatureReaderConfig);
+
+                Serial.println("Read temperature reader config: id = " + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+            }
         }
     }
 }
