@@ -39,7 +39,6 @@ void GPIOService::release(uint8_t port) {
     }
 }
 
-
 uint8_t GPIOService::getPinMode(uint8_t port) {
     if (port < NUMBER_OF_GPIO_PINS) {
         GPIOPinConfig & config = _config.pins[port];

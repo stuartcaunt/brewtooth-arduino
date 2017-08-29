@@ -1,6 +1,6 @@
 x Properties
 x   save wifi details
-
+ - calculate size of json data correctly with array
 x Wifi server
 
 - temperature endpoint
@@ -18,7 +18,7 @@ x Wifi server
 
 - Endpoint to get average temperature ?
 
-- GPIO service
-  - indicates which ports are used
-   - input or output
+x GPIO service
+x   indicates which ports are used
+x    input or output
   - TemperatureReader will use GPIO service
