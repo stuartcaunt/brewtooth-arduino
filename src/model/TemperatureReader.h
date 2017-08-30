@@ -10,8 +10,16 @@ public:
         _config(config) {}
     virtual ~TemperatureReader() {}
 
-    const TemperatureReaderConfig & getConfig() const {
-        return _config;
+    const TemperatureReaderConfig * getConfig() const {
+        return &_config;
+    }
+
+    const unsigned int getId() const {
+        return _config.id;
+    }
+
+    unsigned int setId(unsigned int id) {
+        _config.id = id;
     }
 
     const String & getName() const {

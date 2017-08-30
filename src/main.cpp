@@ -5,6 +5,7 @@
 #include "app/BrewtoothMashController.h"
 #include "utils/WifiConnector.h"
 #include "utils/Configuration.h"
+#include "service/TemperatureReaderService.h"
 
 #define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0
@@ -25,18 +26,25 @@ void setup(void){
     // Initialise configuration
     Configuration::init();
 
+    // Reset if double reset detected
+    if (doubleResetDetector.detectDoubleReset()) {
+        Serial.println("Double Reset Detected: resetting configuration");
+        Configuration::reset();
+    }
+
+    // Initialise Temperature Reader Service
+    TemperatureReaderService::_()->init();
+
     Serial.println("Application started");
     
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
     wifiConnector.connect();
-
 #else
     // reset saved settings when double reset occurs
     WiFiManager wiFiManager;
     if (doubleResetDetector.detectDoubleReset()) {
-        Serial.println("Double Reset Detected: resetting device");
-        Configuration::reset();
+        Serial.println("Double Reset Detected: resetting wifi manager");
         wiFiManager.resetSettings();
     }
 

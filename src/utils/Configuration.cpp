@@ -39,17 +39,25 @@ void Configuration::save() {
     for (std::vector<TemperatureReaderConfig>::iterator it = properties.temperatureReaders.begin(); it != properties.temperatureReaders.end(); it++) {
         TemperatureReaderConfig temperatureReaderConfig = *it;
 
-        Serial.println("Saving temperature reader config: id = " + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+        Serial.println(String("Saving temperature reader config: id = ") + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
         
         JsonObject & temperatureConfigJson = temperatureConfigs.createNestedObject();
         temperatureConfigJson["port"] = temperatureReaderConfig.port;
         temperatureConfigJson["id"] = temperatureReaderConfig.id;
+        temperatureConfigJson["name"] = temperatureReaderConfig.name;
     }
     
     File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
     root.printTo(propertiesFile);
     propertiesFile.close(); 
 }
+
+
+void Configuration::reset() {
+    Serial.println("Reset configuration");
+    makeDefaultConfiguration();
+}
+    
 
 void Configuration::makeDefaultConfiguration() {
     Serial.println("Making defaut configuration");
@@ -86,7 +94,7 @@ void Configuration::deserialize(char * json) {
                 // Add to vector of temperature readers
                 properties.temperatureReaders.push_back(temperatureReaderConfig);
 
-                Serial.println("Read temperature reader config: id = " + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+                Serial.println(String("Read temperature reader config: id = ") + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
             }
         }
     }
