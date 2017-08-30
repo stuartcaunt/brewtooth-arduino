@@ -79,9 +79,10 @@ void Configuration::deserialize(char * json) {
 
                 // Create new TemperatureReaderConfig
                 TemperatureReaderConfig temperatureReaderConfig;
+                temperatureReaderConfig.id = temperatureConfigJson["id"];
                 temperatureReaderConfig.port = temperatureConfigJson["port"];
-                temperatureReaderConfig.id = temperatureConfigJson["id"].as<String>();
-
+                temperatureReaderConfig.name = temperatureConfigJson["name"].as<String>();
+                
                 // Add to vector of temperature readers
                 properties.temperatureReaders.push_back(temperatureReaderConfig);
 
