@@ -1,6 +1,20 @@
 #include "TemperatureReaderService.h"
+#include "GPIOService.h"
 
 TemperatureReaderService * TemperatureReaderService::instance = 0;
+
+TemperatureReaderService::TemperatureReaderService() {
+    
+}
+
+TemperatureReaderService::~TemperatureReaderService() {
+    for (std::map<unsigned int, TemperatureReader *>::iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+        delete it->second;
+    }
+
+    _temperatureReaders.clear();
+}
+
 
 TemperatureReaderService * TemperatureReaderService::_() {
     if (instance == 0) {
@@ -11,6 +25,15 @@ TemperatureReaderService * TemperatureReaderService::_() {
 }
 
 void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig) {
+
+    // Create a new TemperatureReader
+    TemperatureReader * temperatureReader = new TemperatureReader(readerConfig);
+
+    if (readerConfig.id == 0) {
+
+    }
+
+    _temperatureReaders[readerConfig.id] = temperatureReader;
 
 }
 
