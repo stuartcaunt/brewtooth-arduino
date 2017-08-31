@@ -12,10 +12,17 @@
 
 #define DEBUG_WIFI_CONNECTION 1
 
+#define DEBUG(__fmt, ...) Serial.printf("[DEBUG] %.30s %s %4d " __fmt"\n", __FILE__, __TIME__, __LINE__, ##__VA_ARGS__)
+#define LOG(__fmt, ...) Serial.printf("[INFO ] %.30s %s %4d " __fmt"\n", __FILE__, __TIME__, __LINE__, ##__VA_ARGS__)
+#define WARN(__fmt, ...) Serial.printf("[WARN ] %.30s %4d " __fmt"\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define ERROR(__fmt, ...) Serial.printf("[ERROR] %.30s %4d " __fmt"\n", __FILE__, __LINE__, ##__VA_ARGS__)
+
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 BrewtoothMashController * mashController = 0;
 
 void setup(void){
+    LOG("This is a test");
+    LOG("This is another %s test", "hi");
 
     // Initialise serial port
     Serial.begin(9600);
