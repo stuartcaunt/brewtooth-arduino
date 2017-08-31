@@ -9,25 +9,25 @@
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
 #if (LOG_LEVEL == LOG_LEVEL_DEBUG)
-#define DEBUG(__fmt, ...) Serial.printf("[DEBUG] %8s %-50s " __fmt"\n", __TIME__, __FILE__, ##__VA_ARGS__)
+#define DEBUG(__fmt, ...) Serial.printf("[DEBUG] %-4d %-40s " __fmt"\n", __LINE__, __FILE__, ##__VA_ARGS__)
 #else
 #define DEBUG(__fmt, ...)
 #endif
 
 #if (LOG_LEVEL <= LOG_LEVEL_INFO)
-#define LOG(__fmt, ...) Serial.printf("[INFO ] %8s %-50s " __fmt"\n", __TIME__, __FILE__, ##__VA_ARGS__)
+#define LOG(__fmt, ...) Serial.printf("[INFO ] %-4d %-40s " __fmt"\n", __LINE__, __FILE__, ##__VA_ARGS__)
 #else
 #define  LOG(__fmt, ...)
 #endif
 
 #if (LOG_LEVEL <= LOG_LEVEL_WARN)
-#define WARN(__fmt, ...) Serial.printf("[WARN ] %8s %-50s " __fmt"\n", __TIME__, __FILE__, ##__VA_ARGS__)
+#define WARN(__fmt, ...) Serial.printf("[WARN ] %-4d %-40s " __fmt"\n", __LINE__, __FILE__, ##__VA_ARGS__)
 #else
 #define  WARN(__fmt, ...)
 #endif
 
 #if (LOG_LEVEL <= LOG_LEVEL_ERROR)
-#define ERROR(__fmt, ...) Serial.printf("[ERROR] %8s %-50s " __fmt"\n", __TIME__, __FILE__, ##__VA_ARGS__)
+#define ERROR(__fmt, ...) Serial.printf("[ERROR] %-4d %-40s " __fmt"\n", __LINE__, __FILE__, ##__VA_ARGS__)
 #else
 #define  ERROR(__fmt, ...)
 #endif
