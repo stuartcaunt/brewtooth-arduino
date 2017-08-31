@@ -7,7 +7,7 @@
 #include "utils/Configuration.h"
 #include "service/TemperatureReaderService.h"
 
-#define DRD_TIMEOUT 10
+#define DRD_TIMEOUT 4
 #define DRD_ADDRESS 0
 
 #define DEBUG_WIFI_CONNECTION 1

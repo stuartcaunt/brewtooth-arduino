@@ -28,7 +28,6 @@ void TemperatureReaderService::init() {
         if (isFirstUse) {
             Serial.println("Creating default temperature reader");
             instance->createDefaultTemperatureReader();
-            instance->save();
 
         } else {
             Serial.println("Adding configured temperature readers");
@@ -56,7 +55,7 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
             nextAvailableId++;
         }
 
-        Serial.println("Creating new temperature reader with Id " + nextAvailableId);
+        Serial.println(String("Creating new temperature reader with Id ") + nextAvailableId);
         reader->setId(nextAvailableId);
     }
 
