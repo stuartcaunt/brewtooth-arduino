@@ -1,4 +1,5 @@
 #include "FileHelper.h"
+#include "Log.h"
 #include <FS.h>
 
 bool FileHelper::load(const String & filename, std::string & data) {
@@ -6,21 +7,21 @@ bool FileHelper::load(const String & filename, std::string & data) {
     
     File file = SPIFFS.open(filename, "r");
     if (!file){
-        Serial.println("File " + filename + " does not exist");
+        WARN("File \"%s\" does not exist", filename.c_str());
         data = "";
         return false;
     }
 
     size_t size = file.size();
     if (size > 0) {
-        Serial.println("Reading file " + filename + ", containing " + size + " bytes");
+        LOG("Reading file \"%s\" containing %d bytes", filename.c_str(), size);
         std::unique_ptr<char[]> buf (new char[size]);
         file.readBytes(buf.get(), size);
         
         // copy data into string
         data = std::string(buf.get());
     } else {
-        Serial.println("File " + filename + " is empty");        
+        WARN("File \"%s\" is empty ", filename.c_str());        
     }
     file.close();
 

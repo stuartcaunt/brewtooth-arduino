@@ -1,13 +1,14 @@
 #include "Error404Endpoint.h"
+#include <Utils/Log.h>
 
 void Error404Endpoint::buildPaths(ESP8266WebServer * server) {
-    Serial.println("Building paths for Error404Endpoint");
+    LOG("Building paths for Error404Endpoint");
     
     server->onNotFound(std::bind(&Error404Endpoint::handle404, this, server));
 }
 
 void Error404Endpoint::handle404(ESP8266WebServer * server) {
-    Serial.println("handle404");
+    LOG("handle404");
     
     String message = "File Not Found\n\n";
     message += "URI: ";

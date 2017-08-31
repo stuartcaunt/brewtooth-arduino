@@ -1,4 +1,5 @@
 #include "GPIOService.h"
+#include <utils/Log.h>
 #include <Arduino.h>
 
 GPIOService * GPIOService::instance = 0;
@@ -18,15 +19,15 @@ bool GPIOService::acquire(uint8_t port) {
 
         if (config.available && !config.used) {
             config.used = true;
-            Serial.println(String("Aquired GPIO port ") + port);
+            LOG("Aquired GPIO port %d", port);
         
             return true;
 
         } else {
-           Serial.println(String("Refused aquire of GPIO port ") + port + String(": available = ") + config.available + String(", used = ") + config.used); 
+           WARN("Refused aquire of GPIO port %d: available = %s, used = %s",port, config.available ? "true" : "false", config.used ? "true" : "false"); 
         }
     } else {
-        Serial.println(String("Refused aquire of GPIO port ") + port + String(": max available = ") + NUMBER_OF_GPIO_PINS) ;         
+        WARN("Refused aquire of GPIO port %d: max available = ", port, NUMBER_OF_GPIO_PINS);
     }
 
     return false;

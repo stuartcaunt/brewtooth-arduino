@@ -1,6 +1,7 @@
 #include "TemperatureReaderService.h"
 #include "GPIOService.h"
 #include <utils/Configuration.h>
+#include <utils/Log.h>
 
 TemperatureReaderService * TemperatureReaderService::instance = 0;
 
@@ -23,14 +24,14 @@ void TemperatureReaderService::init() {
     if (instance == 0) {
         instance = new TemperatureReaderService();
 
-        Serial.println("Initialising Temperature Reader Service");
+        LOG("Initialising Temperature Reader Service");
 
         if (isFirstUse) {
-            Serial.println("Creating default temperature reader");
+            LOG("Creating default temperature reader");
             instance->createDefaultTemperatureReader();
 
         } else {
-            Serial.println("Adding configured temperature readers");
+            LOG("Adding configured temperature readers");
             for (std::vector<TemperatureReaderConfig>::const_iterator it = temperatureReaders.begin(); it != temperatureReaders.end(); it++) {
                 instance->add(*it, false);
             }
@@ -43,7 +44,7 @@ TemperatureReaderService * TemperatureReaderService::_() {
 }
 
 void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig, bool save) {
-    Serial.println(String("Adding temperature reader \"") + readerConfig.name + String("\" with GPIO port ") + readerConfig.port);
+    LOG("Adding temperature reader \"%s\", id = %d, port = %d ", readerConfig.name.c_str(), readerConfig.id, readerConfig.port);
     
     // Create a new TemperatureReader
     TemperatureReader * reader = new TemperatureReader(readerConfig);
@@ -55,7 +56,7 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
             nextAvailableId++;
         }
 
-        Serial.println(String("Creating new temperature reader with Id ") + nextAvailableId);
+        LOG("Creating new temperature reader with Id %d", nextAvailableId);
         reader->setId(nextAvailableId);
     }
 
@@ -65,7 +66,7 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
     // Check/acquire GPIO port
     reader->setPortIsValid(GPIOService::_()->acquire(readerConfig.port));
     if (!reader->getPortIsValid()) {
-        Serial.println(String("Temperature reader \"") + reader->getName() + "\" has in invalid GPIO port: " + reader->getPort());
+        WARN("Temperature reader \"%s\" has an invalid GPIO port", reader->getName().c_str(), reader->getPort());
     }
 
     // Save current readers
@@ -75,10 +76,10 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
 }
 
 void TemperatureReaderService::update(const TemperatureReaderConfig & readerConfig) {
-    Serial.println(String("Updating temperature reader ") + readerConfig.id + String(": \"") + readerConfig.name + String("\" with GPIO port ") + readerConfig.port);
+    LOG("Updating temperature reader \"%s\", id = %d, port = %d ", readerConfig.name.c_str(), readerConfig.id, readerConfig.port);
     
     if (_temperatureReaders.find(readerConfig.id) == _temperatureReaders.end()) {
-        Serial.println("Unable to update temperature reader with Id " + readerConfig.id + String(" as it does not exist"));
+        WARN("Unable to update temperature reader with Id %d as it does not exist", readerConfig.id);
         return;
     }
 
@@ -95,7 +96,7 @@ void TemperatureReaderService::update(const TemperatureReaderConfig & readerConf
     // Check/acquire GPIO port
     reader->setPortIsValid(GPIOService::_()->acquire(readerConfig.port));
     if (!reader->getPortIsValid()) {
-        Serial.println("Temperature reader \"" + reader->getName() + "\" has in invalid GPIO port: " + reader->getPort());
+        WARN("Temperature reader \"%s\" has an invalid GPIO port", reader->getName().c_str(), reader->getPort());
     }
 
     // Save current readers
@@ -103,11 +104,11 @@ void TemperatureReaderService::update(const TemperatureReaderConfig & readerConf
 }
 
 const TemperatureReaderConfig * TemperatureReaderService::get(unsigned int id) const {
-    Serial.println("Getting temperature reader with Id " + id);
+    LOG("Getting temperature reader with Id %d", id);
 
     std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.find(id);
     if (it == _temperatureReaders.end()) {
-        Serial.println("Unable to get temperature reader with Id " + id + String(" as it does not exist"));
+        WARN("Unable to get temperature reader with Id %d as it does not exist", id);
         return NULL;
     }
 
@@ -115,11 +116,11 @@ const TemperatureReaderConfig * TemperatureReaderService::get(unsigned int id) c
 }
 
 void TemperatureReaderService::erase(unsigned int id) {
-    Serial.println("Deleting temperature reader with Id " + id);
-
+    LOG("Deleting temperature reader with Id %d", id);
+    
     std::map<unsigned int, TemperatureReader *>::iterator it = _temperatureReaders.find(id);
     if (it == _temperatureReaders.end()) {
-        Serial.println("Unable to delete temperature reader with Id " + id + String(" as it does not exist"));
+        WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
         return;
     }
 
@@ -139,11 +140,11 @@ void TemperatureReaderService::erase(unsigned int id) {
 }
 
 float TemperatureReaderService::getTemperature(unsigned int id) const {
-    Serial.println("Getting temperature from reader with Id " + id);
+    LOG("Getting temperature from reader with Id %d", id);
 
     std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.find(id);
     if (it == _temperatureReaders.end()) {
-        Serial.println("Unable to get temperature from reader with Id " + id + String(" as it does not exist"));
+        WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
         return 0.0;
     }
 
@@ -151,14 +152,14 @@ float TemperatureReaderService::getTemperature(unsigned int id) const {
 }
 
 float TemperatureReaderService::getMeanTemperature() const {
-    Serial.println("Getting mean temperature");
+    LOG("Getting mean temperature");
     float meanTemperature = 0.0;
     for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
         meanTemperature += it->second->getTemperature();
     }
 
     meanTemperature /= _temperatureReaders.size();
-    Serial.println(String("Mean temperature calculated as ") + meanTemperature + String(" from ") + _temperatureReaders.size() + String(" reader(s)"));
+    LOG("Mean temperature calculated as %f from %d reader(s)", meanTemperature, _temperatureReaders.size());
     
     return meanTemperature;
 }
@@ -172,7 +173,7 @@ void TemperatureReaderService::createDefaultTemperatureReader() {
 }
 
 void TemperatureReaderService::save() {
-    Serial.println("Saving configuration with current temperature readers");
+    LOG("Saving configuration with current temperature readers");
     std::vector<TemperatureReaderConfig> readerConfigs;
     for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
         readerConfigs.push_back(*(it->second->getConfig()));

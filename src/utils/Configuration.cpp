@@ -1,12 +1,13 @@
 #include "Configuration.h"
 #include "FileHelper.h"
+#include "Log.h"
 #include <FS.h>
 #include <ArduinoJson.h>
 
 Properties Configuration::properties = Properties();
 
 void Configuration::init() {
-    Serial.println("Loading properties file");
+    LOG("Loading properties file");
     
     std::string jsonData;
     FileHelper fileHelper;
@@ -19,13 +20,13 @@ void Configuration::init() {
         delete [] jsonBuffer;
 
     } else {
-        Serial.println("Could not read properties file");
+        LOG("Could not read properties file");
         makeDefaultConfiguration();
     }
 }
 
 void Configuration::save() {
-    Serial.println("Saving properties file");
+    LOG("Saving properties file");
     
     StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
     
@@ -39,7 +40,7 @@ void Configuration::save() {
     for (std::vector<TemperatureReaderConfig>::iterator it = properties.temperatureReaders.begin(); it != properties.temperatureReaders.end(); it++) {
         TemperatureReaderConfig temperatureReaderConfig = *it;
 
-        Serial.println(String("Saving temperature reader config: id = ") + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+        LOG("Saving temperature reader \"%s\", id = %d, port = %d ", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
         
         JsonObject & temperatureConfigJson = temperatureConfigs.createNestedObject();
         temperatureConfigJson["port"] = temperatureReaderConfig.port;
@@ -54,13 +55,13 @@ void Configuration::save() {
 
 
 void Configuration::reset() {
-    Serial.println("Reset configuration");
+    LOG("Reset configuration");
     makeDefaultConfiguration();
 }
     
 
 void Configuration::makeDefaultConfiguration() {
-    Serial.println("Making defaut configuration");
+    LOG("Making defaut configuration");
     properties = Properties();
 
     save();
@@ -71,7 +72,7 @@ void Configuration::deserialize(char * json) {
     
     JsonObject& root = jsonBuffer.parseObject(json);
     if (!root.success()) {
-        Serial.println("Failed to read JSON data");
+        ERROR("Failed to read JSON data");
 
     } else {
         // Set first use to false
@@ -94,7 +95,7 @@ void Configuration::deserialize(char * json) {
                 // Add to vector of temperature readers
                 properties.temperatureReaders.push_back(temperatureReaderConfig);
 
-                Serial.println(String("Read temperature reader config: id = ") + temperatureReaderConfig.id + String(", port = ") + temperatureReaderConfig.port);
+                LOG("Read temperature reader config \"%s\", id = %d, port = %d", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
             }
         }
     }

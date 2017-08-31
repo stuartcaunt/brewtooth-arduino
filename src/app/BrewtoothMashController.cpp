@@ -1,7 +1,8 @@
-#include <Arduino.h>
-#include <ESP8266WebServer.h>
 #include "BrewtoothMashController.h"
 #include <routing/WebServerRouter.h>
+#include <Utils/Log.h>
+#include <Arduino.h>
+#include <ESP8266WebServer.h>
 
 BrewtoothMashController::BrewtoothMashController() :
     _server(new ESP8266WebServer(80)),
@@ -19,7 +20,8 @@ void BrewtoothMashController::setup() {
     
     // start the server
     _server->begin();
-    Serial.println("HTTP server started");
+#include <Utils/Log.h>
+    LOG("HTTP server started");
 }
 
 void BrewtoothMashController::loop() {

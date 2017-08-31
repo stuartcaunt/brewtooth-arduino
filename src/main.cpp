@@ -2,20 +2,16 @@
 #include <FS.h>
 #include <WiFiManager.h> 
 #include <DoubleResetDetector.h>
-#include "app/BrewtoothMashController.h"
-#include "utils/WifiConnector.h"
-#include "utils/Configuration.h"
-#include "service/TemperatureReaderService.h"
+#include <app/BrewtoothMashController.h>
+#include <utils/WifiConnector.h>
+#include <utils/Configuration.h>
+#include <utils/Log.h>
+#include <service/TemperatureReaderService.h>
 
 #define DRD_TIMEOUT 4
 #define DRD_ADDRESS 0
 
 #define DEBUG_WIFI_CONNECTION 1
-
-#define DEBUG(__fmt, ...) Serial.printf("[DEBUG] %8s %20s %4d " __fmt"\n", __TIME__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define LOG(__fmt, ...) Serial.printf("[INFO ] %8s %20s %4d " __fmt"\n", __TIME__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define WARN(__fmt, ...) Serial.printf("[WARN ] %8s %20s %4d " __fmt"\n", __TIME__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define ERROR(__fmt, ...) Serial.printf("[ERROR] %8s %20s %4d " __fmt"\n", __TIME__, __FILE__, __LINE__, ##__VA_ARGS__)
 
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 BrewtoothMashController * mashController = 0;
@@ -23,26 +19,24 @@ BrewtoothMashController * mashController = 0;
 void setup(void){
     // Initialise serial port
     Serial.begin(9600);
- 
+    Serial.println("");
+    
     // Initialise SPIFFS
     SPIFFS.begin();
     
     // Initialise configuration
     Configuration::init();
-
-    LOG("This is a test 1");
-    WARN("This is a test 2");
     
     // Reset if double reset detected
     if (doubleResetDetector.detectDoubleReset()) {
-        Serial.println("Double Reset Detected: resetting configuration");
+        LOG("Double Reset Detected: resetting configuration");
         Configuration::reset();
     }
 
     // Initialise Temperature Reader Service
     TemperatureReaderService::_()->init();
 
-    Serial.println("Application started");
+    LOG("Application started");
     
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
@@ -51,19 +45,19 @@ void setup(void){
     // reset saved settings when double reset occurs
     WiFiManager wiFiManager;
     if (doubleResetDetector.detectDoubleReset()) {
-        Serial.println("Double Reset Detected: resetting wifi manager");
+        LOG("Double Reset Detected: resetting wifi manager");
         wiFiManager.resetSettings();
     }
 
     // Start wifi connection
     String macAddress = WiFi.softAPmacAddress();
     macAddress.replace(":", "");
-    Serial.println("Mac addr = " + macAddress;
-    String ssid = "BREWTOOTH-" + macAddress.substring(0, 4);
+    LOG("Mac addr = %s",  macAddress.c_str());
+    String ssid = "BREWTOOTH-" + macAddress.substring(0, 6);
 
-    Serial.println("Waiting for wifi setup...");
+    LOG("Waiting for wifi setup...");
     if (!wiFiManager.autoConnect(ssid.c_str())) {
-        Serial.println("Wifi setup failed... retry");
+        LOG("Wifi setup failed... retry");
         
         delay(3000);
         //reset and try again, or maybe put it to deep sleep
@@ -73,7 +67,7 @@ void setup(void){
     }
     #endif
     
-    Serial.println("... wifi setup terminated");
+    LOG("... wifi setup terminated");
 
     // Create mash controller
     mashController = new BrewtoothMashController();
