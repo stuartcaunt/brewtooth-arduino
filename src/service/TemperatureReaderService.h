@@ -3,7 +3,6 @@
 
 #include <model/TemperatureReader.h>
 #include <map>
-#include <vector>
 
 class TemperatureReaderService {
 public:

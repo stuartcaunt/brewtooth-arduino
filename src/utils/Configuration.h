@@ -3,13 +3,15 @@
 
 #include <Arduino.h>
 #include <vector>
-#include "../model/TemperatureReaderConfig.h"
+#include <model/TemperatureReaderConfig.h>
+#include <model/MashControllerConfig.h>
 
 struct Properties {
     Properties() :
         isFirstUse(true) {}
         
     bool isFirstUse;
+    std::vector<MashControllerConfig> mashControllers;
     std::vector<TemperatureReaderConfig> temperatureReaders;
 };
 
