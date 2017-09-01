@@ -11,7 +11,7 @@ struct MashControllerConfig {
 
     unsigned int id;
     String name;
-    std::vector<TemperatureReaderConfig> temperatureReaders;
+    std::vector<unsigned int> temperatureReaderIds;
 };
 
 #endif /*MASHCONTROLLERCONFIG_H*/

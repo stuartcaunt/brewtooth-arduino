@@ -78,7 +78,7 @@ void Configuration::deserialize(char * json) {
         // Set first use to false
         properties.isFirstUse = false;
 
-        // Deserialize wifiData
+        // Deserialize temperature readers
         if (root.containsKey("temperatureReaders")) {
             JsonArray & temperatureConfigs = root["temperatureReaders"];
 
@@ -96,6 +96,33 @@ void Configuration::deserialize(char * json) {
                 properties.temperatureReaders.push_back(temperatureReaderConfig);
 
                 LOG("Read temperature reader config \"%s\", id = %d, port = %d", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
+            }
+        }
+
+        // Deserialize mash controllers
+        if (root.containsKey("mashControllers")) {
+            JsonArray & mashControllers = root["mashControllers"];
+
+            for (JsonArray::iterator it = mashControllers.begin(); it != mashControllers.end(); ++it) {
+                // Convert to json object
+                JsonObject & mashControllerConfigJson = *it;
+
+                // Create new MashControllerConfig
+                MashControllerConfig mashControllerConfig;
+                mashControllerConfig.id = mashControllerConfigJson["id"];
+                mashControllerConfig.name = mashControllerConfigJson["name"].as<String>();
+
+                // Get temperature reader ids
+                JsonArray & readerIds = mashControllerConfigJson["temperatureReaderIds"];
+                for (JsonArray::iterator itReader = mashControllers.begin(); itReader != mashControllers.end(); ++itReader) {
+                    unsigned int readerId = *it;
+                    mashControllerConfig.temperatureReaderIds.push_back(readerId);
+                }
+
+                // Add to vector of temperature readers
+                properties.mashControllers.push_back(mashControllerConfig);
+
+                LOG("Read mash controller config \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
             }
         }
     }

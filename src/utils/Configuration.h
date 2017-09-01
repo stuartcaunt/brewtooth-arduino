@@ -11,8 +11,8 @@ struct Properties {
         isFirstUse(true) {}
         
     bool isFirstUse;
-    std::vector<MashControllerConfig> mashControllers;
     std::vector<TemperatureReaderConfig> temperatureReaders;
+    std::vector<MashControllerConfig> mashControllers;
 };
 
 // https://bblanchon.github.io/ArduinoJson/assistant/
