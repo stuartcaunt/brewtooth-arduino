@@ -18,14 +18,17 @@ MashControllerService::~MashControllerService() {
 }
 
 void MashControllerService::init() {
-    const std::vector<MashControllerConfig> & mashControllers = Configuration::properties.mashControllers;
-    bool isFirstUse = Configuration::properties.isFirstUse;
+    // Initialise temperature reader service
+    TemperatureReaderService::init();
 
     if (instance == 0) {
         instance = new MashControllerService();
 
         LOG("Initialising Mash Controller Service");
 
+        const std::vector<MashControllerConfig> & mashControllers = Configuration::properties.mashControllers;
+        bool isFirstUse = Configuration::properties.isFirstUse;
+    
         if (isFirstUse) {
             LOG("Creating default mash controller");
             instance->createDefaultMashController();

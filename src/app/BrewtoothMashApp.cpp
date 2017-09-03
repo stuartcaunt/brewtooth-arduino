@@ -1,20 +1,24 @@
-#include "BrewtoothMashController.h"
+#include "BrewtoothMashApp.h"
 #include <routing/WebServerRouter.h>
+#include <service/MashControllerService.h>
 #include <Utils/Log.h>
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 
-BrewtoothMashController::BrewtoothMashController() :
+BrewtoothMashApp::BrewtoothMashApp() :
     _server(new ESP8266WebServer(80)),
     _router(new WebServerRouter(_server)) {
 }
 
-BrewtoothMashController::~BrewtoothMashController() {
+BrewtoothMashApp::~BrewtoothMashApp() {
     delete _router;
     delete _server;
 }
 
-void BrewtoothMashController::setup() {
+void BrewtoothMashApp::setup() {
+    // Initialise mash controller service
+    MashControllerService::init();
+
     // Build server routes
     _router->buildRoutes();
     
@@ -24,6 +28,6 @@ void BrewtoothMashController::setup() {
     LOG("HTTP server started");
 }
 
-void BrewtoothMashController::loop() {
+void BrewtoothMashApp::loop() {
     _server->handleClient();
 }

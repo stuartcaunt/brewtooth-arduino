@@ -2,7 +2,7 @@
 #include <FS.h>
 #include <WiFiManager.h> 
 #include <DoubleResetDetector.h>
-#include <app/BrewtoothMashController.h>
+#include <app/BrewtoothMashApp.h>
 #include <utils/WifiConnector.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
@@ -14,7 +14,7 @@
 #define DEBUG_WIFI_CONNECTION 1
 
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
-BrewtoothMashController * mashController = 0;
+BrewtoothMashApp * mashApp = 0;
 
 void setup(void){
     // Initialise serial port
@@ -32,9 +32,6 @@ void setup(void){
         LOG("Double Reset Detected: resetting configuration");
         Configuration::reset();
     }
-
-    // Initialise Temperature Reader Service
-    TemperatureReaderService::_()->init();
 
     LOG("Application started");
     
@@ -70,15 +67,15 @@ void setup(void){
     LOG("... wifi setup terminated");
 
     // Create mash controller
-    mashController = new BrewtoothMashController();
+    mashApp = new BrewtoothMashApp();
     
     // Setup the mash controller
-    mashController->setup();    
+    mashApp->setup();    
 }
 
 void loop(void){
     // Loop over mash controller
-    mashController->loop();
+    mashApp->loop();
 
     // Determine if double reset has been done
     doubleResetDetector.loop();

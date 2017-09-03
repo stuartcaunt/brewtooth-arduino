@@ -47,6 +47,29 @@ void Configuration::save() {
         temperatureConfigJson["id"] = temperatureReaderConfig.id;
         temperatureConfigJson["name"] = temperatureReaderConfig.name;
     }
+
+    // Array of temperature configs
+    JsonArray & mashControllerConfigs = root.createNestedArray("mashControllers");
+    
+    // Iterate over mash controllers
+    for (std::vector<MashControllerConfig>::iterator it = properties.mashControllers.begin(); it != properties.mashControllers.end(); it++) {
+        MashControllerConfig mashControllerConfig = *it;
+
+        LOG("Saving mash controller \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
+        
+        JsonObject & mashControllerConfigJson = mashControllerConfigs.createNestedObject();
+        mashControllerConfigJson["id"] = mashControllerConfig.id;
+        mashControllerConfigJson["name"] = mashControllerConfig.name;
+
+        // Create array for temperatuer reader Ids
+        JsonArray & temperatureReaderIds = root.createNestedArray("temperatureReaderIds");
+        for (std::vector<unsigned int>::iterator itTempId = mashControllerConfig.temperatureReaderIds.begin(); itTempId != mashControllerConfig.temperatureReaderIds.end(); itTempId++) {
+            unsigned int temperatureReaderId = *itTempId;
+
+            // Add temperature reader Id to array
+            temperatureReaderIds.add(temperatureReaderId);
+        }
+    }
     
     File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
     root.printTo(propertiesFile);

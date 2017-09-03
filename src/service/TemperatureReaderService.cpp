@@ -18,12 +18,12 @@ TemperatureReaderService::~TemperatureReaderService() {
 }
 
 void TemperatureReaderService::init() {
-    const std::vector<TemperatureReaderConfig> & temperatureReaders = Configuration::properties.temperatureReaders;
-    bool isFirstUse = Configuration::properties.isFirstUse;
-
     if (instance == 0) {
         instance = new TemperatureReaderService();
 
+        const std::vector<TemperatureReaderConfig> & temperatureReaders = Configuration::properties.temperatureReaders;
+        bool isFirstUse = Configuration::properties.isFirstUse;
+    
         LOG("Initialising Temperature Reader Service");
 
         if (isFirstUse) {
