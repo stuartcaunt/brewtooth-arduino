@@ -28,7 +28,7 @@ void Configuration::init() {
 void Configuration::save() {
     LOG("Saving properties file");
     
-    StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
     
     // root object
     JsonObject & root = jsonBuffer.createObject();
@@ -91,7 +91,7 @@ void Configuration::makeDefaultConfiguration() {
 }
     
 void Configuration::deserialize(char * json) {
-    StaticJsonBuffer<PROPERTIES_JSON_SIZE> jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
     
     JsonObject& root = jsonBuffer.parseObject(json);
     if (!root.success()) {

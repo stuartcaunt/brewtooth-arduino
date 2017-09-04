@@ -19,16 +19,24 @@ struct Properties {
 // {
 //     "temperatureReaders": [
 //         {
-//             "port": 0,
-//             "id": "XXXXXXXXXXXXXXXXXXXX"
+//             "id": 0,
+//             "port": 6,
+//             "name": "XXXXXXXXXXXXXXXXXXXX"
 //         },
 //         {
+//             "id": 1,
 //             "port": 1,
-//             "id": "XXXXXXXXXXXXXXXXXXXX"
+//             "name": "XXXXXXXXXXXXXXXXXXXX"
+//         }
+//     ],
+//     "mashControllers": [
+//         {
+//             "id": 0,
+//             "name": "XXXXXXXXXXXXXXXXXXXX",
+//             "temperatureReaderIds": [0, 1]
 //         }
 //     ]
 // }
-#define PROPERTIES_JSON_SIZE 256
 #define PROPERTIES_FILE_NAME "application.properties"
 
 

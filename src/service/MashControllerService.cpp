@@ -133,12 +133,11 @@ void MashControllerService::erase(unsigned int id) {
 }
 
 void MashControllerService::createDefaultMashController() {
-    // TODO 
-    // MashControllerConfig defaultConfig;
-    // defaultConfig.port = 9;
-    // defaultConfig.name = "mash controller 0";
+    MashControllerConfig defaultConfig;
+    defaultConfig.name = "mash controller 0";
+    defaultConfig.temperatureReaderIds.push_back(0);
 
-    // this->add(defaultConfig);
+    this->add(defaultConfig);
 }
 
 void MashControllerService::save() {
