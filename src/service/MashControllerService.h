@@ -13,13 +13,14 @@ public:
 
     void add(const MashControllerConfig & mashControllerConfig, bool save = true);
     void update(const MashControllerConfig & mashControllerConfig);
-    const MashControllerConfig * get(unsigned int id) const;
+    MashController * get(unsigned int id) const;
     void erase(unsigned int id);
 
 private:
     MashControllerService();
     static MashControllerService * instance;
 
+    void addTemperatureReaders(MashController * mashController, const std::vector<unsigned int> & temperatureReaderIds);
     void createDefaultMashController();
     void save();
 

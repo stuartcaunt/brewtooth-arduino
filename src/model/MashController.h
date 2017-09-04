@@ -31,6 +31,18 @@ public:
         _config.name = name;
     }
 
+    void addTemperatureReader(TemperatureReader * temperatureReader) {
+        _temperatureReaders.push_back(temperatureReader);
+    }
+
+    const std::vector<TemperatureReader *> & getTemperatureReaders() const {
+        return _temperatureReaders;
+    }
+
+    void clearTemperatureReaders() {
+        _temperatureReaders.clear();
+    }
+
 private:
     MashControllerConfig _config;
     std::vector<TemperatureReader *> _temperatureReaders;

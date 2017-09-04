@@ -13,7 +13,7 @@ public:
     
     void add(const TemperatureReaderConfig & readerConfig, bool save = true);
     void update(const TemperatureReaderConfig & readerConfig);
-    const TemperatureReaderConfig * get(unsigned int id) const;
+    TemperatureReader * get(unsigned int id) const;
     void erase(unsigned int id);
 
     float getTemperature(unsigned int id) const;

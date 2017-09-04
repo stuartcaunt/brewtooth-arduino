@@ -64,11 +64,10 @@ void MashControllerService::add(const MashControllerConfig & mashControllerConfi
     }
 
     // Add to all mashControllers
-    _mashControllers[mashControllerConfig.id] = mashController;
+    _mashControllers[mashController->getId()] = mashController;
 
-    // Create temperature readers
-    // TODO
-
+    // Iterate over temperature readers
+    this->addTemperatureReaders(mashController, mashControllerConfig.temperatureReaderIds);
 
     // Save current mashControllers
     if (save) {
@@ -90,14 +89,31 @@ void MashControllerService::update(const MashControllerConfig & mashControllerCo
     // Copy data
     mashController->setName(mashControllerConfig.name);
 
-    // Temperature readers...
-    // TODO
+    // Temperature readers : clear current ones and add new ones
+    mashController->clearTemperatureReaders();
+    this->addTemperatureReaders(mashController, mashControllerConfig.temperatureReaderIds);
 
     // Save current mashControllers
     this->save();
 }
 
-const MashControllerConfig * MashControllerService::get(unsigned int id) const {
+void MashControllerService::addTemperatureReaders(MashController * mashController, const std::vector<unsigned int> & temperatureReaderIds) {
+    for (std::vector<unsigned int>::const_iterator it = temperatureReaderIds.begin(); it != temperatureReaderIds.end(); it++) {
+        unsigned int temperatureReaderId = *it;
+        // Get temperature reader from termperature reader service
+        TemperatureReader * temperatureReader = TemperatureReaderService::_()->get(temperatureReaderId);
+        
+        if (temperatureReader == NULL) {
+            ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", temperatureReaderId, mashController->getName().c_str(), mashController->getId());
+        } else {
+            // Add it
+            ERROR("Adding temperature reader %d to mash controller \"%s\", id = %d", temperatureReaderId, mashController->getName().c_str(), mashController->getId());
+            mashController->addTemperatureReader(temperatureReader);
+        }
+    }
+}
+
+MashController * MashControllerService::get(unsigned int id) const {
     LOG("Getting mash controller with Id %d", id);
 
     std::map<unsigned int, MashController *>::const_iterator it = _mashControllers.find(id);
@@ -106,7 +122,7 @@ const MashControllerConfig * MashControllerService::get(unsigned int id) const {
         return NULL;
     }
 
-    return it->second->getConfig();
+    return it->second;
 }
 
 void MashControllerService::erase(unsigned int id) {
@@ -124,8 +140,6 @@ void MashControllerService::erase(unsigned int id) {
     // Remove from map
     _mashControllers.erase(it);
 
-    // TODO Temperature readers ?
-    
     delete mashController;
 
     // Save current mashControllers
@@ -143,13 +157,12 @@ void MashControllerService::createDefaultMashController() {
 void MashControllerService::save() {
     LOG("Saving configuration with current mash controllers");
 
-    // TODO 
-    // std::vector<MashControllerConfig> mashControllerConfigs;
-    // for (std::map<unsigned int, MashController *>::const_iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
-    //     mashControllerConfigs.push_back(*(it->second->getConfig()));
-    // }
+    std::vector<MashControllerConfig> mashControllerConfigs;
+    for (std::map<unsigned int, MashController *>::const_iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+        mashControllerConfigs.push_back(*(it->second->getConfig()));
+    }
 
-    // Configuration::properties.mashControllers = mashControllerConfigs;
+    Configuration::properties.mashControllers = mashControllerConfigs;
 
-    // Configuration::save();
+    Configuration::save();
 }

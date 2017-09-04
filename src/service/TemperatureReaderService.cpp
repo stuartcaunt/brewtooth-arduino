@@ -61,7 +61,7 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
     }
 
     // Add to all readers
-    _temperatureReaders[readerConfig.id] = reader;
+    _temperatureReaders[reader->getId()] = reader;
 
     // Check/acquire GPIO port
     reader->setPortIsValid(GPIOService::_()->acquire(readerConfig.port));
@@ -103,7 +103,7 @@ void TemperatureReaderService::update(const TemperatureReaderConfig & readerConf
     this->save();
 }
 
-const TemperatureReaderConfig * TemperatureReaderService::get(unsigned int id) const {
+TemperatureReader * TemperatureReaderService::get(unsigned int id) const {
     LOG("Getting temperature reader with Id %d", id);
 
     std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.find(id);
@@ -112,7 +112,7 @@ const TemperatureReaderConfig * TemperatureReaderService::get(unsigned int id) c
         return NULL;
     }
 
-    return it->second->getConfig();
+    return it->second;
 }
 
 void TemperatureReaderService::erase(unsigned int id) {
