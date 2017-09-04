@@ -43,7 +43,7 @@ TemperatureReaderService * TemperatureReaderService::_() {
     return instance;
 }
 
-void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig, bool save) {
+TemperatureReader * TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig, bool save) {
     LOG("Adding temperature reader \"%s\", id = %d, port = %d ", readerConfig.name.c_str(), readerConfig.id, readerConfig.port);
     
     // Create a new TemperatureReader
@@ -73,14 +73,16 @@ void TemperatureReaderService::add(const TemperatureReaderConfig & readerConfig,
     if (save) {
         this->save();
     }
+
+    return reader;
 }
 
-void TemperatureReaderService::update(const TemperatureReaderConfig & readerConfig) {
+TemperatureReader * TemperatureReaderService::update(const TemperatureReaderConfig & readerConfig) {
     LOG("Updating temperature reader \"%s\", id = %d, port = %d ", readerConfig.name.c_str(), readerConfig.id, readerConfig.port);
     
     if (_temperatureReaders.find(readerConfig.id) == _temperatureReaders.end()) {
         WARN("Unable to update temperature reader with Id %d as it does not exist", readerConfig.id);
-        return;
+        return NULL;
     }
 
     // Obtain current temperature reader
@@ -101,6 +103,8 @@ void TemperatureReaderService::update(const TemperatureReaderConfig & readerConf
 
     // Save current readers
     this->save();
+
+    return reader;
 }
 
 TemperatureReader * TemperatureReaderService::get(unsigned int id) const {
@@ -113,6 +117,17 @@ TemperatureReader * TemperatureReaderService::get(unsigned int id) const {
     }
 
     return it->second;
+}
+
+std::vector<TemperatureReader *> TemperatureReaderService::getAll() const {
+    LOG("Getting all temperature readers");
+  
+    std::vector<TemperatureReader *> readers;
+    for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+        readers.push_back(it->second);
+    }
+
+    return readers;
 }
 
 void TemperatureReaderService::erase(unsigned int id) {

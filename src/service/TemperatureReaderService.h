@@ -3,6 +3,7 @@
 
 #include <model/TemperatureReader.h>
 #include <map>
+#include <vector>
 
 class TemperatureReaderService {
 public:
@@ -11,9 +12,10 @@ public:
     static void init();
     static TemperatureReaderService * _();
     
-    void add(const TemperatureReaderConfig & readerConfig, bool save = true);
-    void update(const TemperatureReaderConfig & readerConfig);
+    TemperatureReader * add(const TemperatureReaderConfig & readerConfig, bool save = true);
+    TemperatureReader * update(const TemperatureReaderConfig & readerConfig);
     TemperatureReader * get(unsigned int id) const;
+    std::vector<TemperatureReader *> getAll() const;
     void erase(unsigned int id);
 
     float getTemperature(unsigned int id) const;

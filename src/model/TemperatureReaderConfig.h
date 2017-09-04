@@ -26,6 +26,7 @@ struct TemperatureReaderConfig {
         json["id"] = id;
         json["port"] = port;
         json["name"] = name;
+        json["isValid"] = isPortValid;
     }
 };
 
