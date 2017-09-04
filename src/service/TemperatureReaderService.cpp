@@ -181,6 +181,7 @@ float TemperatureReaderService::getMeanTemperature() const {
 
 void TemperatureReaderService::createDefaultTemperatureReader() {
     TemperatureReaderConfig defaultConfig;
+    defaultConfig.id = 1;
     defaultConfig.port = 9;
     defaultConfig.name = "temperature reader 0";
 

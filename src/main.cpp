@@ -8,7 +8,7 @@
 #include <utils/Log.h>
 #include <service/TemperatureReaderService.h>
 
-#define DRD_TIMEOUT 4
+#define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0
 
 #define DEBUG_WIFI_CONNECTION 1
@@ -26,14 +26,8 @@ void setup(void){
     // Initialise SPIFFS
     SPIFFS.begin();
     
-    // Initialise configuration
-    Configuration::init();
-    
-    // Reset if double reset detected
-    if (doubleResetDetector.detectDoubleReset()) {
-        LOG("Double Reset Detected: resetting configuration");
-        Configuration::reset();
-    }
+    // Initialise configuration (reset if double reset detector activated)
+    Configuration::init(doubleResetDetector.detectDoubleReset());
 
     // Create and setup mash controller
     mashApp = new BrewtoothMashApp();

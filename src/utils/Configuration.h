@@ -42,9 +42,8 @@ struct Properties {
 
 class Configuration {
 public:
-    static void init();
+    static void init(bool reset = false);
     static void save();
-    static void reset();
     
     static Properties properties;
 

@@ -6,23 +6,31 @@
 
 Properties Configuration::properties = Properties();
 
-void Configuration::init() {
-    LOG("Loading properties file");
+void Configuration::init(bool reset) {
     
-    std::string jsonData;
-    FileHelper fileHelper;
-    if (fileHelper.load(PROPERTIES_FILE_NAME, jsonData)) {
-        char * jsonBuffer = new char[jsonData.length() + 1];
-        strcpy(jsonBuffer, jsonData.c_str());
-        
-        deserialize(jsonBuffer);
-
-        delete [] jsonBuffer;
+    if (reset) {
+        LOG("Resetting configuration");
+        makeDefaultConfiguration();
 
     } else {
-        LOG("Could not read properties file");
-        makeDefaultConfiguration();
+        LOG("Loading properties file");
+        
+        std::string jsonData;
+        FileHelper fileHelper;
+        if (fileHelper.load(PROPERTIES_FILE_NAME, jsonData)) {
+            char * jsonBuffer = new char[jsonData.length() + 1];
+            strcpy(jsonBuffer, jsonData.c_str());
+            
+            deserialize(jsonBuffer);
+    
+            delete [] jsonBuffer;
+    
+        } else {
+            LOG("Could not read properties file");
+            makeDefaultConfiguration();
+        }
     }
+
 }
 
 void Configuration::save() {
@@ -72,13 +80,6 @@ void Configuration::save() {
     root.printTo(propertiesFile);
     propertiesFile.close(); 
 }
-
-
-void Configuration::reset() {
-    LOG("Reset configuration");
-    makeDefaultConfiguration();
-}
-    
 
 void Configuration::makeDefaultConfiguration() {
     LOG("Making defaut configuration");

@@ -148,8 +148,9 @@ void MashControllerService::erase(unsigned int id) {
 
 void MashControllerService::createDefaultMashController() {
     MashControllerConfig defaultConfig;
+    defaultConfig.id = 1;
     defaultConfig.name = "mash controller 0";
-    defaultConfig.temperatureReaderIds.push_back(0);
+    defaultConfig.temperatureReaderIds.push_back(1);
 
     this->add(defaultConfig);
 }
