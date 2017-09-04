@@ -1,5 +1,5 @@
 #include "Error404Endpoint.h"
-#include <Utils/Log.h>
+#include <utils/Log.h>
 
 void Error404Endpoint::buildPaths(ESP8266WebServer * server) {
     LOG("Building paths for Error404Endpoint");

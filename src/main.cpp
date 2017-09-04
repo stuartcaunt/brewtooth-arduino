@@ -21,6 +21,8 @@ void setup(void){
     Serial.begin(9600);
     Serial.println("");
     
+    LOG("Application starting");
+    
     // Initialise SPIFFS
     SPIFFS.begin();
     
@@ -33,7 +35,9 @@ void setup(void){
         Configuration::reset();
     }
 
-    LOG("Application started");
+    // Create and setup mash controller
+    mashApp = new BrewtoothMashApp();
+    mashApp->setup();    
     
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
@@ -62,15 +66,9 @@ void setup(void){
         delay(5000);
 
     }
-    #endif
+#endif
     
     LOG("... wifi setup terminated");
-
-    // Create mash controller
-    mashApp = new BrewtoothMashApp();
-    
-    // Setup the mash controller
-    mashApp->setup();    
 }
 
 void loop(void){

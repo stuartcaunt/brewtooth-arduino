@@ -1,7 +1,7 @@
 #include "BrewtoothMashApp.h"
 #include <routing/WebServerRouter.h>
 #include <service/MashControllerService.h>
-#include <Utils/Log.h>
+#include <utils/Log.h>
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 
@@ -24,7 +24,7 @@ void BrewtoothMashApp::setup() {
     
     // start the server
     _server->begin();
-#include <Utils/Log.h>
+#include <utils/Log.h>
     LOG("HTTP server started");
 }
 

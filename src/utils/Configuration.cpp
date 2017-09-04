@@ -42,10 +42,7 @@ void Configuration::save() {
 
         LOG("Saving temperature reader \"%s\", id = %d, port = %d ", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
         
-        JsonObject & temperatureConfigJson = temperatureConfigs.createNestedObject();
-        temperatureConfigJson["port"] = temperatureReaderConfig.port;
-        temperatureConfigJson["id"] = temperatureReaderConfig.id;
-        temperatureConfigJson["name"] = temperatureReaderConfig.name;
+        temperatureReaderConfig.convertToJson(temperatureConfigs.createNestedObject());
     }
 
     // Array of temperature configs
@@ -110,10 +107,7 @@ void Configuration::deserialize(char * json) {
                 JsonObject & temperatureConfigJson = *it;
 
                 // Create new TemperatureReaderConfig
-                TemperatureReaderConfig temperatureReaderConfig;
-                temperatureReaderConfig.id = temperatureConfigJson["id"];
-                temperatureReaderConfig.port = temperatureConfigJson["port"];
-                temperatureReaderConfig.name = temperatureConfigJson["name"].as<String>();
+                TemperatureReaderConfig temperatureReaderConfig(temperatureConfigJson);
                 
                 // Add to vector of temperature readers
                 properties.temperatureReaders.push_back(temperatureReaderConfig);

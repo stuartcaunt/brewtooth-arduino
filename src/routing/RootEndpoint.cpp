@@ -1,5 +1,5 @@
 #include "RootEndpoint.h"
-#include <Utils/Log.h>
+#include <utils/Log.h>
 
 void RootEndpoint::buildPaths(ESP8266WebServer * server) {
     LOG("Building paths for RootEndpoint");

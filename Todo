@@ -1,6 +1,6 @@
 x Properties
 x   save wifi details
- - calculate size of json data correctly with array
+x   calculate size of json data correctly with array
 x Wifi server
 
 - temperature endpoint
@@ -11,14 +11,14 @@ x Wifi server
  - GET to read temperature
  - Save TemperatureReaders to Configuration file
 
-- TemperatureReader
-  - initialised with a single reader
-  - configured with a port  
-    - can be modified
+x TemperatureReader
+x   initialised with a single reader
+x   configured with a port  
+x     can be modified
 
 - Endpoint to get average temperature ?
 
 x GPIO service
 x   indicates which ports are used
 x    input or output
-  - TemperatureReader will use GPIO service
+x   TemperatureReader will use GPIO service

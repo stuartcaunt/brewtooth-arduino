@@ -1,8 +1,8 @@
 #ifndef WEBSERVERENDPOINT_H
 #define WEBSERVERENDPOINT_H
 
-#include <ESP8266WebServer.h>
 #include <Arduino.h>
+#include <ESP8266WebServer.h>
 
 class WebServerEndpoint {
 public:
