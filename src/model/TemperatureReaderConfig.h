@@ -1,10 +1,10 @@
 #ifndef TEMPERATUREREADERCONFIG_H
 #define TEMPERATUREREADERCONFIG_H
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+#include "Jsonable.h"
 
-struct TemperatureReaderConfig {
+class TemperatureReaderConfig : public Jsonable {
+public:
     TemperatureReaderConfig() :
         id(0),
         port(0),
@@ -17,17 +17,18 @@ struct TemperatureReaderConfig {
         name(json["name"].as<String>()),
         isPortValid(false) {}
 
-    unsigned int id;
-    unsigned int port;
-    String name;
-    bool isPortValid;
-
-    void convertToJson(JsonObject & json) const {
+    virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["port"] = port;
         json["name"] = name;
         json["isValid"] = isPortValid;
     }
+    
+public:
+    unsigned int id;
+    unsigned int port;
+    String name;
+    bool isPortValid;
 };
 
 #endif /*TEMPERATUREREADERCONFIG_H*/

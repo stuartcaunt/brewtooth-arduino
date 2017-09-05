@@ -2,6 +2,7 @@
 #include <service/TemperatureReaderService.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
+#include <utils/JsonStringBuilder.h>
 
 void TemperatureEndpoint::buildPaths(ESP8266WebServer * server) {
     LOG("Building paths for TemperatureEndpoint");
@@ -15,18 +16,10 @@ void TemperatureEndpoint::buildPaths(ESP8266WebServer * server) {
 void TemperatureEndpoint::getTemperatureReaders(ESP8266WebServer * server) {
     LOG("Getting all temperature readers");
     std::vector<TemperatureReader *> temperatureReaders = TemperatureReaderService::_()->getAll();
+    std::vector<Jsonable *> jsonables;
+    jsonables.insert(jsonables.end(), temperatureReaders.begin(), temperatureReaders.end());
 
-    DynamicJsonBuffer jsonBuffer;
-    JsonArray & json = jsonBuffer.createArray();
-
-    for (std::vector<TemperatureReader *>::iterator it = temperatureReaders.begin(); it != temperatureReaders.end(); it++) {
-        const TemperatureReaderConfig * readerConfig = (*it)->getConfig();
-        readerConfig->convertToJson(json.createNestedObject());
-    }
-
-    String jsonString;
-    json.printTo(jsonString);
-    server->send(200, "application/json", jsonString.c_str());
+    server->send(200, "application/json", JsonStringBuilder::jsonString(jsonables).c_str());
 }
 
 void TemperatureEndpoint::addTemperatureReader(ESP8266WebServer * server) {
@@ -46,15 +39,8 @@ void TemperatureEndpoint::addTemperatureReader(ESP8266WebServer * server) {
             TemperatureReaderConfig readerConfig(json);
             TemperatureReader * temperatureReader = TemperatureReaderService::_()->add(readerConfig);
 
-            // Convert to json
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject & json = jsonBuffer.createObject();
-            temperatureReader->getConfig()->convertToJson(json);
-
-            // Convert to string
-            String jsonString;
-            json.printTo(jsonString);
-            server->send(200, "application/json", jsonString.c_str());
+            // Send json response
+            server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
         }
 
     } else {

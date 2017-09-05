@@ -3,7 +3,7 @@
 
 #include "TemperatureReaderConfig.h"
 
-class TemperatureReader {
+class TemperatureReader : public Jsonable {
 
 public:
     TemperatureReader(const TemperatureReaderConfig & config) :
@@ -52,6 +52,10 @@ public:
 
     void readTemperature();
     
+    virtual void convertToJson(JsonObject & json) const {
+        _config.convertToJson(json);
+    }
+        
 private:
     TemperatureReaderConfig _config;
     bool _isPortValid;
