@@ -14,12 +14,23 @@ void TemperatureEndpoint::buildPaths(ESP8266WebServer * server) {
 }
 
 void TemperatureEndpoint::getTemperatureReaders(ESP8266WebServer * server) {
-    LOG("Getting all temperature readers");
-    std::vector<TemperatureReader *> temperatureReaders = TemperatureReaderService::_()->getAll();
-    std::vector<Jsonable *> jsonables;
-    jsonables.insert(jsonables.end(), temperatureReaders.begin(), temperatureReaders.end());
 
-    server->send(200, "application/json", JsonStringBuilder::jsonString(jsonables).c_str());
+    if (server->hasArg("id")) {
+        String idVal = server->arg("id");
+        LOG("Getting temperature reader ");
+        
+        // TODO
+
+    } else {
+        LOG("Getting all temperature readers");
+        std::vector<TemperatureReader *> temperatureReaders = TemperatureReaderService::_()->getAll();
+    
+        // convert vector to create json array
+        std::vector<Jsonable *> jsonables;
+        jsonables.insert(jsonables.end(), temperatureReaders.begin(), temperatureReaders.end());
+    
+        server->send(200, "application/json", JsonStringBuilder::jsonString(jsonables).c_str());
+    }
 }
 
 void TemperatureEndpoint::addTemperatureReader(ESP8266WebServer * server) {
