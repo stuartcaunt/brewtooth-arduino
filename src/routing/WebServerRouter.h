@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 
-class ESP8266WebServer;
+class BrewtoothWebServer;
 class WebServerEndpoint;
 
 class WebServerRouter {
 public:
-    WebServerRouter(ESP8266WebServer * server);
+    WebServerRouter(BrewtoothWebServer * server);
     virtual ~WebServerRouter();
 
     void buildRoutes();
@@ -18,7 +18,7 @@ private:
     void addEndpoint(WebServerEndpoint * endpoint);
         
 private:
-    ESP8266WebServer * _server;
+    BrewtoothWebServer * _server;
     std::vector<WebServerEndpoint *> _endpoints;
 };
 

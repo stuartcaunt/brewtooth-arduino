@@ -3,11 +3,10 @@
 #include "RootEndpoint.h"
 #include "TemperatureEndpoint.h"
 #include <utils/Log.h>
-#include <ESP8266WebServer.h>
+#include <utils/BrewtoothWebServer.h>
 
-WebServerRouter::WebServerRouter(ESP8266WebServer * server) :
+WebServerRouter::WebServerRouter(BrewtoothWebServer * server) :
     _server(server) {
-
 }
 
 WebServerRouter::~WebServerRouter() {

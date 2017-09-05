@@ -8,10 +8,11 @@ public:
     TemperatureEndpoint() : _temperature(0.0) {}
     virtual ~TemperatureEndpoint() {}
 
-    virtual void buildPaths(ESP8266WebServer * server);
+    virtual void buildPaths(BrewtoothWebServer * server);
     
 private:
     void getTemperatureReaders(ESP8266WebServer * server);
+    void getTemperatureReader(ESP8266WebServer * server, int id);
     void addTemperatureReader(ESP8266WebServer * server);
         
     void getTemperature(ESP8266WebServer * server);

@@ -3,10 +3,10 @@
 #include <service/MashControllerService.h>
 #include <utils/Log.h>
 #include <Arduino.h>
-#include <ESP8266WebServer.h>
+#include <utils/BrewtoothWebServer.h>
 
 BrewtoothMashApp::BrewtoothMashApp() :
-    _server(new ESP8266WebServer(80)),
+    _server(new BrewtoothWebServer(80)),
     _router(new WebServerRouter(_server)) {
 }
 

@@ -1,7 +1,7 @@
 #include "Error404Endpoint.h"
 #include <utils/Log.h>
 
-void Error404Endpoint::buildPaths(ESP8266WebServer * server) {
+void Error404Endpoint::buildPaths(BrewtoothWebServer * server) {
     LOG("Building paths for Error404Endpoint");
     
     server->onNotFound(std::bind(&Error404Endpoint::handle404, this, server));

@@ -4,12 +4,14 @@
 #include <utils/Log.h>
 #include <utils/JsonStringBuilder.h>
 
-void TemperatureEndpoint::buildPaths(ESP8266WebServer * server) {
+void TemperatureEndpoint::buildPaths(BrewtoothWebServer * server) {
     LOG("Building paths for TemperatureEndpoint");
-    
+    using namespace std::placeholders;
+
     server->on("/temperature", std::bind(&TemperatureEndpoint::getTemperature, this, server));
     
     server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReaders, this, server));
+    server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReader, this, server, _1));
     server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&TemperatureEndpoint::addTemperatureReader, this, server));
 }
 
@@ -33,6 +35,9 @@ void TemperatureEndpoint::getTemperatureReaders(ESP8266WebServer * server) {
     }
 }
 
+void TemperatureEndpoint::getTemperatureReader(ESP8266WebServer * server, int id) {
+}
+    
 void TemperatureEndpoint::addTemperatureReader(ESP8266WebServer * server) {
     LOG("Adding a temperature reader");
     

@@ -8,7 +8,7 @@ public:
     Error404Endpoint() {}
     virtual ~Error404Endpoint() {}
 
-    virtual void buildPaths(ESP8266WebServer * server);
+    virtual void buildPaths(BrewtoothWebServer * server);
     
 private:
     void handle404(ESP8266WebServer * server);

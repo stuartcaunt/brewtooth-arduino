@@ -1,7 +1,7 @@
 #include "RootEndpoint.h"
 #include <utils/Log.h>
 
-void RootEndpoint::buildPaths(ESP8266WebServer * server) {
+void RootEndpoint::buildPaths(BrewtoothWebServer * server) {
     LOG("Building paths for RootEndpoint");
     
     server->on("/", std::bind(&RootEndpoint::getMessage, this, server));

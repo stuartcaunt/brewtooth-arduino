@@ -1,7 +1,7 @@
 #ifndef BREWTOOTHMASHAPP_H
 #define BREWTOOTHMASHAPP_H
 
-class ESP8266WebServer;
+class BrewtoothWebServer;
 class WebServerRouter;
 
 class BrewtoothMashApp {
@@ -13,7 +13,7 @@ public:
     void loop();
 
 private:
-    ESP8266WebServer * _server;
+    BrewtoothWebServer * _server;
     WebServerRouter * _router;
 };
 
