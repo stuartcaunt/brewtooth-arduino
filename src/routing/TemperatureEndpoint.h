@@ -13,6 +13,7 @@ public:
 private:
     void getTemperatureReaders();
     void getTemperatureReader(int id);
+    void deleteTemperatureReader(int id);
     void addTemperatureReader();
         
     void getTemperature();

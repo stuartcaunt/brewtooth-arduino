@@ -13,6 +13,7 @@ void TemperatureEndpoint::buildPaths() {
     
     _server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReaders, this));
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReader, this, _1));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&TemperatureEndpoint::deleteTemperatureReader, this, _1));
     _server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&TemperatureEndpoint::addTemperatureReader, this));
 }
 
@@ -37,6 +38,10 @@ void TemperatureEndpoint::getTemperatureReader(int id) {
         WARN("Temperature reader with Id = %d does not exist", id);
         _server->send(404, "text/plain", "Temperature reader not found");
     }
+}
+
+void TemperatureEndpoint::deleteTemperatureReader(int id) {
+    LOG("Deleting temperature reader id = %d", id);
 }
     
 void TemperatureEndpoint::addTemperatureReader() {
