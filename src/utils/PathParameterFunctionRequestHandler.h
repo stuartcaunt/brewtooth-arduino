@@ -11,6 +11,7 @@ struct PathPart {
         isParam(isParam) {}
     std::string text;
     boolean isParam;
+    std::String lastParamValue;
 };
 
 template<typename T>
@@ -22,7 +23,8 @@ public:
         _method(method) {
         std::vector<std::string> pathTexts = split(uri, "/");
 
-        for (std::vector<std::string>::iterator it = pathTexts.begin(); it != pathTexts.end(); it++) {
+        int index = 0;
+        for (int index = 0; index < pathTexts.length(); index++) {
             std::string pathText = *it;
             if (startsWith(pathText, "{") && endsWith(pathText, "}")) {
                 _pathParts.push_back(PathPart(pathText, true));
@@ -47,10 +49,17 @@ public:
 
         // compare each path part to check if strings match when not a path param
         for (int i = 0; i < _pathParts.size(); i++) {
-            if (!_pathParts[i].isParam && _pathParts[i].text != requestUriParts[i]) {
-                return false;
+            if (_pathParts[i].isParam) {
+                _pathParts[i].lastParamValue = requestUriParts[i];
+
+            } else {
+                if (_pathParts[i].text != requestUriParts[i]) {
+                    return false;
+                }
             }
         }
+
+        _lastRequestUri = requestUri;
 
         return true;
     }
@@ -66,6 +75,8 @@ private:
     String _uri;
     HTTPMethod _method;
     std::vector<PathPart> _pathParts;
+    int paramIndex;
+    String _lastRequestUri;
 };
 
 #endif /*PATHPARAMETERFUNCTIONREQUESTHANDLER_H*/
