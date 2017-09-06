@@ -1,15 +1,16 @@
 #include "RootEndpoint.h"
 #include <utils/Log.h>
+#include <webserver/BrewtoothWebServer.h>
 
-void RootEndpoint::buildPaths(BrewtoothWebServer * server) {
+void RootEndpoint::buildPaths() {
     LOG("Building paths for RootEndpoint");
     
-    server->on("/", std::bind(&RootEndpoint::getMessage, this, server));
+    _server->on("/", std::bind(&RootEndpoint::getMessage, this));
 }
 
-void RootEndpoint::getMessage(ESP8266WebServer * server) {
+void RootEndpoint::getMessage() {
 //   digitalWrite(led, 1);
     LOG("getMessage");
-    server->send(200, "text/plain", "Welcome to the brewtooth ESP8266 server!");
+    _server->send(200, "text/plain", "Welcome to the brewtooth ESP8266 server!");
 //   digitalWrite(led, 0);
 }

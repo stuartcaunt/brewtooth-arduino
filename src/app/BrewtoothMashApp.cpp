@@ -3,7 +3,7 @@
 #include <service/MashControllerService.h>
 #include <utils/Log.h>
 #include <Arduino.h>
-#include <utils/BrewtoothWebServer.h>
+#include <webserver/BrewtoothWebServer.h>
 
 BrewtoothMashApp::BrewtoothMashApp() :
     _server(new BrewtoothWebServer(80)),

@@ -8,10 +8,10 @@ public:
     RootEndpoint() {}
     virtual ~RootEndpoint() {}
 
-    virtual void buildPaths(BrewtoothWebServer * server);
+    virtual void buildPaths();
     
 private:
-    void getMessage(ESP8266WebServer * server);
+    void getMessage();
 };
 
 #endif /*ROOTENDPOINT_H*/

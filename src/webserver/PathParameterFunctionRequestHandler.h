@@ -2,8 +2,11 @@
 #define PATHPARAMETERFUNCTIONREQUESTHANDLER_H
 
 #include <Arduino.h>
+#include <vector>
+#include <string>
 #include <ESP8266WebServer.h>
 #include <utils/StringFunctions.h>
+#include <utils/Converter.h>
 
 struct PathPart {
     PathPart(const std::string & text, bool isParam = false) :
@@ -11,7 +14,7 @@ struct PathPart {
         isParam(isParam) {}
     std::string text;
     boolean isParam;
-    std::String lastParamValue;
+    std::string lastParamValue;
 };
 
 template<typename T>
@@ -23,11 +26,14 @@ public:
         _method(method) {
         std::vector<std::string> pathTexts = split(uri, "/");
 
-        int index = 0;
-        for (int index = 0; index < pathTexts.length(); index++) {
-            std::string pathText = *it;
+        for (int index = 0; index < pathTexts.size(); index++) {
+            std::string pathText = pathTexts[index];
             if (startsWith(pathText, "{") && endsWith(pathText, "}")) {
+                pathText = replace_all(pathText, "{", "");
+                pathText = replace_all(pathText, "}", "");
                 _pathParts.push_back(PathPart(pathText, true));
+                _paramIndex = index;
+
             } else {
                 _pathParts.push_back(PathPart(pathText));
             }
@@ -37,6 +43,8 @@ public:
     }
 
     virtual bool canHandle(HTTPMethod requestMethod, String requestUri) {
+        _lastRequestUri = "";
+
         if (_method != HTTP_ANY && _method != requestMethod) {
             return false;
         }
@@ -59,15 +67,33 @@ public:
             }
         }
 
+        // Store last request Uri
         _lastRequestUri = requestUri;
 
         return true;
     }
 
     virtual bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
+        std::string paramValueString;
+        if (_lastRequestUri == requestUri) {
+            paramValueString = _pathParts[_paramIndex].lastParamValue;
+        
+        } else {
+            // re-obtain paramValue string
+            if (!canHandle(requestMethod, requestUri)) {
+                return false;
+            }
+
+            paramValueString = _pathParts[_paramIndex].lastParamValue;
+        }
+
         // Get param from path
+        T paramValue = Converter<T>::convert(paramValueString);
 
+        // Call function
+        _fn(paramValue);
 
+        return true;
     }
     
 private:
@@ -75,7 +101,8 @@ private:
     String _uri;
     HTTPMethod _method;
     std::vector<PathPart> _pathParts;
-    int paramIndex;
+    
+    int _paramIndex;
     String _lastRequestUri;
 };
 

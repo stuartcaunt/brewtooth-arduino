@@ -2,16 +2,22 @@
 #define WEBSERVERENDPOINT_H
 
 #include <Arduino.h>
-#include <utils/BrewtoothWebServer.h>
+
+class BrewtoothWebServer;
+class ESP8266WebServer;
 
 class WebServerEndpoint {
 public:
     WebServerEndpoint() {}
     virtual ~WebServerEndpoint() {}
 
-    virtual void buildPaths(BrewtoothWebServer * server) = 0;
+    void setWebServer(BrewtoothWebServer * server) {
+        _server = server;
+    }
+    virtual void buildPaths() = 0;
 
 protected:
+    BrewtoothWebServer * _server;
 
 };
 

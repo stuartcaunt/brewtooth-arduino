@@ -3,7 +3,7 @@
 #include "RootEndpoint.h"
 #include "TemperatureEndpoint.h"
 #include <utils/Log.h>
-#include <utils/BrewtoothWebServer.h>
+#include <webserver/BrewtoothWebServer.h>
 
 WebServerRouter::WebServerRouter(BrewtoothWebServer * server) :
     _server(server) {
@@ -26,7 +26,8 @@ void WebServerRouter::buildRoutes() {
 }
 
 void WebServerRouter::addEndpoint(WebServerEndpoint * endpoint) {
-    endpoint->buildPaths(_server);
+    endpoint->setWebServer(_server);
+    endpoint->buildPaths();
     this->_endpoints.push_back(endpoint);
 }
 
