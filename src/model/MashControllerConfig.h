@@ -1,7 +1,7 @@
 #ifndef MASHCONTROLLERCONFIG_H
 #define MASHCONTROLLERCONFIG_H
 
-#include "TemperatureReaderConfig.h"
+#include "ThermometerConfig.h"
 #include <vector>
 
 struct MashControllerConfig {
@@ -11,7 +11,7 @@ struct MashControllerConfig {
 
     unsigned int id;
     String name;
-    std::vector<unsigned int> temperatureReaderIds;
+    std::vector<unsigned int> thermometerIds;
 };
 
 #endif /*MASHCONTROLLERCONFIG_H*/

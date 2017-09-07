@@ -1,5 +1,5 @@
 #include "MashControllerService.h"
-#include "TemperatureReaderService.h"
+#include "ThermometerService.h"
 #include <utils/Configuration.h>
 #include <utils/Log.h>
 
@@ -19,7 +19,7 @@ MashControllerService::~MashControllerService() {
 
 void MashControllerService::init() {
     // Initialise temperature reader service
-    TemperatureReaderService::init();
+    ThermometerService::init();
 
     if (instance == 0) {
         instance = new MashControllerService();
@@ -67,7 +67,7 @@ void MashControllerService::add(const MashControllerConfig & mashControllerConfi
     _mashControllers[mashController->getId()] = mashController;
 
     // Iterate over temperature readers
-    this->addTemperatureReaders(mashController, mashControllerConfig.temperatureReaderIds);
+    this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
     // Save current mashControllers
     if (save) {
@@ -90,25 +90,25 @@ void MashControllerService::update(const MashControllerConfig & mashControllerCo
     mashController->setName(mashControllerConfig.name);
 
     // Temperature readers : clear current ones and add new ones
-    mashController->clearTemperatureReaders();
-    this->addTemperatureReaders(mashController, mashControllerConfig.temperatureReaderIds);
+    mashController->clearThermometers();
+    this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
     // Save current mashControllers
     this->save();
 }
 
-void MashControllerService::addTemperatureReaders(MashController * mashController, const std::vector<unsigned int> & temperatureReaderIds) {
-    for (std::vector<unsigned int>::const_iterator it = temperatureReaderIds.begin(); it != temperatureReaderIds.end(); it++) {
-        unsigned int temperatureReaderId = *it;
+void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
+    for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {
+        unsigned int thermometerId = *it;
         // Get temperature reader from termperature reader service
-        TemperatureReader * temperatureReader = TemperatureReaderService::_()->get(temperatureReaderId);
+        Thermometer * thermometer = ThermometerService::_()->get(thermometerId);
         
-        if (temperatureReader == NULL) {
-            ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", temperatureReaderId, mashController->getName().c_str(), mashController->getId());
+        if (thermometer == NULL) {
+            ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", thermometerId, mashController->getName().c_str(), mashController->getId());
         } else {
             // Add it
-            ERROR("Adding temperature reader %d to mash controller \"%s\", id = %d", temperatureReaderId, mashController->getName().c_str(), mashController->getId());
-            mashController->addTemperatureReader(temperatureReader);
+            ERROR("Adding temperature reader %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
+            mashController->addThermometer(thermometer);
         }
     }
 }
@@ -150,7 +150,7 @@ void MashControllerService::createDefaultMashController() {
     MashControllerConfig defaultConfig;
     defaultConfig.id = 1;
     defaultConfig.name = "mash controller 0";
-    defaultConfig.temperatureReaderIds.push_back(1);
+    defaultConfig.thermometerIds.push_back(1);
 
     this->add(defaultConfig);
 }

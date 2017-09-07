@@ -1,7 +1,7 @@
 #include "WebServerRouter.h"
 #include "Error404Endpoint.h"
 #include "RootEndpoint.h"
-#include "TemperatureEndpoint.h"
+#include "ThermometerEndpoint.h"
 #include <utils/Log.h>
 #include <webserver/BrewtoothWebServer.h>
 
@@ -22,7 +22,7 @@ void WebServerRouter::buildRoutes() {
     LOG("Building all routes");
     this->addEndpoint(new Error404Endpoint());
     this->addEndpoint(new RootEndpoint());
-    this->addEndpoint(new TemperatureEndpoint());
+    this->addEndpoint(new ThermometerEndpoint());
 }
 
 void WebServerRouter::addEndpoint(WebServerEndpoint * endpoint) {

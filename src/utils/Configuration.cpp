@@ -42,15 +42,15 @@ void Configuration::save() {
     JsonObject & root = jsonBuffer.createObject();
 
     // Array of temperature configs
-    JsonArray & temperatureConfigs = root.createNestedArray("temperatureReaders");
+    JsonArray & thermometerConfigs = root.createNestedArray("thermometers");
     
     // iteratuer over temperature readers
-    for (std::vector<TemperatureReaderConfig>::iterator it = properties.temperatureReaders.begin(); it != properties.temperatureReaders.end(); it++) {
-        TemperatureReaderConfig temperatureReaderConfig = *it;
+    for (std::vector<ThermometerConfig>::iterator it = properties.thermometers.begin(); it != properties.thermometers.end(); it++) {
+        ThermometerConfig thermometerConfig = *it;
 
-        LOG("Saving temperature reader \"%s\", id = %d, port = %d ", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
+        LOG("Saving temperature reader \"%s\", id = %d, port = %d ", thermometerConfig.name.c_str(), thermometerConfig.id, thermometerConfig.port);
         
-        temperatureReaderConfig.convertToJson(temperatureConfigs.createNestedObject());
+        thermometerConfig.convertToJson(thermometerConfigs.createNestedObject());
     }
 
     // Array of temperature configs
@@ -67,12 +67,12 @@ void Configuration::save() {
         mashControllerConfigJson["name"] = mashControllerConfig.name;
 
         // Create array for temperatuer reader Ids
-        JsonArray & temperatureReaderIds = root.createNestedArray("temperatureReaderIds");
-        for (std::vector<unsigned int>::iterator itTempId = mashControllerConfig.temperatureReaderIds.begin(); itTempId != mashControllerConfig.temperatureReaderIds.end(); itTempId++) {
-            unsigned int temperatureReaderId = *itTempId;
+        JsonArray & thermometerIds = root.createNestedArray("thermometerIds");
+        for (std::vector<unsigned int>::iterator itTempId = mashControllerConfig.thermometerIds.begin(); itTempId != mashControllerConfig.thermometerIds.end(); itTempId++) {
+            unsigned int thermometerId = *itTempId;
 
             // Add temperature reader Id to array
-            temperatureReaderIds.add(temperatureReaderId);
+            thermometerIds.add(thermometerId);
         }
     }
     
@@ -100,20 +100,20 @@ void Configuration::deserialize(char * json) {
         properties.isFirstUse = false;
 
         // Deserialize temperature readers
-        if (root.containsKey("temperatureReaders")) {
-            JsonArray & temperatureConfigs = root["temperatureReaders"];
+        if (root.containsKey("thermometers")) {
+            JsonArray & thermometerConfigs = root["thermometers"];
 
-            for (JsonArray::iterator it = temperatureConfigs.begin(); it != temperatureConfigs.end(); ++it) {
+            for (JsonArray::iterator it = thermometerConfigs.begin(); it != thermometerConfigs.end(); ++it) {
                 // Convert to json object
-                JsonObject & temperatureConfigJson = *it;
+                JsonObject & thermometerConfigJson = *it;
 
-                // Create new TemperatureReaderConfig
-                TemperatureReaderConfig temperatureReaderConfig(temperatureConfigJson);
+                // Create new ThermometerConfig
+                ThermometerConfig thermometerConfig(thermometerConfigJson);
                 
                 // Add to vector of temperature readers
-                properties.temperatureReaders.push_back(temperatureReaderConfig);
+                properties.thermometers.push_back(thermometerConfig);
 
-                LOG("Read temperature reader config \"%s\", id = %d, port = %d", temperatureReaderConfig.name.c_str(), temperatureReaderConfig.id, temperatureReaderConfig.port);
+                LOG("Read temperature reader config \"%s\", id = %d, port = %d", thermometerConfig.name.c_str(), thermometerConfig.id, thermometerConfig.port);
             }
         }
 
@@ -131,10 +131,10 @@ void Configuration::deserialize(char * json) {
                 mashControllerConfig.name = mashControllerConfigJson["name"].as<String>();
 
                 // Get temperature reader ids
-                JsonArray & readerIds = mashControllerConfigJson["temperatureReaderIds"];
+                JsonArray & readerIds = mashControllerConfigJson["thermometerIds"];
                 for (JsonArray::iterator itReader = mashControllers.begin(); itReader != mashControllers.end(); ++itReader) {
                     unsigned int readerId = *it;
-                    mashControllerConfig.temperatureReaderIds.push_back(readerId);
+                    mashControllerConfig.thermometerIds.push_back(readerId);
                 }
 
                 // Add to vector of temperature readers

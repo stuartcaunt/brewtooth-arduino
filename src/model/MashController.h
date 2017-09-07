@@ -2,7 +2,7 @@
 #define MASHCONTROLLER_H
 
 #include "MashControllerConfig.h"
-class TemperatureReader;
+class Thermometer;
 
 class MashController {
 
@@ -31,21 +31,21 @@ public:
         _config.name = name;
     }
 
-    void addTemperatureReader(TemperatureReader * temperatureReader) {
-        _temperatureReaders.push_back(temperatureReader);
+    void addThermometer(Thermometer * thermometer) {
+        _thermometers.push_back(thermometer);
     }
 
-    const std::vector<TemperatureReader *> & getTemperatureReaders() const {
-        return _temperatureReaders;
+    const std::vector<Thermometer *> & getThermometers() const {
+        return _thermometers;
     }
 
-    void clearTemperatureReaders() {
-        _temperatureReaders.clear();
+    void clearThermometers() {
+        _thermometers.clear();
     }
 
 private:
     MashControllerConfig _config;
-    std::vector<TemperatureReader *> _temperatureReaders;
+    std::vector<Thermometer *> _thermometers;
 };
 
 #endif /*MASHCONTROLLER_H*/

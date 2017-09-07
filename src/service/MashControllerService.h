@@ -20,7 +20,7 @@ private:
     MashControllerService();
     static MashControllerService * instance;
 
-    void addTemperatureReaders(MashController * mashController, const std::vector<unsigned int> & temperatureReaderIds);
+    void addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds);
     void createDefaultMashController();
     void save();
 

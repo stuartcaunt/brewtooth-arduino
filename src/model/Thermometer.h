@@ -1,16 +1,16 @@
-#ifndef TEMPERATUREREADER_H
-#define TEMPERATUREREADER_H
+#ifndef THERMOMETER_H
+#define THERMOMETER_H
 
-#include "TemperatureReaderConfig.h"
+#include "ThermometerConfig.h"
 
-class TemperatureReader : public Jsonable {
+class Thermometer : public Jsonable {
 
 public:
-    TemperatureReader(const TemperatureReaderConfig & config) :
+    Thermometer(const ThermometerConfig & config) :
         _config(config) {}
-    virtual ~TemperatureReader() {}
+    virtual ~Thermometer() {}
 
-    const TemperatureReaderConfig * getConfig() const {
+    const ThermometerConfig * getConfig() const {
         return &_config;
     }
 
@@ -57,9 +57,9 @@ public:
     }
         
 private:
-    TemperatureReaderConfig _config;
+    ThermometerConfig _config;
     bool _isPortValid;
     float _temperature;
 };
 
-#endif /*TEMPERATUREREADER_H*/
+#endif /*THERMOMETER_H*/

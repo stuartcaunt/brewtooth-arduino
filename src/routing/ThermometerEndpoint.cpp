@@ -1,24 +1,24 @@
-#include "TemperatureEndpoint.h"
-#include <service/TemperatureReaderService.h>
+#include "ThermometerEndpoint.h"
+#include <service/ThermometerService.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
 #include <webserver/BrewtoothWebServer.h>
 #include <utils/JsonStringBuilder.h>
 
-void TemperatureEndpoint::buildPaths() {
-    LOG("Building paths for TemperatureEndpoint");
+void ThermometerEndpoint::buildPaths() {
+    LOG("Building paths for ThermometerEndpoint");
     using namespace std::placeholders;
     
-    _server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&TemperatureEndpoint::addTemperatureReader, this));
-    _server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReaders, this));
-    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&TemperatureEndpoint::getTemperatureReader, this, _1));
-    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&TemperatureEndpoint::deleteTemperatureReader, this, _1));
-    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_PUT, std::bind(&TemperatureEndpoint::updateTemperatureReader, this, _1));
+    _server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&ThermometerEndpoint::addThermometer, this));
+    _server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometers, this));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometer, this, _1));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&ThermometerEndpoint::deleteThermometer, this, _1));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_PUT, std::bind(&ThermometerEndpoint::updateThermometer, this, _1));
 
-    _server->on("/temperature", std::bind(&TemperatureEndpoint::getTemperature, this));
+    _server->on("/temperature", std::bind(&ThermometerEndpoint::getTemperature, this));
 }
     
-void TemperatureEndpoint::addTemperatureReader() {
+void ThermometerEndpoint::addThermometer() {
     LOG("Adding a temperature reader");
     
     if (_server->hasArg("plain")) {
@@ -32,11 +32,11 @@ void TemperatureEndpoint::addTemperatureReader() {
         
         } else {
             // Build new temperature reader
-            TemperatureReaderConfig readerConfig(json);
-            TemperatureReader * temperatureReader = TemperatureReaderService::_()->add(readerConfig);
+            ThermometerConfig readerConfig(json);
+            Thermometer * thermometer = ThermometerService::_()->add(readerConfig);
 
             // Send json response
-            _server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
+            _server->send(200, "application/json", JsonStringBuilder::jsonString(thermometer).c_str());
         }
 
     } else {
@@ -46,30 +46,30 @@ void TemperatureEndpoint::addTemperatureReader() {
     }
 }
 
-void TemperatureEndpoint::getTemperatureReaders() {
+void ThermometerEndpoint::getThermometers() {
     LOG("Getting all temperature readers");
-    std::vector<TemperatureReader *> temperatureReaders = TemperatureReaderService::_()->getAll();
+    std::vector<Thermometer *> thermometers = ThermometerService::_()->getAll();
 
     // convert vector to create json array
     std::vector<Jsonable *> jsonables;
-    jsonables.insert(jsonables.end(), temperatureReaders.begin(), temperatureReaders.end());
+    jsonables.insert(jsonables.end(), thermometers.begin(), thermometers.end());
 
     _server->send(200, "application/json", JsonStringBuilder::jsonString(jsonables).c_str());
 }
 
-void TemperatureEndpoint::getTemperatureReader(int id) {
+void ThermometerEndpoint::getThermometer(int id) {
     LOG("Getting temperature reader id = %d", id);
 
-    TemperatureReader * temperatureReader = TemperatureReaderService::_()->get(id);
-    if (temperatureReader != NULL) {
-        _server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
+    Thermometer * thermometer = ThermometerService::_()->get(id);
+    if (thermometer != NULL) {
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(thermometer).c_str());
     } else {
         WARN("Cannote get temperature reader : reader with Id = %d does not exist", id);
         _server->send(404, "text/plain", "Temperature reader not found");
     }
 }
 
-void TemperatureEndpoint::updateTemperatureReader(int id) {
+void ThermometerEndpoint::updateThermometer(int id) {
     LOG("Updating temperature reader id = %d", id);
 
     if (_server->hasArg("plain")) {
@@ -79,14 +79,14 @@ void TemperatureEndpoint::updateTemperatureReader(int id) {
 
         if (json.success()) {
             // Build new temperature reader
-            TemperatureReaderConfig readerConfig(json);
+            ThermometerConfig readerConfig(json);
             
             if (readerConfig.id == id) {
-                TemperatureReader * temperatureReader = TemperatureReaderService::_()->update(readerConfig);
+                Thermometer * thermometer = ThermometerService::_()->update(readerConfig);
     
-                if (temperatureReader != NULL) {
+                if (thermometer != NULL) {
                     // Send json response
-                    _server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
+                    _server->send(200, "application/json", JsonStringBuilder::jsonString(thermometer).c_str());
                 } else {
                     ERROR("The thermometer to update with Id (%d) does not exist", id);
                     _server->send(400, "text/plain", String("The thermometer to update with Id ") + id + String(" does not exist"));
@@ -110,10 +110,10 @@ void TemperatureEndpoint::updateTemperatureReader(int id) {
 
 }
 
-void TemperatureEndpoint::deleteTemperatureReader(int id) {
+void ThermometerEndpoint::deleteThermometer(int id) {
     LOG("Deleting temperature reader id = %d", id);
 
-    if (TemperatureReaderService::_()->erase(id)) {
+    if (ThermometerService::_()->erase(id)) {
         // deleted
         _server->send(200);
     } else {
@@ -123,7 +123,7 @@ void TemperatureEndpoint::deleteTemperatureReader(int id) {
     }
 }
     
-void TemperatureEndpoint::getTemperature() {
+void ThermometerEndpoint::getTemperature() {
     LOG("getTemperature");
     
     String message = "Temperature = " + String(_temperature++);

@@ -6,7 +6,6 @@
 #include <utils/WifiConnector.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
-#include <service/TemperatureReaderService.h>
 
 #define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0

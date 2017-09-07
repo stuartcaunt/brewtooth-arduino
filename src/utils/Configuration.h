@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <model/TemperatureReaderConfig.h>
+#include <model/ThermometerConfig.h>
 #include <model/MashControllerConfig.h>
 
 struct Properties {
@@ -11,13 +11,13 @@ struct Properties {
         isFirstUse(true) {}
         
     bool isFirstUse;
-    std::vector<TemperatureReaderConfig> temperatureReaders;
+    std::vector<ThermometerConfig> thermometers;
     std::vector<MashControllerConfig> mashControllers;
 };
 
 // https://bblanchon.github.io/ArduinoJson/assistant/
 // {
-//     "temperatureReaders": [
+//     "thermometers": [
 //         {
 //             "id": 0,
 //             "port": 6,
