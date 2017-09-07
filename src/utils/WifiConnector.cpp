@@ -16,5 +16,5 @@ void WifiConnector::connect() {
     Serial.println("");
   
     LOG("Connected to %s", _ssid.c_str());
-    LOG("IP address: %s", String(WiFi.localIP()).c_str());
+    LOG("IP address: %s", WiFi.localIP().toString().c_str());
 }

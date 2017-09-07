@@ -84,12 +84,17 @@ void TemperatureEndpoint::updateTemperatureReader(int id) {
             if (readerConfig.id == id) {
                 TemperatureReader * temperatureReader = TemperatureReaderService::_()->update(readerConfig);
     
-                // Send json response
-                _server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
+                if (temperatureReader != NULL) {
+                    // Send json response
+                    _server->send(200, "application/json", JsonStringBuilder::jsonString(temperatureReader).c_str());
+                } else {
+                    ERROR("The thermometer to update with Id (%d) does not exist", id);
+                    _server->send(400, "text/plain", String("The thermometer to update with Id ") + id + String(" does not exist"));
+                }
 
             } else {
                 ERROR("The Id of the thermometer to update (%d) does not match the Id in the path (%d)", readerConfig.id, id);
-                _server->send(400, "text/plain", String("The Id of the thermometer to update (") + readerConfig.id + String("does not match the Id in the path (") + id + String(")"));
+                _server->send(400, "text/plain", String("The Id of the thermometer to update (") + readerConfig.id + String(") does not match the Id in the path (") + id + String(")"));
             }
 
         } else {

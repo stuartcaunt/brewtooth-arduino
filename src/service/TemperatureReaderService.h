@@ -2,7 +2,6 @@
 #define TEMPERATUREREADERSERVICE_H
 
 #include <model/TemperatureReader.h>
-#include <map>
 #include <vector>
 
 class TemperatureReaderService {
@@ -15,7 +14,7 @@ public:
     TemperatureReader * add(const TemperatureReaderConfig & readerConfig, bool save = true);
     TemperatureReader * update(const TemperatureReaderConfig & readerConfig);
     TemperatureReader * get(unsigned int id) const;
-    std::vector<TemperatureReader *> getAll() const;
+    const std::vector<TemperatureReader *> & getAll() const;
     bool erase(unsigned int id);
 
     float getTemperature(unsigned int id) const;
@@ -29,9 +28,9 @@ private:
 
     void createDefaultTemperatureReader();
     void save();
-
+        
 private:
-    std::map<unsigned int, TemperatureReader *> _temperatureReaders;
+    std::vector<TemperatureReader *> _temperatureReaders;
     
 };
 

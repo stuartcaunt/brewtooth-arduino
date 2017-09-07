@@ -10,8 +10,8 @@ TemperatureReaderService::TemperatureReaderService() {
 }
 
 TemperatureReaderService::~TemperatureReaderService() {
-    for (std::map<unsigned int, TemperatureReader *>::iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
-        delete it->second;
+    for (std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+        delete *it;
     }
 
     _temperatureReaders.clear();
@@ -51,17 +51,32 @@ TemperatureReader * TemperatureReaderService::add(const TemperatureReaderConfig 
 
     if (readerConfig.id == 0) {
         // Get first available id
-        unsigned int nextAvailableId = 1;
-        while (_temperatureReaders.find(nextAvailableId) != _temperatureReaders.end()) {
-            nextAvailableId++;
+        unsigned int maxId = 0;
+        for (std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+            maxId = maxId < (*it)->getId() ? (*it)->getId() : maxId;
         }
+
+        unsigned int nextAvailableId = maxId + 1;
 
         LOG("Creating new temperature reader with Id %d", nextAvailableId);
         reader->setId(nextAvailableId);
+    
+    } else {
+        // Check if it exist
+        std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin();
+        while (it != _temperatureReaders.end() && ((*it)->getId() != readerConfig.id)) {
+            it++;
+        }
+
+        // replace if needed
+        if (it != _temperatureReaders.end()) {
+            LOG("Temperature reader with Id %d already exists: replacing it", readerConfig.id);
+            _temperatureReaders.erase(it);
+        }
     }
 
     // Add to all readers
-    _temperatureReaders[reader->getId()] = reader;
+    _temperatureReaders.push_back(reader);
 
     // Check/acquire GPIO port
     reader->setPortIsValid(GPIOService::_()->acquire(readerConfig.port));
@@ -80,13 +95,19 @@ TemperatureReader * TemperatureReaderService::add(const TemperatureReaderConfig 
 TemperatureReader * TemperatureReaderService::update(const TemperatureReaderConfig & readerConfig) {
     LOG("Updating temperature reader \"%s\", id = %d, port = %d ", readerConfig.name.c_str(), readerConfig.id, readerConfig.port);
     
-    if (_temperatureReaders.find(readerConfig.id) == _temperatureReaders.end()) {
+    // Check if it exist
+    std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin();
+    while (it != _temperatureReaders.end() && ((*it)->getId() != readerConfig.id)) {
+        it++;
+    }
+
+    if (it == _temperatureReaders.end()) {
         WARN("Unable to update temperature reader with Id %d as it does not exist", readerConfig.id);
         return NULL;
     }
 
     // Obtain current temperature reader
-    TemperatureReader * reader = _temperatureReaders[readerConfig.id];
+    TemperatureReader * reader = *it;
 
     // Release current port
     GPIOService::_()->release(reader->getPort());
@@ -110,40 +131,48 @@ TemperatureReader * TemperatureReaderService::update(const TemperatureReaderConf
 TemperatureReader * TemperatureReaderService::get(unsigned int id) const {
     LOG("Getting temperature reader with Id %d", id);
 
-    std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.find(id);
+    // Check if it exist
+    std::vector<TemperatureReader *>::const_iterator it = _temperatureReaders.begin();
+    while (it != _temperatureReaders.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
     if (it == _temperatureReaders.end()) {
         WARN("Unable to get temperature reader with Id %d as it does not exist", id);
         return NULL;
     }
 
-    return it->second;
+    TemperatureReader * temperatureReader = *it;
+    DEBUG("Got temperature reader \"%s\", id = %d, port = %d ", temperatureReader->getName().c_str(), temperatureReader->getId(), temperatureReader->getPort());
+    
+    return temperatureReader;
 }
 
-std::vector<TemperatureReader *> TemperatureReaderService::getAll() const {
+const std::vector<TemperatureReader *> & TemperatureReaderService::getAll() const {
     LOG("Getting all temperature readers");
   
-    std::vector<TemperatureReader *> readers;
-    for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
-        readers.push_back(it->second);
-    }
-
-    return readers;
+    return _temperatureReaders;
 }
 
 bool TemperatureReaderService::erase(unsigned int id) {
     LOG("Deleting temperature reader with Id %d", id);
     
-    std::map<unsigned int, TemperatureReader *>::iterator it = _temperatureReaders.find(id);
+    // Check if it exist
+    std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin();
+    while (it != _temperatureReaders.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
     if (it == _temperatureReaders.end()) {
         WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
-        return false;
+        return NULL;
     }
 
     // Obtain current temperature reader
-    TemperatureReader * reader = it->second;
+    TemperatureReader * reader = *it;
     
     // Remove from map
-    _temperatureReaders.erase(id);
+    _temperatureReaders.erase(it);
 
     // Release port
     GPIOService::_()->release(reader->getPort());
@@ -159,20 +188,25 @@ bool TemperatureReaderService::erase(unsigned int id) {
 float TemperatureReaderService::getTemperature(unsigned int id) const {
     LOG("Getting temperature from reader with Id %d", id);
 
-    std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.find(id);
+    // Check if it exist
+    std::vector<TemperatureReader *>::const_iterator it = _temperatureReaders.begin();
+    while (it != _temperatureReaders.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
     if (it == _temperatureReaders.end()) {
-        WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
+        WARN("Unable to get temperature from thermometer with Id %d as it does not exist", id);
         return 0.0;
     }
 
-    return it->second->getTemperature();
+    return (*it)->getTemperature();
 }
 
 float TemperatureReaderService::getMeanTemperature() const {
     LOG("Getting mean temperature");
     float meanTemperature = 0.0;
-    for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
-        meanTemperature += it->second->getTemperature();
+    for (std::vector<TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+        meanTemperature += (*it)->getTemperature();
     }
 
     meanTemperature /= _temperatureReaders.size();
@@ -193,8 +227,8 @@ void TemperatureReaderService::createDefaultTemperatureReader() {
 void TemperatureReaderService::save() {
     LOG("Saving configuration with current temperature readers");
     std::vector<TemperatureReaderConfig> readerConfigs;
-    for (std::map<unsigned int, TemperatureReader *>::const_iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
-        readerConfigs.push_back(*(it->second->getConfig()));
+    for (std::vector<TemperatureReader *>::iterator it = _temperatureReaders.begin(); it != _temperatureReaders.end(); it++) {
+        readerConfigs.push_back(*((*it)->getConfig()));
     }
 
     Configuration::properties.temperatureReaders = readerConfigs;
