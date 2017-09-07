@@ -11,10 +11,12 @@ public:
     virtual void buildPaths();
     
 private:
+    void addTemperatureReader();
     void getTemperatureReaders();
+
     void getTemperatureReader(int id);
     void deleteTemperatureReader(int id);
-    void addTemperatureReader();
+    void updateTemperatureReader(int id);
         
     void getTemperature();
     float _temperature;

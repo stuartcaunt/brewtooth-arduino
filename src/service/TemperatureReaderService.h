@@ -16,7 +16,7 @@ public:
     TemperatureReader * update(const TemperatureReaderConfig & readerConfig);
     TemperatureReader * get(unsigned int id) const;
     std::vector<TemperatureReader *> getAll() const;
-    void erase(unsigned int id);
+    bool erase(unsigned int id);
 
     float getTemperature(unsigned int id) const;
     float getMeanTemperature() const;

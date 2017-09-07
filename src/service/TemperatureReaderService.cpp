@@ -130,20 +130,20 @@ std::vector<TemperatureReader *> TemperatureReaderService::getAll() const {
     return readers;
 }
 
-void TemperatureReaderService::erase(unsigned int id) {
+bool TemperatureReaderService::erase(unsigned int id) {
     LOG("Deleting temperature reader with Id %d", id);
     
     std::map<unsigned int, TemperatureReader *>::iterator it = _temperatureReaders.find(id);
     if (it == _temperatureReaders.end()) {
         WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
-        return;
+        return false;
     }
 
     // Obtain current temperature reader
     TemperatureReader * reader = it->second;
     
     // Remove from map
-    _temperatureReaders.erase(it);
+    _temperatureReaders.erase(id);
 
     // Release port
     GPIOService::_()->release(reader->getPort());
@@ -152,6 +152,8 @@ void TemperatureReaderService::erase(unsigned int id) {
 
     // Save current readers
     this->save();
+
+    return true;
 }
 
 float TemperatureReaderService::getTemperature(unsigned int id) const {
