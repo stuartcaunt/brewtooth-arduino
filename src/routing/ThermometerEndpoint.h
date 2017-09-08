@@ -18,7 +18,8 @@ private:
     void deleteThermometer(int id);
     void updateThermometer(int id);
         
-    void getTemperature();
+    void getThermometerTemperature(int id);
+    void getMeanTemperature();
     float _temperature;
 };
 

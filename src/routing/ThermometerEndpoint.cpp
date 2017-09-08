@@ -15,11 +15,12 @@ void ThermometerEndpoint::buildPaths() {
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&ThermometerEndpoint::deleteThermometer, this, _1));
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_PUT, std::bind(&ThermometerEndpoint::updateThermometer, this, _1));
 
-    _server->on("/temperature", std::bind(&ThermometerEndpoint::getTemperature, this));
+    _server->onPathParam<int>("/thermometers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometerTemperature, this, _1));
+    _server->on("/thermometers/temperature", std::bind(&ThermometerEndpoint::getMeanTemperature, this));
 }
     
 void ThermometerEndpoint::addThermometer() {
-    LOG("Adding a temperature reader");
+    LOG("Adding a thermometer");
     
     if (_server->hasArg("plain")) {
         String jsonText = _server->arg("plain");
@@ -31,7 +32,7 @@ void ThermometerEndpoint::addThermometer() {
             _server->send(400, "text/plain", "Failed to parse JSON data");
         
         } else {
-            // Build new temperature reader
+            // Build new thermometer
             ThermometerConfig readerConfig(json);
             Thermometer * thermometer = ThermometerService::_()->add(readerConfig);
 
@@ -47,7 +48,7 @@ void ThermometerEndpoint::addThermometer() {
 }
 
 void ThermometerEndpoint::getThermometers() {
-    LOG("Getting all temperature readers");
+    LOG("Getting all thermometers");
     std::vector<Thermometer *> thermometers = ThermometerService::_()->getAll();
 
     // convert vector to create json array
@@ -58,19 +59,20 @@ void ThermometerEndpoint::getThermometers() {
 }
 
 void ThermometerEndpoint::getThermometer(int id) {
-    LOG("Getting temperature reader id = %d", id);
+    LOG("Getting thermometer id = %d", id);
 
     Thermometer * thermometer = ThermometerService::_()->get(id);
     if (thermometer != NULL) {
         _server->send(200, "application/json", JsonStringBuilder::jsonString(thermometer).c_str());
     } else {
-        WARN("Cannote get temperature reader : reader with Id = %d does not exist", id);
-        _server->send(404, "text/plain", "Temperature reader not found");
+        WARN("Cannot get thermometer : reader with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "Thermometer not found");
     }
 }
 
+
 void ThermometerEndpoint::updateThermometer(int id) {
-    LOG("Updating temperature reader id = %d", id);
+    LOG("Updating thermometer id = %d", id);
 
     if (_server->hasArg("plain")) {
         String jsonText = _server->arg("plain");
@@ -78,7 +80,7 @@ void ThermometerEndpoint::updateThermometer(int id) {
         JsonObject & json = jsonBuffer.parseObject(jsonText);
 
         if (json.success()) {
-            // Build new temperature reader
+            // Build new thermometer
             ThermometerConfig readerConfig(json);
             
             if (readerConfig.id == id) {
@@ -111,19 +113,32 @@ void ThermometerEndpoint::updateThermometer(int id) {
 }
 
 void ThermometerEndpoint::deleteThermometer(int id) {
-    LOG("Deleting temperature reader id = %d", id);
+    LOG("Deleting thermometer id = %d", id);
 
     if (ThermometerService::_()->erase(id)) {
         // deleted
         _server->send(200);
     } else {
         // could not find
-        WARN("Cannot delete temperature reader : reader with Id = %d does not exist", id);
-        _server->send(404, "text/plain", "Temperature reader not deleted : not found");
+        WARN("Cannot delete thermometer : reader with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "Thermometer not deleted : not found");
     }
 }
-    
-void ThermometerEndpoint::getTemperature() {
+
+void ThermometerEndpoint::getThermometerTemperature(int id) {
+    LOG("Getting temperature from thermometer id = %d", id);
+
+    Thermometer * thermometer = ThermometerService::_()->get(id);
+    if (thermometer != NULL) {
+        _server->send(200, "text/plain", "OK");
+
+    } else {
+        WARN("Cannot get thermometer : reader with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "Thermometer not found");
+    }
+}
+
+void ThermometerEndpoint::getMeanTemperature() {
     LOG("getTemperature");
     
     String message = "Temperature = " + String(_temperature++);
