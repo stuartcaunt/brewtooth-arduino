@@ -10,15 +10,15 @@ MashControllerService::MashControllerService() {
 }
 
 MashControllerService::~MashControllerService() {
-    for (std::map<unsigned int, MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
-        delete it->second;
+    for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+        delete *it;
     }
 
     _mashControllers.clear();
 }
 
 void MashControllerService::init() {
-    // Initialise temperature reader service
+    // Initialise thermometer service
     ThermometerService::init();
 
     if (instance == 0) {
@@ -46,7 +46,7 @@ MashControllerService * MashControllerService::_() {
     return instance;
 }
 
-void MashControllerService::add(const MashControllerConfig & mashControllerConfig, bool save) {
+MashController * MashControllerService::add(const MashControllerConfig & mashControllerConfig, bool save) {
     LOG("Adding mash controller \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
     
     // Create a new MashController
@@ -54,37 +54,61 @@ void MashControllerService::add(const MashControllerConfig & mashControllerConfi
 
     if (mashControllerConfig.id == 0) {
         // Get first available id
-        unsigned int nextAvailableId = 1;
-        while (_mashControllers.find(nextAvailableId) != _mashControllers.end()) {
-            nextAvailableId++;
+        unsigned int maxId = 0;
+        for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+            maxId = maxId < (*it)->getId() ? (*it)->getId() : maxId;
         }
+
+        unsigned int nextAvailableId = maxId + 1;
 
         LOG("Creating new mash controller with Id %d", nextAvailableId);
         mashController->setId(nextAvailableId);
+    
+    } else {
+        // Check if it exist
+        std::vector<MashController *>::iterator it = _mashControllers.begin();
+        while (it != _mashControllers.end() && ((*it)->getId() != mashControllerConfig.id)) {
+            it++;
+        }
+
+        // replace if needed
+        if (it != _mashControllers.end()) {
+            LOG("Mash controller with Id %d already exists: replacing it", mashControllerConfig.id);
+            _mashControllers.erase(it);
+        }
+
     }
 
     // Add to all mashControllers
-    _mashControllers[mashController->getId()] = mashController;
+    _mashControllers.push_back(mashController);
 
-    // Iterate over temperature readers
+    // Iterate over thermometers
     this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
     // Save current mashControllers
     if (save) {
         this->save();
     }
+
+    return mashController;
 }
 
-void MashControllerService::update(const MashControllerConfig & mashControllerConfig) {
+MashController * MashControllerService::update(const MashControllerConfig & mashControllerConfig) {
     LOG("Updating mash controller \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
     
-    if (_mashControllers.find(mashControllerConfig.id) == _mashControllers.end()) {
+    // Check if it exist
+    std::vector<MashController *>::iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != mashControllerConfig.id)) {
+        it++;
+    }
+
+    if (it == _mashControllers.end()) {
         WARN("Unable to update mash controller with Id %d as it does not exist", mashControllerConfig.id);
-        return;
+        return NULL;
     }
 
     // Obtain current mash controller
-    MashController * mashController = _mashControllers[mashControllerConfig.id];
+    MashController * mashController = *it;
 
     // Copy data
     mashController->setName(mashControllerConfig.name);
@@ -95,19 +119,21 @@ void MashControllerService::update(const MashControllerConfig & mashControllerCo
 
     // Save current mashControllers
     this->save();
+
+    return mashController;
 }
 
 void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
     for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {
         unsigned int thermometerId = *it;
-        // Get temperature reader from termperature reader service
+        // Get thermometer from thermometer service
         Thermometer * thermometer = ThermometerService::_()->get(thermometerId);
         
         if (thermometer == NULL) {
             ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", thermometerId, mashController->getName().c_str(), mashController->getId());
         } else {
             // Add it
-            ERROR("Adding temperature reader %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
+            ERROR("Adding thermometer %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
             mashController->addThermometer(thermometer);
         }
     }
@@ -116,26 +142,44 @@ void MashControllerService::addThermometers(MashController * mashController, con
 MashController * MashControllerService::get(unsigned int id) const {
     LOG("Getting mash controller with Id %d", id);
 
-    std::map<unsigned int, MashController *>::const_iterator it = _mashControllers.find(id);
+    // Check if it exist
+    std::vector<MashController *>::const_iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
     if (it == _mashControllers.end()) {
         WARN("Unable to get mash controller with Id %d as it does not exist", id);
         return NULL;
     }
 
-    return it->second;
+    MashController * mashController = *it;
+    DEBUG("Got mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
+        
 }
 
-void MashControllerService::erase(unsigned int id) {
+const std::vector<MashController *> & MashControllerService::getAll() const {
+    LOG("Getting all mash controllers");
+  
+    return _mashControllers;
+}
+
+bool MashControllerService::erase(unsigned int id) {
     LOG("Deleting mash controller with Id %d", id);
-    
-    std::map<unsigned int, MashController *>::iterator it = _mashControllers.find(id);
+        
+    // Check if it exist
+    std::vector<MashController *>::iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
     if (it == _mashControllers.end()) {
         WARN("Unable to delete mash controller with Id %d as it does not exist", id);
-        return;
+        return false;
     }
 
     // Obtain current mash controller
-    MashController * mashController = it->second;
+    MashController * mashController = *it;
     
     // Remove from map
     _mashControllers.erase(it);
@@ -144,6 +188,8 @@ void MashControllerService::erase(unsigned int id) {
 
     // Save current mashControllers
     this->save();
+
+    return true;
 }
 
 void MashControllerService::createDefaultMashController() {
@@ -159,8 +205,8 @@ void MashControllerService::save() {
     LOG("Saving configuration with current mash controllers");
 
     std::vector<MashControllerConfig> mashControllerConfigs;
-    for (std::map<unsigned int, MashController *>::const_iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
-        mashControllerConfigs.push_back(*(it->second->getConfig()));
+    for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+        mashControllerConfigs.push_back(*((*it)->getConfig()));
     }
 
     Configuration::properties.mashControllers = mashControllerConfigs;

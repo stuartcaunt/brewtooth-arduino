@@ -2,7 +2,7 @@
 #define MASHCONTROLLERSERVICE_H
 
 #include <model/MashController.h>
-#include <map>
+#include <vector>
 
 class MashControllerService {
 public:
@@ -11,10 +11,11 @@ public:
     static void init();
     static MashControllerService * _();
 
-    void add(const MashControllerConfig & mashControllerConfig, bool save = true);
-    void update(const MashControllerConfig & mashControllerConfig);
+    MashController * add(const MashControllerConfig & mashControllerConfig, bool save = true);
+    MashController * update(const MashControllerConfig & mashControllerConfig);
     MashController * get(unsigned int id) const;
-    void erase(unsigned int id);
+    const std::vector<MashController *> & getAll() const;
+    bool erase(unsigned int id);
 
 private:
     MashControllerService();
@@ -25,7 +26,7 @@ private:
     void save();
 
 private:
-    std::map<unsigned int, MashController *> _mashControllers;
+    std::vector<MashController *> _mashControllers;
 };
 
 #endif /*MASHCONTROLLERSERVICE_H*/

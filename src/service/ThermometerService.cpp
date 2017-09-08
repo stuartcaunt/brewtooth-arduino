@@ -165,7 +165,7 @@ bool ThermometerService::erase(unsigned int id) {
 
     if (it == _thermometers.end()) {
         WARN("Unable to delete temperature reader with Id %d as it does not exist", id);
-        return NULL;
+        return false;
     }
 
     // Obtain current temperature reader
