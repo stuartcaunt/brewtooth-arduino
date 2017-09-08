@@ -8,15 +8,22 @@ x  POST to add new TemperatureReader
 x    Specify with a GPIO port
 x  PUT to update a TemperatureReader
 x  GET to read
- - GET to read temperature
+x  GET to read temperature
 x  Save TemperatureReaders to Configuration file
- - rename to Thermometer and ThermometerService
-- Endpoint to get average temperature ?
+x  rename to Thermometer and ThermometerService
+x  Endpoint to get average temperature ?
 
 x TemperatureReader
 x   initialised with a single reader
 x   configured with a port  
 x     can be modified
+ - read temperature
+
+- MashController
+ - get average temperature
+ - add heater
+ - add agitator
+ - set temperature
 
 
 x GPIO service
