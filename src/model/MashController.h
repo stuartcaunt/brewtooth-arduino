@@ -4,7 +4,7 @@
 #include "MashControllerConfig.h"
 class Thermometer;
 
-class MashController {
+class MashController : public Jsonable {
 
 public:
     MashController(const MashControllerConfig & config) :
@@ -41,6 +41,10 @@ public:
 
     void clearThermometers() {
         _thermometers.clear();
+    }
+    
+    virtual void convertToJson(JsonObject & json) const {
+        _config.convertToJson(json);
     }
 
 private:

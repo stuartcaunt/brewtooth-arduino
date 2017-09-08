@@ -2,6 +2,7 @@
 #include "Error404Endpoint.h"
 #include "RootEndpoint.h"
 #include "ThermometerEndpoint.h"
+#include "MashControllerEndpoint.h"
 #include <utils/Log.h>
 #include <webserver/BrewtoothWebServer.h>
 
@@ -23,6 +24,7 @@ void WebServerRouter::buildRoutes() {
     this->addEndpoint(new Error404Endpoint());
     this->addEndpoint(new RootEndpoint());
     this->addEndpoint(new ThermometerEndpoint());
+    this->addEndpoint(new MashControllerEndpoint());
 }
 
 void WebServerRouter::addEndpoint(WebServerEndpoint * endpoint) {

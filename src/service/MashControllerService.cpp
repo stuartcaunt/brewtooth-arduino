@@ -76,7 +76,6 @@ MashController * MashControllerService::add(const MashControllerConfig & mashCon
             LOG("Mash controller with Id %d already exists: replacing it", mashControllerConfig.id);
             _mashControllers.erase(it);
         }
-
     }
 
     // Add to all mashControllers
@@ -155,7 +154,8 @@ MashController * MashControllerService::get(unsigned int id) const {
 
     MashController * mashController = *it;
     DEBUG("Got mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
-        
+    
+    return mashController;
 }
 
 const std::vector<MashController *> & MashControllerService::getAll() const {

@@ -62,18 +62,7 @@ void Configuration::save() {
 
         LOG("Saving mash controller \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
         
-        JsonObject & mashControllerConfigJson = mashControllerConfigs.createNestedObject();
-        mashControllerConfigJson["id"] = mashControllerConfig.id;
-        mashControllerConfigJson["name"] = mashControllerConfig.name;
-
-        // Create array for temperatuer reader Ids
-        JsonArray & thermometerIds = root.createNestedArray("thermometerIds");
-        for (std::vector<unsigned int>::iterator itTempId = mashControllerConfig.thermometerIds.begin(); itTempId != mashControllerConfig.thermometerIds.end(); itTempId++) {
-            unsigned int thermometerId = *itTempId;
-
-            // Add temperature reader Id to array
-            thermometerIds.add(thermometerId);
-        }
+        mashControllerConfig.convertToJson(mashControllerConfigs.createNestedObject());
     }
     
     File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
@@ -126,20 +115,11 @@ void Configuration::deserialize(char * json) {
                 JsonObject & mashControllerConfigJson = *it;
 
                 // Create new MashControllerConfig
-                MashControllerConfig mashControllerConfig;
-                mashControllerConfig.id = mashControllerConfigJson["id"];
-                mashControllerConfig.name = mashControllerConfigJson["name"].as<String>();
-
-                // Get temperature reader ids
-                JsonArray & readerIds = mashControllerConfigJson["thermometerIds"];
-                for (JsonArray::iterator itReader = mashControllers.begin(); itReader != mashControllers.end(); ++itReader) {
-                    unsigned int readerId = *it;
-                    mashControllerConfig.thermometerIds.push_back(readerId);
-                }
-
+                MashControllerConfig mashControllerConfig(mashControllerConfigJson);
+                
                 // Add to vector of temperature readers
                 properties.mashControllers.push_back(mashControllerConfig);
-
+                
                 LOG("Read mash controller config \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
             }
         }
