@@ -20,10 +20,12 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperature, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getHeater, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateHeater, this, _1));
     _server->onPathParam<int>("/controllers/{id}/heater/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setHeaterActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/heater/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setHeaterActive, this, _1, false));
     
     _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getAgitator, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateAgitator, this, _1));
     _server->onPathParam<int>("/controllers/{id}/agitator/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
 }
@@ -80,7 +82,6 @@ void MashControllerEndpoint::getMashController(int id) {
     }
 }
 
-
 void MashControllerEndpoint::updateMashController(int id) {
     LOG("Updating mashController id = %d", id);
 
@@ -100,8 +101,8 @@ void MashControllerEndpoint::updateMashController(int id) {
                     // Send json response
                     _server->send(200, "application/json", JsonStringBuilder::jsonString(mashController).c_str());
                 } else {
-                    ERROR("The mashController to update with Id (%d) does not exist", id);
-                    _server->send(400, "text/plain", String("The mashController to update with Id ") + id + String(" does not exist"));
+                    ERROR("Failed to update mashController with Id %d", id);
+                    _server->send(400, "text/plain", String("Failed to update mashController with Id ") + id);
                 }
 
             } else {
@@ -119,7 +120,6 @@ void MashControllerEndpoint::updateMashController(int id) {
         _server->send(400, "text/plain", "Body not received");
         return;
     }
-
 }
 
 void MashControllerEndpoint::deleteMashController(int id) {
@@ -163,6 +163,41 @@ void MashControllerEndpoint::getHeater(int id) {
     }
 }
 
+void MashControllerEndpoint::updateHeater(int id) {
+    LOG("Updating heater for mashController id = %d", id);
+
+    if (_server->hasArg("plain")) {
+        String jsonText = _server->arg("plain");
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & json = jsonBuffer.parseObject(jsonText);
+
+        if (json.success()) {
+            // Build new mashController
+            RelayConfig relayConfig(json);
+            
+            Relay * relay = MashControllerService::_()->updateHeater(id, relayConfig);
+
+            if (relay != NULL) {
+                // Send json response
+                _server->send(200, "application/json", JsonStringBuilder::jsonString(relay).c_str());
+            
+            } else {
+                ERROR("Failed to update heater for mashController with Id %d", id);
+                _server->send(400, "text/plain", String("Failed to update heater for mashController with Id ") + id);
+            }
+
+        } else {
+            ERROR("Failed to parse JSON data");
+            _server->send(400, "text/plain", "Failed to parse JSON data");
+        }
+
+    } else {
+        ERROR("Body not received");
+        _server->send(400, "text/plain", "Body not received");
+        return;
+    }
+}
+
 void MashControllerEndpoint::setHeaterActive(int id, bool active) {
     LOG("Getting heater from mashController id = %d", id);
     
@@ -198,7 +233,42 @@ void MashControllerEndpoint::getAgitator(int id) {
         _server->send(404, "text/plain", "MashController not found");
     }
 }
+
+void MashControllerEndpoint::updateAgitator(int id) {
+    LOG("Updating agitator for mashController id = %d", id);
     
+    if (_server->hasArg("plain")) {
+        String jsonText = _server->arg("plain");
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & json = jsonBuffer.parseObject(jsonText);
+
+        if (json.success()) {
+            // Build new mashController
+            RelayConfig relayConfig(json);
+            
+            Relay * relay = MashControllerService::_()->updateAgitator(id, relayConfig);
+
+            if (relay != NULL) {
+                // Send json response
+                _server->send(200, "application/json", JsonStringBuilder::jsonString(relay).c_str());
+            
+            } else {
+                ERROR("Failed to update agitator for mashController with Id %d", id);
+                _server->send(400, "text/plain", String("Failed to update agitator for mashController with Id ") + id);
+            }
+
+        } else {
+            ERROR("Failed to parse JSON data");
+            _server->send(400, "text/plain", "Failed to parse JSON data");
+        }
+
+    } else {
+        ERROR("Body not received");
+        _server->send(400, "text/plain", "Body not received");
+        return;
+    }
+}
+   
 void MashControllerEndpoint::setAgitatorActive(int id, bool active) {
     LOG("Getting agitator from mashController id = %d", id);
     

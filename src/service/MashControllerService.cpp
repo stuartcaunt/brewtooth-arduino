@@ -187,6 +187,58 @@ bool MashControllerService::erase(unsigned int id) {
     return true;
 }
 
+Relay * MashControllerService::updateHeater(unsigned int mashControllerId, const RelayConfig & relayConfig) {
+    LOG("Updating heater for mash controller with Id %d", mashControllerId);
+    
+    // Check if it exist
+    std::vector<MashController *>::iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != mashControllerId)) {
+        it++;
+    }
+
+    if (it == _mashControllers.end()) {
+        WARN("Unable to update heater for mash controller with Id %d as it does not exist", mashControllerId);
+        return NULL;
+    }
+
+    // Obtain current mash controller
+    MashController * mashController = *it;
+
+    // Set new heater
+    this->setHeater(mashController, relayConfig);
+
+    // Save current mashControllers
+    this->save();
+
+    return mashController->getHeater();;
+}
+
+
+Relay * MashControllerService::updateAgitator(unsigned int mashControllerId, const RelayConfig & relayConfig) {
+    LOG("Updating agitator for mash controller with Id %d", mashControllerId);
+    
+    // Check if it exist
+    std::vector<MashController *>::iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != mashControllerId)) {
+        it++;
+    }
+
+    if (it == _mashControllers.end()) {
+        WARN("Unable to update agitator for mash controller with Id %d as it does not exist", mashControllerId);
+        return NULL;
+    }
+
+    // Obtain current mash controller
+    MashController * mashController = *it;
+
+    // Set new heater
+    this->setAgitator(mashController, relayConfig);
+
+    // Save current mashControllers
+    this->save();
+
+    return mashController->getHeater();;
+}
 
 void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
     for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {

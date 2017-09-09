@@ -5,6 +5,7 @@
 #include <vector>
 
 class MashController;
+class Relay;
 
 class MashControllerService {
 public:
@@ -19,6 +20,9 @@ public:
     const std::vector<MashController *> & getAll() const;
     bool erase(unsigned int id);
 
+    Relay * updateHeater(unsigned int mashControllerId, const RelayConfig & relayConfig);
+    Relay * updateAgitator(unsigned int mashControllerId, const RelayConfig & relayConfig);
+    
 private:
     MashControllerService();
     static MashControllerService * instance;

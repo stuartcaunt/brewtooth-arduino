@@ -21,9 +21,11 @@ private:
     void getTemperature(int id);
     
     void getHeater(int id);
+    void updateHeater(int id);
     void setHeaterActive(int id, bool active);
     
     void getAgitator(int id);
+    void updateAgitator(int id);
     void setAgitatorActive(int id, bool active);
 };
 
