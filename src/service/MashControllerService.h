@@ -1,8 +1,10 @@
 #ifndef MASHCONTROLLERSERVICE_H
 #define MASHCONTROLLERSERVICE_H
 
-#include <model/MashController.h>
+#include <model/MashControllerConfig.h>
 #include <vector>
+
+class MashController;
 
 class MashControllerService {
 public:
@@ -22,7 +24,12 @@ private:
     static MashControllerService * instance;
 
     void addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds);
+
+    void setHeater(MashController * mashController, const RelayConfig & heater);
+    void setAgitator(MashController * mashController, const RelayConfig & agitator);
+
     void createDefaultMashController();
+
     void save();
 
 private:

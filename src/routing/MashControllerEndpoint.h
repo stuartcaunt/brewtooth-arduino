@@ -19,6 +19,12 @@ private:
     void updateMashController(int id);
         
     void getTemperature(int id);
+    
+    void getHeater(int id);
+    void setHeaterActive(int id, bool active);
+    
+    void getAgitator(int id);
+    void setAgitatorActive(int id, bool active);
 };
 
 #endif /*MASHCONTROLLERENDPOINT_H*/

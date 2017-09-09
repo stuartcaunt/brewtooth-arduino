@@ -3,13 +3,19 @@
 
 #include "MashControllerConfig.h"
 class Thermometer;
+class Relay;
 
 class MashController : public Jsonable {
 
 public:
     MashController(const MashControllerConfig & config) :
-        _config(config) {}
-    virtual ~MashController() {}
+        _config(config),
+        _heater(NULL),
+        _agitator(NULL) {}
+    virtual ~MashController() {
+        this->deleteHeater();
+        this->deleteAgitator();
+    }
 
     const MashControllerConfig * getConfig() const {
         return &_config;
@@ -47,9 +53,23 @@ public:
         _config.convertToJson(json);
     }
 
+    Relay * getHeater() const {
+        return _heater;
+    }
+    void setHeater(Relay * heater);
+    void deleteHeater();
+
+    Relay * getAgitator() const {
+        return _agitator;
+    }
+    void setAgitator(Relay * agitator);
+    void deleteAgitator();
+
 private:
     MashControllerConfig _config;
     std::vector<Thermometer *> _thermometers;
+    Relay * _heater;
+    Relay * _agitator;
 };
 
 #endif /*MASHCONTROLLER_H*/

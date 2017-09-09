@@ -2,7 +2,6 @@
 #include "FileHelper.h"
 #include "Log.h"
 #include <FS.h>
-#include <ArduinoJson.h>
 
 Properties Configuration::properties = Properties();
 
@@ -36,13 +35,35 @@ void Configuration::init(bool reset) {
 void Configuration::save() {
     LOG("Saving properties file");
     
-    DynamicJsonBuffer jsonBuffer;
-    
     // root object
+    DynamicJsonBuffer jsonBuffer;
     JsonObject & root = jsonBuffer.createObject();
 
+    // Convert properties to json
+    convertPropertiesToJson(root);
+    
+    File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
+    root.printTo(propertiesFile);
+    propertiesFile.close(); 
+}
+
+String Configuration::getPropertiesJsonString() {
+    // root object
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject & root = jsonBuffer.createObject();
+
+    // Convert properties to json
+    convertPropertiesToJson(root);
+
+    String jsonString;
+    root.printTo(jsonString);
+
+    return jsonString;
+}
+
+void Configuration::convertPropertiesToJson(JsonObject & json) {
     // Array of temperature configs
-    JsonArray & thermometerConfigs = root.createNestedArray("thermometers");
+    JsonArray & thermometerConfigs = json.createNestedArray("thermometers");
     
     // iteratuer over temperature readers
     for (std::vector<ThermometerConfig>::iterator it = properties.thermometers.begin(); it != properties.thermometers.end(); it++) {
@@ -54,7 +75,7 @@ void Configuration::save() {
     }
 
     // Array of temperature configs
-    JsonArray & mashControllerConfigs = root.createNestedArray("mashControllers");
+    JsonArray & mashControllerConfigs = json.createNestedArray("mashControllers");
     
     // Iterate over mash controllers
     for (std::vector<MashControllerConfig>::iterator it = properties.mashControllers.begin(); it != properties.mashControllers.end(); it++) {
@@ -64,10 +85,6 @@ void Configuration::save() {
         
         mashControllerConfig.convertToJson(mashControllerConfigs.createNestedObject());
     }
-    
-    File propertiesFile = SPIFFS.open(PROPERTIES_FILE_NAME, "w");
-    root.printTo(propertiesFile);
-    propertiesFile.close(); 
 }
 
 void Configuration::makeDefaultConfiguration() {

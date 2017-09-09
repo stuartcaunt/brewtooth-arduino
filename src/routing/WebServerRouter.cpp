@@ -1,6 +1,7 @@
 #include "WebServerRouter.h"
 #include "Error404Endpoint.h"
 #include "RootEndpoint.h"
+#include "ConfigurationEndpoint.h"
 #include "ThermometerEndpoint.h"
 #include "MashControllerEndpoint.h"
 #include <utils/Log.h>
@@ -23,6 +24,7 @@ void WebServerRouter::buildRoutes() {
     LOG("Building all routes");
     this->addEndpoint(new Error404Endpoint());
     this->addEndpoint(new RootEndpoint());
+    this->addEndpoint(new ConfigurationEndpoint());
     this->addEndpoint(new ThermometerEndpoint());
     this->addEndpoint(new MashControllerEndpoint());
 }

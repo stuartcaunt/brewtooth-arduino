@@ -1,5 +1,7 @@
 #include "MashControllerService.h"
 #include "ThermometerService.h"
+#include <model/MashController.h>
+#include <model/Relay.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
 
@@ -84,6 +86,10 @@ MashController * MashControllerService::add(const MashControllerConfig & mashCon
     // Iterate over thermometers
     this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
+    // Handle heater and agitator
+    this->setHeater(mashController, mashControllerConfig.heater);
+    this->setAgitator(mashController, mashControllerConfig.agitator);
+
     // Save current mashControllers
     if (save) {
         this->save();
@@ -116,27 +122,16 @@ MashController * MashControllerService::update(const MashControllerConfig & mash
     mashController->clearThermometers();
     this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
+    // Handle heater and agitator
+    this->setHeater(mashController, mashControllerConfig.heater);
+    this->setAgitator(mashController, mashControllerConfig.agitator);
+
     // Save current mashControllers
     this->save();
 
     return mashController;
 }
 
-void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
-    for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {
-        unsigned int thermometerId = *it;
-        // Get thermometer from thermometer service
-        Thermometer * thermometer = ThermometerService::_()->get(thermometerId);
-        
-        if (thermometer == NULL) {
-            ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", thermometerId, mashController->getName().c_str(), mashController->getId());
-        } else {
-            // Add it
-            ERROR("Adding thermometer %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
-            mashController->addThermometer(thermometer);
-        }
-    }
-}
 
 MashController * MashControllerService::get(unsigned int id) const {
     LOG("Getting mash controller with Id %d", id);
@@ -192,11 +187,55 @@ bool MashControllerService::erase(unsigned int id) {
     return true;
 }
 
+
+void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
+    for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {
+        unsigned int thermometerId = *it;
+        // Get thermometer from thermometer service
+        Thermometer * thermometer = ThermometerService::_()->get(thermometerId);
+        
+        if (thermometer == NULL) {
+            ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", thermometerId, mashController->getName().c_str(), mashController->getId());
+        } else {
+            // Add it
+            LOG("Adding thermometer %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
+            mashController->addThermometer(thermometer);
+        }
+    }
+}
+
+void MashControllerService::setHeater(MashController * mashController, const RelayConfig & heater) {
+    LOG("Creating heater: enabled %s, port %d", heater.enabled ? "true" : "false", heater.port);
+    Relay * relay = new Relay(heater);
+    LOG("Adding heater with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
+    mashController->setHeater(relay);
+}
+
+void MashControllerService::setAgitator(MashController * mashController, const RelayConfig & agitator) {
+    LOG("Creating agitator: enabled %s, port %d", agitator.enabled ? "true" : "false", agitator.port);
+    Relay * relay = new Relay(agitator);
+    LOG("Adding agitator with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
+    mashController->setAgitator(relay);
+}
+
 void MashControllerService::createDefaultMashController() {
+    // Thermometers
     MashControllerConfig defaultConfig;
     defaultConfig.id = 1;
     defaultConfig.name = "mash controller 0";
     defaultConfig.thermometerIds.push_back(1);
+
+    // Heater
+    RelayConfig defaultHeater;
+    defaultHeater.enabled = true;
+    defaultHeater.port = 4;
+    defaultConfig.heater = defaultHeater;
+
+    // Agitator
+    RelayConfig defaultAgitator;
+    defaultHeater.enabled = false;
+    defaultHeater.port = 5;
+    defaultConfig.agitator = defaultAgitator;
 
     this->add(defaultConfig);
 }

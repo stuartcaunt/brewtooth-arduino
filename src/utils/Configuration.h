@@ -44,10 +44,12 @@ class Configuration {
 public:
     static void init(bool reset = false);
     static void save();
+    static String getPropertiesJsonString();
     
     static Properties properties;
 
 private:
+    static void convertPropertiesToJson(JsonObject & json);
     static void makeDefaultConfiguration();
     static void deserialize(char * jsonBuffer);
 

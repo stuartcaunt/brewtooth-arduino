@@ -58,7 +58,6 @@ public:
         
 private:
     ThermometerConfig _config;
-    bool _isPortValid;
     float _temperature;
 };
 

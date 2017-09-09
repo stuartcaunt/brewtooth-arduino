@@ -1,7 +1,7 @@
 #ifndef MASHCONTROLLERCONFIG_H
 #define MASHCONTROLLERCONFIG_H
 
-#include "ThermometerConfig.h"
+#include "RelayConfig.h"
 #include "Jsonable.h"
 #include <vector>
 
@@ -14,26 +14,47 @@ struct MashControllerConfig : public Jsonable {
         id(json["id"]),
         name(json["name"].as<String>()) {
 
+        // Thermometers
         JsonArray & thermometerIds = json["thermometerIds"];
         for (JsonArray::iterator it = thermometerIds.begin(); it != thermometerIds.end(); ++it) {
             unsigned int readerId = *it;
             this->thermometerIds.push_back(readerId);
         }
+
+        // Heater
+        JsonObject & heaterJson = json["heater"];
+        this->heater = RelayConfig(heaterJson);
+
+        // Agitator
+        JsonObject & agitatorJson = json["agitator"];
+        this->agitator = RelayConfig(agitatorJson);
     }
 
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["name"] = name;
+
+        // Thermometers
         JsonArray & thermometerIds = json.createNestedArray("thermometerIds");
         for (std::vector<unsigned int>::const_iterator it = this->thermometerIds.begin(); it != this->thermometerIds.end(); it++) {
             unsigned int thermometerId = *it;
             thermometerIds.add(thermometerId);
         }
+
+        // Heater
+        JsonObject & heaterJson = json.createNestedObject("heater");
+        heater.convertToJson(heaterJson);
+
+        // Agitator
+        JsonObject & agitatorJson = json.createNestedObject("agitator");
+        agitator.convertToJson(agitatorJson);
     }
 
     unsigned int id;
     String name;
     std::vector<unsigned int> thermometerIds;
+    RelayConfig heater;
+    RelayConfig agitator;
 };
 
 #endif /*MASHCONTROLLERCONFIG_H*/

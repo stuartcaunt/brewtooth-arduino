@@ -15,7 +15,7 @@ public:
         id(json["id"]),
         port(json["port"]),
         name(json["name"].as<String>()),
-        isPortValid(false) {}
+        isPortValid(json["isValid"]) {}
 
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;

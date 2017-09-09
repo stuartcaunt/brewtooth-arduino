@@ -3,30 +3,44 @@ x   save wifi details
 x   calculate size of json data correctly with array
 x Wifi server
 
-- temperature endpoint
-x  POST to add new TemperatureReader
+x GPIO service
+x   indicates which ports are used
+x    input or output
+x   Thermometer will use GPIO service
+
+x Thermometer endpoint
+x  POST to add new Thermometer
 x    Specify with a GPIO port
-x  PUT to update a TemperatureReader
+x  PUT to update a Thermometer
 x  GET to read
 x  GET to read temperature
-x  Save TemperatureReaders to Configuration file
+x  Save Thermometers to Configuration file
 x  rename to Thermometer and ThermometerService
 x  Endpoint to get average temperature ?
 
-x TemperatureReader
+x Thermometer
 x   initialised with a single reader
 x   configured with a port  
 x     can be modified
  - read temperature
 
 - MashController
+ - get/set PID
  - get average temperature
  - add heater
+  - GPIO service
  - add agitator
- - set temperature
+  - GPIO service
+ - control temperature
+
+- MashControllerEndpoint
+ - get/set heater on/off
+ - get/set PID
+ - get/set temperature
+ - PUT to update heater/agitator
+
+- App
+ - update all temperature reading during loop
+ - update all temperature setting during loop
 
 
-x GPIO service
-x   indicates which ports are used
-x    input or output
-x   TemperatureReader will use GPIO service
