@@ -3,12 +3,22 @@
 
 #include "ThermometerConfig.h"
 
-class Thermometer : public Jsonable {
+class OneWire;
+class DallasTemperature;
+typedef uint8_t DeviceAddress[8];
 
+class Thermometer : public Jsonable {
 public:
     Thermometer(const ThermometerConfig & config) :
-        _config(config) {}
+        _config(config),
+        _temperatureReading(false),
+        _temperatureC(0.0),
+        _oneWire(NULL),
+        _sensors(NULL),
+        _devicesAvailable(false) {}
     virtual ~Thermometer() {}
+
+    void init();
 
     const ThermometerConfig * getConfig() const {
         return &_config;
@@ -46,11 +56,15 @@ public:
         _config.isPortValid = isValid;
     }
     
-    float getTemperature() const {
-        return _temperature;
+    float getTemperatureC() const {
+        return _temperatureC;
     }
 
     void readTemperature();
+
+    bool isValid() const {
+        return _config.isPortValid && _devicesAvailable;
+    }
     
     virtual void convertToJson(JsonObject & json) const {
         _config.convertToJson(json);
@@ -58,7 +72,13 @@ public:
         
 private:
     ThermometerConfig _config;
-    float _temperature;
+    bool _temperatureReading;
+    float _temperatureC;
+
+    OneWire * _oneWire;
+    DallasTemperature * _sensors;
+    bool _devicesAvailable;
+    DeviceAddress _deviceAddress;
 };
 
 #endif /*THERMOMETER_H*/

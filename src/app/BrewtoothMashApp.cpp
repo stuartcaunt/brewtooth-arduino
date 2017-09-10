@@ -1,5 +1,6 @@
 #include "BrewtoothMashApp.h"
 #include <routing/WebServerRouter.h>
+#include <service/ThermometerService.h>
 #include <service/MashControllerService.h>
 #include <utils/Log.h>
 #include <Arduino.h>
@@ -29,5 +30,8 @@ void BrewtoothMashApp::setup() {
 }
 
 void BrewtoothMashApp::loop() {
+    // Update temperature readers
+    ThermometerService::_()->readTemperatures();
+
     _server->handleClient();
 }

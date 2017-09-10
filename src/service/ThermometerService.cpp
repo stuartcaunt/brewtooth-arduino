@@ -1,5 +1,6 @@
 #include "ThermometerService.h"
 #include "GPIOService.h"
+#include <model/Thermometer.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
 
@@ -83,6 +84,8 @@ Thermometer * ThermometerService::add(const ThermometerConfig & thermometerConfi
     if (thermometer->getPortIsValid()) {
         GPIOService::_()->setPinMode(thermometer->getPort(), INPUT);
 
+        thermometer->init();
+
     } else {
         WARN("Thermometer \"%s\" has an invalid GPIO port", thermometer->getName().c_str(), thermometer->getPort());
     }
@@ -121,7 +124,9 @@ Thermometer * ThermometerService::update(const ThermometerConfig & thermometerCo
 
     // Check/acquire GPIO port
     thermometer->setPortIsValid(GPIOService::_()->acquire(thermometerConfig.port));
-    if (!thermometer->getPortIsValid()) {
+    if (thermometer->getPortIsValid()) {
+        thermometer->init();
+    } else {
         WARN("Thermometer \"%s\" has an invalid GPIO port", thermometer->getName().c_str(), thermometer->getPort());
     }
 
@@ -188,7 +193,7 @@ bool ThermometerService::erase(unsigned int id) {
     return true;
 }
 
-float ThermometerService::getTemperature(unsigned int id) const {
+float ThermometerService::getTemperatureC(unsigned int id) const {
     LOG("Getting temperature from thermometer with Id %d", id);
 
     // Check if it exist
@@ -202,14 +207,14 @@ float ThermometerService::getTemperature(unsigned int id) const {
         return 0.0;
     }
 
-    return (*it)->getTemperature();
+    return (*it)->getTemperatureC();
 }
 
-float ThermometerService::getMeanTemperature() const {
+float ThermometerService::getMeanTemperatureC() const {
     LOG("Getting mean temperature");
     float meanTemperature = 0.0;
     for (std::vector<Thermometer *>::const_iterator it = _thermometers.begin(); it != _thermometers.end(); it++) {
-        meanTemperature += (*it)->getTemperature();
+        meanTemperature += (*it)->getTemperatureC();
     }
 
     meanTemperature /= _thermometers.size();
@@ -240,5 +245,8 @@ void ThermometerService::save() {
 }
 
 void ThermometerService::readTemperatures() {
-
+    for (std::vector<Thermometer *>::iterator it = _thermometers.begin(); it != _thermometers.end(); it++) {
+        Thermometer * thermometer = *it;
+        thermometer->readTemperature();
+    }
 }

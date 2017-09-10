@@ -1,4 +1,5 @@
 #include "ThermometerEndpoint.h"
+#include <model/Thermometer.h>
 #include <service/ThermometerService.h>
 #include <utils/Configuration.h>
 #include <utils/Log.h>
@@ -130,7 +131,8 @@ void ThermometerEndpoint::getThermometerTemperature(int id) {
 
     Thermometer * thermometer = ThermometerService::_()->get(id);
     if (thermometer != NULL) {
-        _server->send(200, "text/plain", "OK");
+        String output(thermometer->getTemperatureC());
+        _server->send(200, "text/plain", output.c_str());
 
     } else {
         WARN("Cannot get thermometer : reader with Id = %d does not exist", id);
@@ -139,9 +141,11 @@ void ThermometerEndpoint::getThermometerTemperature(int id) {
 }
 
 void ThermometerEndpoint::getMeanTemperature() {
-    LOG("getTemperature");
+    LOG("getMeanTemperature");
     
-    String message = "Temperature = " + String(_temperature++);
+    float meanTemperature = ThermometerService::_()->getMeanTemperatureC();
+    
+    String output(meanTemperature);
 
-    _server->send(200, "text/plain", message);
+    _server->send(200, "text/plain", output.c_str());
 }

@@ -1,8 +1,10 @@
 #ifndef THERMOMETERSERVICE_H
 #define THERMOMETERSERVICE_H
 
-#include <model/Thermometer.h>
+#include <model/ThermometerConfig.h>
 #include <vector>
+
+class Thermometer;
 
 class ThermometerService {
 public:
@@ -17,8 +19,8 @@ public:
     const std::vector<Thermometer *> & getAll() const;
     bool erase(unsigned int id);
 
-    float getTemperature(unsigned int id) const;
-    float getMeanTemperature() const;
+    float getTemperatureC(unsigned int id) const;
+    float getMeanTemperatureC() const;
 
     void readTemperatures();
     

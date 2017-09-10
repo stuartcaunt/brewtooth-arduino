@@ -5,7 +5,7 @@
 
 class ThermometerEndpoint : public WebServerEndpoint {
 public:
-    ThermometerEndpoint() : _temperature(0.0) {}
+    ThermometerEndpoint() {}
     virtual ~ThermometerEndpoint() {}
 
     virtual void buildPaths();
@@ -20,7 +20,6 @@ private:
         
     void getThermometerTemperature(int id);
     void getMeanTemperature();
-    float _temperature;
 };
 
 #endif /*THERMOMETERENDPOINT_H*/

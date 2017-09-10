@@ -140,6 +140,10 @@ void MashControllerEndpoint::getTemperature(int id) {
 
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
+        String output(mashController->getTemperatureC());
+        _server->send(200, "text/plain", output.c_str());
+
+
         _server->send(200, "text/plain", "OK");
 
     } else {

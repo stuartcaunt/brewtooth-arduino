@@ -65,6 +65,8 @@ public:
     void setAgitator(Relay * agitator);
     void deleteAgitator();
 
+    float getTemperatureC() const;
+
 private:
     MashControllerConfig _config;
     std::vector<Thermometer *> _thermometers;
