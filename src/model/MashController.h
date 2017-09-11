@@ -65,7 +65,7 @@ public:
     void setAgitator(Relay * agitator);
     void deleteAgitator();
 
-    float getTemperatureC() const;
+    float getMeanTemperatureC() const;
 
 private:
     MashControllerConfig _config;

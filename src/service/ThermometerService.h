@@ -19,7 +19,7 @@ public:
     const std::vector<ThermometerWire *> & getAll() const;
     bool erase(unsigned int id);
 
-    float getTemperatureC(unsigned int id) const;
+    float getMeanTemperatureC(unsigned int id) const;
     float getMeanTemperatureC() const;
 
     void readTemperatures();

@@ -193,7 +193,7 @@ bool ThermometerService::erase(unsigned int id) {
     return true;
 }
 
-float ThermometerService::getTemperatureC(unsigned int id) const {
+float ThermometerService::getMeanTemperatureC(unsigned int id) const {
     LOG("Getting temperature from thermometerWire with Id %d", id);
 
     // Check if it exist
@@ -207,14 +207,14 @@ float ThermometerService::getTemperatureC(unsigned int id) const {
         return 0.0;
     }
 
-    return (*it)->getTemperatureC();
+    return (*it)->getMeanTemperatureC();
 }
 
 float ThermometerService::getMeanTemperatureC() const {
     LOG("Getting mean temperature");
     float meanTemperature = 0.0;
     for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
-        meanTemperature += (*it)->getTemperatureC();
+        meanTemperature += (*it)->getMeanTemperatureC();
     }
 
     meanTemperature /= _thermometerWires.size();

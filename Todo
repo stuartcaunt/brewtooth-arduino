@@ -24,6 +24,7 @@ x   initialised with a single reader
 x   configured with a port  
 x     can be modified
 x  read temperature
+ - Get temperatures structure
 
 OneWire
   Modify object model to take into account multiple thermometers on single onewire
@@ -44,6 +45,7 @@ x   GPIO service
 x  get/set heater on/off
  - get/set PID
 x  get mean temperature
+ - get temperature structure
  - get structure of temperatures 
  - get status (temperatures, heater & agitator)
  - start/stop temperature control

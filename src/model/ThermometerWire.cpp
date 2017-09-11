@@ -24,12 +24,18 @@ void ThermometerWire::init() {
         LOG("Found %d temperature sensors", deviceCount);
 
         _devicesAvailable = (deviceCount > 0);
-        if (!_devicesAvailable) {
+        if (_devicesAvailable) {
+            // Get all device addresses
+            for (uint8_t i = 0; i < deviceCount; i++) {
+                Thermometer thermometer;
+                _sensors->getAddress(thermometer.deviceAddress, i);
+
+                _thermometers.push_back(thermometer);
+            }
+
+        } else {
             WARN("No devices available");
         }
-
-        // Get address for index 0
-        _sensors->getAddress(_deviceAddress, 0);
 
         // Set the resolution
         _sensors->setResolution(12);
@@ -42,24 +48,28 @@ void ThermometerWire::init() {
 void ThermometerWire::readTemperature() {
     if (_devicesAvailable) {
         if (_temperatureReading) {
-            if (_sensors->isConversionAvailable(_deviceAddress)) {
+            if (_sensors->isConversionComplete()) {
                 _temperatureReading = false;
-                _temperatureC = _sensors->getTempC(_deviceAddress);
-                DEBUG("Temperature conversion complete. Got temperature %d", (int)_temperatureC);
+                // Read all temperatures
+                _meanTemperatureC = 0.0;
+                for (std::vector<Thermometer>::iterator it = _thermometers.begin(); it != _thermometers.end(); it++) {
+                    Thermometer & thermometer = *it;
+                    thermometer.temperatureC = _sensors->getTempC(thermometer.deviceAddress);
+                    _meanTemperatureC += thermometer.temperatureC ;
+                }
+
+                // get average temperature
+                _meanTemperatureC = _meanTemperatureC / _thermometers.size();
+                DEBUG("Temperature conversion complete. Got temperature %d", (int)_meanTemperatureC);
             
             } else {
                 DEBUG("Waiting for temperature conversion");
             }
         
         } else {
-            if (_sensors->requestTemperaturesByAddress(_deviceAddress)) {
-                DEBUG("Requesting temperature");
-                _temperatureReading = true;
-            
-            } else {
-                ERROR("Cannot read temperature as device is not connected: disabling thermometer");
-                _devicesAvailable = false;
-            }
+            _sensors->requestTemperatures();
+            DEBUG("Requesting temperature");
+            _temperatureReading = true;
         }
     }
 }

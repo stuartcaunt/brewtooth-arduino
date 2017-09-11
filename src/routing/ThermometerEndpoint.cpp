@@ -131,7 +131,7 @@ void ThermometerEndpoint::getThermometerTemperature(int id) {
 
     ThermometerWire * thermometerWire = ThermometerService::_()->get(id);
     if (thermometerWire != NULL) {
-        String output(thermometerWire->getTemperatureC());
+        String output(thermometerWire->getMeanTemperatureC());
         _server->send(200, "text/plain", output.c_str());
 
     } else {

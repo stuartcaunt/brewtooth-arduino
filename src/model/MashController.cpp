@@ -81,13 +81,13 @@ void MashController::deleteAgitator() {
     }
 }
 
-float MashController::getTemperatureC() const {
+float MashController::getMeanTemperatureC() const {
     float temperature = 0.0;
     int count = 0;
     for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
         ThermometerWire * thermometerWire = *it;
         if (thermometerWire->isValid()) {
-            temperature += thermometerWire->getTemperatureC();
+            temperature += thermometerWire->getMeanTemperatureC();
             count++;
         }
     }
