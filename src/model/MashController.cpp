@@ -1,5 +1,5 @@
 #include "MashController.h"
-#include "Thermometer.h"
+#include "ThermometerWire.h"
 #include "Relay.h"
 #include <service/GPIOService.h>
 #include <utils/Log.h>
@@ -84,10 +84,10 @@ void MashController::deleteAgitator() {
 float MashController::getTemperatureC() const {
     float temperature = 0.0;
     int count = 0;
-    for (std::vector<Thermometer *>::const_iterator it = _thermometers.begin(); it != _thermometers.end(); it++) {
-        Thermometer * thermometer = *it;
-        if (thermometer->isValid()) {
-            temperature += thermometer->getTemperatureC();
+    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
+        ThermometerWire * thermometerWire = *it;
+        if (thermometerWire->isValid()) {
+            temperature += thermometerWire->getTemperatureC();
             count++;
         }
     }
@@ -95,7 +95,7 @@ float MashController::getTemperatureC() const {
     if (count > 0) {
         temperature /= count;
     }
-    LOG("Got average temperature of %d with %d valid thermometers", (int)temperature, count);
+    LOG("Got average temperature of %d with %d valid thermometerWires", (int)temperature, count);
 
     return temperature;
 }

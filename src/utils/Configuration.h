@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <model/ThermometerConfig.h>
+#include <model/ThermometerWireConfig.h>
 #include <model/MashControllerConfig.h>
 
 struct Properties {
@@ -11,7 +11,7 @@ struct Properties {
         isFirstUse(true) {}
         
     bool isFirstUse;
-    std::vector<ThermometerConfig> thermometers;
+    std::vector<ThermometerWireConfig> thermometers;
     std::vector<MashControllerConfig> mashControllers;
 };
 

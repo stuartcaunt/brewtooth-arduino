@@ -1,26 +1,26 @@
-#ifndef THERMOMETER_H
-#define THERMOMETER_H
+#ifndef THERMOMETERWIRE_H
+#define THERMOMETERWIRE_H
 
-#include "ThermometerConfig.h"
+#include "ThermometerWireConfig.h"
 
 class OneWire;
 class DallasTemperature;
 typedef uint8_t DeviceAddress[8];
 
-class Thermometer : public Jsonable {
+class ThermometerWire : public Jsonable {
 public:
-    Thermometer(const ThermometerConfig & config) :
+    ThermometerWire(const ThermometerWireConfig & config) :
         _config(config),
         _temperatureReading(false),
         _temperatureC(0.0),
         _oneWire(NULL),
         _sensors(NULL),
         _devicesAvailable(false) {}
-    virtual ~Thermometer() {}
+    virtual ~ThermometerWire() {}
 
     void init();
 
-    const ThermometerConfig * getConfig() const {
+    const ThermometerWireConfig * getConfig() const {
         return &_config;
     }
 
@@ -71,7 +71,7 @@ public:
     }
         
 private:
-    ThermometerConfig _config;
+    ThermometerWireConfig _config;
     bool _temperatureReading;
     float _temperatureC;
 
@@ -81,4 +81,4 @@ private:
     DeviceAddress _deviceAddress;
 };
 
-#endif /*THERMOMETER_H*/
+#endif /*THERMOMETER_HWIRE*/

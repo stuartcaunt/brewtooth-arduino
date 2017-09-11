@@ -244,14 +244,14 @@ void MashControllerService::addThermometers(MashController * mashController, con
     for (std::vector<unsigned int>::const_iterator it = thermometerIds.begin(); it != thermometerIds.end(); it++) {
         unsigned int thermometerId = *it;
         // Get thermometer from thermometer service
-        Thermometer * thermometer = ThermometerService::_()->get(thermometerId);
+        ThermometerWire * thermometerWire = ThermometerService::_()->get(thermometerId);
         
-        if (thermometer == NULL) {
+        if (thermometerWire == NULL) {
             ERROR("Temperature reader %d cannot be added to mash controller \"%s\", id = %d because it does not exist", thermometerId, mashController->getName().c_str(), mashController->getId());
         } else {
             // Add it
             LOG("Adding thermometer %d to mash controller \"%s\", id = %d", thermometerId, mashController->getName().c_str(), mashController->getId());
-            mashController->addThermometer(thermometer);
+            mashController->addThermometer(thermometerWire);
         }
     }
 }

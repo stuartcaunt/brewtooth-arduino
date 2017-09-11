@@ -66,8 +66,8 @@ void Configuration::convertPropertiesToJson(JsonObject & json) {
     JsonArray & thermometerConfigs = json.createNestedArray("thermometers");
     
     // iteratuer over temperature readers
-    for (std::vector<ThermometerConfig>::iterator it = properties.thermometers.begin(); it != properties.thermometers.end(); it++) {
-        ThermometerConfig thermometerConfig = *it;
+    for (std::vector<ThermometerWireConfig>::iterator it = properties.thermometers.begin(); it != properties.thermometers.end(); it++) {
+        ThermometerWireConfig thermometerConfig = *it;
 
         LOG("Saving temperature reader \"%s\", id = %d, port = %d ", thermometerConfig.name.c_str(), thermometerConfig.id, thermometerConfig.port);
         
@@ -113,8 +113,8 @@ void Configuration::deserialize(char * json) {
                 // Convert to json object
                 JsonObject & thermometerConfigJson = *it;
 
-                // Create new ThermometerConfig
-                ThermometerConfig thermometerConfig(thermometerConfigJson);
+                // Create new ThermometerWireConfig
+                ThermometerWireConfig thermometerConfig(thermometerConfigJson);
                 
                 // Add to vector of temperature readers
                 properties.thermometers.push_back(thermometerConfig);

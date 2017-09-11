@@ -1,17 +1,17 @@
-#ifndef THERMOMETERCONFIG_H
-#define THERMOMETERCONFIG_H
+#ifndef THERMOMETERWIRECONFIG_H
+#define THERMOMETERWIRECONFIG_H
 
 #include "Jsonable.h"
 
-class ThermometerConfig : public Jsonable {
+class ThermometerWireConfig : public Jsonable {
 public:
-    ThermometerConfig() :
+    ThermometerWireConfig() :
         id(0),
         port(0),
         name(""),
         isPortValid(false) {}
 
-    ThermometerConfig(const JsonObject & json) :
+    ThermometerWireConfig(const JsonObject & json) :
         id(json["id"]),
         port(json["port"]),
         name(json["name"].as<String>()),
@@ -31,4 +31,4 @@ public:
     bool isPortValid;
 };
 
-#endif /*THERMOMETERCONFIG_H*/
+#endif /*THERMOMETERWIRECONFIG_H*/

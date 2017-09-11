@@ -1,10 +1,10 @@
 #ifndef THERMOMETERSERVICE_H
 #define THERMOMETERSERVICE_H
 
-#include <model/ThermometerConfig.h>
+#include <model/ThermometerWireConfig.h>
 #include <vector>
 
-class Thermometer;
+class ThermometerWire;
 
 class ThermometerService {
 public:
@@ -13,10 +13,10 @@ public:
     static void init();
     static ThermometerService * _();
     
-    Thermometer * add(const ThermometerConfig & thermometerConfig, bool save = true);
-    Thermometer * update(const ThermometerConfig & thermometerConfig);
-    Thermometer * get(unsigned int id) const;
-    const std::vector<Thermometer *> & getAll() const;
+    ThermometerWire * add(const ThermometerWireConfig & thermometerWireConfig, bool save = true);
+    ThermometerWire * update(const ThermometerWireConfig & thermometerWireConfig);
+    ThermometerWire * get(unsigned int id) const;
+    const std::vector<ThermometerWire *> & getAll() const;
     bool erase(unsigned int id);
 
     float getTemperatureC(unsigned int id) const;
@@ -32,7 +32,7 @@ private:
     void save();
         
 private:
-    std::vector<Thermometer *> _thermometers;
+    std::vector<ThermometerWire *> _thermometerWires;
     
 };
 

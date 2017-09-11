@@ -2,7 +2,7 @@
 #define MASHCONTROLLER_H
 
 #include "MashControllerConfig.h"
-class Thermometer;
+class ThermometerWire;
 class Relay;
 
 class MashController : public Jsonable {
@@ -37,16 +37,16 @@ public:
         _config.name = name;
     }
 
-    void addThermometer(Thermometer * thermometer) {
-        _thermometers.push_back(thermometer);
+    void addThermometer(ThermometerWire * thermometerWire) {
+        _thermometerWires.push_back(thermometerWire);
     }
 
-    const std::vector<Thermometer *> & getThermometers() const {
-        return _thermometers;
+    const std::vector<ThermometerWire *> & getThermometers() const {
+        return _thermometerWires;
     }
 
     void clearThermometers() {
-        _thermometers.clear();
+        _thermometerWires.clear();
     }
     
     virtual void convertToJson(JsonObject & json) const {
@@ -69,7 +69,7 @@ public:
 
 private:
     MashControllerConfig _config;
-    std::vector<Thermometer *> _thermometers;
+    std::vector<ThermometerWire *> _thermometerWires;
     Relay * _heater;
     Relay * _agitator;
 };

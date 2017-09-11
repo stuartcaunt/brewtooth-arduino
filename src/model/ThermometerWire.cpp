@@ -1,8 +1,8 @@
-#include "Thermometer.h"
+#include "ThermometerWire.h"
 #include <utils/Log.h>
 #include <DallasTemperature.h>
 
-void Thermometer::init() {
+void ThermometerWire::init() {
     if (_oneWire != NULL) {
         delete _oneWire;
         _oneWire = NULL;
@@ -39,7 +39,7 @@ void Thermometer::init() {
     }
 }
 
-void Thermometer::readTemperature() {
+void ThermometerWire::readTemperature() {
     if (_devicesAvailable) {
         if (_temperatureReading) {
             if (_sensors->isConversionAvailable(_deviceAddress)) {
