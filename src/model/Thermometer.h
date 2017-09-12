@@ -9,7 +9,7 @@ class Thermometer : public Jsonable {
 public:
     DeviceAddress deviceAddress;
     float temperatureC;
-    
+
     virtual void convertToJson(JsonObject & json) const {
         json["temperatureC"] = temperatureC;
 

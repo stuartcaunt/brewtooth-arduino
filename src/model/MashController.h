@@ -6,18 +6,13 @@
 
 class ThermometerWire;
 class Relay;
+class PID;
 
 class MashController : public Jsonable {
 
 public:
-    MashController(const MashControllerConfig & config) :
-        _config(config),
-        _heater(NULL),
-        _agitator(NULL) {}
-    virtual ~MashController() {
-        this->deleteHeater();
-        this->deleteAgitator();
-    }
+    MashController(const MashControllerConfig & config);
+    virtual ~MashController();
 
     const MashControllerConfig * getConfig() const {
         return &_config;
@@ -71,11 +66,28 @@ public:
 
     ThermometerWireData getThermometerData() const;
 
+    void autoTune();
+    void setTunings(float kp, float ki, float kd);
+    void setSetpointC(float setpointC);
+    void startTemperatureControl();
+    void stopTemperatureControl();
+    void setAutoTemperatureControl(bool isAuto);
+    void update();
+        
 private:
     MashControllerConfig _config;
     std::vector<ThermometerWire *> _thermometerWires;
     Relay * _heater;
     Relay * _agitator;
+
+    PID * _temperatureController;
+
+    float _kp;
+    float _ki;
+    float _kd;
+    float _meanTemperatureC;
+    float _setpointC;
+    float _output;
 };
 
 #endif /*MASHCONTROLLER_H*/

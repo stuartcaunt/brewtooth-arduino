@@ -5,6 +5,16 @@
 #include <service/GPIOService.h>
 #include <utils/Log.h>
 
+MashController::MashController(const MashControllerConfig & config) :
+    _config(config),
+    _heater(NULL),
+    _agitator(NULL) {
+}
+
+MashController::~MashController() {
+    this->deleteHeater();
+    this->deleteAgitator();
+}
 
 void MashController::setHeater(Relay * heater) {
     this->deleteHeater();
@@ -124,5 +134,39 @@ ThermometerWireData MashController::getThermometerData() const {
     data.meanTemperatureC /= count;
 
     return data;
+}
+
+void MashController::autoTune() {
+
+}
+
+void MashController::setTunings(float kp, float ki, float kd) {
+    _config.kp = kp;
+    _config.ki = ki;
+    _config.kd = kd;
+
+    // Set PIDs in temperatureController
+}
+
+void MashController::setSetpointC(float setpointC) {
+
+}
+
+void MashController::startTemperatureControl() {
+    // create temperature controller
+
+    // _temperatureController = new PID()
+}
+
+void MashController::stopTemperatureControl() {
+    // delete temperature controller
+}
+
+void MashController::setAutoTemperatureControl(bool isAuto) {
+    // Set temperature controller to auto or manual
+}
+
+void MashController::update() {
+    // Get mean temperature from thermometer wires
 }
 
