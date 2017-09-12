@@ -11,26 +11,6 @@ class PID;
 class MashController : public Jsonable {
 
 public:
-    MashController(const MashControllerConfig & config) :
-        _config(config),
-        _heater(NULL),
-        _agitator(NULL),
-        _temperatureController(NULL),
-        _meanTemperatureC(0.0),
-        _setpointC(0.0),
-        _output(0.0) {
-    }
-
-    virtual ~MashController() {
-        this->deleteHeater();
-        this->deleteAgitator();
-
-        if (_temperatureController != NULL) {
-            delete _temperatureController;
-            _temperatureController = NULL;
-        }
-    }
-
     MashController(const MashControllerConfig & config);
     virtual ~MashController();
 
@@ -89,31 +69,36 @@ public:
     ThermometerWireData getThermometerData() const;
 
     void autoTune();
-    void setTunings(float kp, float ki, float kd);
+    void setTunings(double kp, double ki, double kd);
     
-    void setSetpointC(float setpointC) {
+    void setSetpointC(double setpointC) {
         _setpointC = setpointC;
     }
     
-    float getSetpointC() const {
+    double getSetpointC() const {
         return _setpointC;
     }
 
-    float getKp() const {
+    double getKp() const {
         return _config.kp;
     }
     
-    float getKi() const {
+    double getKi() const {
         return _config.ki;
     }
     
-    float getKd() const {
+    double getKd() const {
         return _config.kd;
     }
 
     void startTemperatureControl();
     void stopTemperatureControl();
+    
     void setAutoTemperatureControl(bool isAuto);
+    bool isAutoTemperatureControl() const {
+        return _config.autoControl;
+    }
+
     void update();
         
 private:
@@ -124,9 +109,9 @@ private:
 
     PID * _temperatureController;
 
-    float _meanTemperatureC;
-    float _setpointC;
-    float _output;
+    double _meanTemperatureC;
+    double _setpointC;
+    double _temperatureControlOutput;
 };
 
 #endif /*MASHCONTROLLER_H*/

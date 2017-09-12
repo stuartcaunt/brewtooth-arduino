@@ -6,6 +6,27 @@
 #include <utils/Log.h>
 #include <PID_v1.h>
 
+MashController::MashController(const MashControllerConfig & config) :
+    _config(config),
+    _heater(NULL),
+    _agitator(NULL),
+    _temperatureController(NULL),
+    _meanTemperatureC(0.0),
+    _setpointC(0.0),
+    _temperatureControlOutput(0.0) {
+
+}
+
+MashController::~MashController() {
+    this->deleteHeater();
+    this->deleteAgitator();
+
+    if (_temperatureController != NULL) {
+        delete _temperatureController;
+        _temperatureController = NULL;
+    }
+}
+
 void MashController::setHeater(Relay * heater) {
     this->deleteHeater();
     _heater = heater;
@@ -111,23 +132,29 @@ void MashController::autoTune() {
 
 }
 
-void MashController::setTunings(float kp, float ki, float kd) {
+void MashController::setTunings(double kp, double ki, double kd) {
     _config.kp = kp;
     _config.ki = ki;
     _config.kd = kd;
 
     // Set PIDs in temperatureController
     if (_temperatureController != NULL) {
-        _temperatureController->setTunings(kp, ki, kd);
+        _temperatureController->SetTunings(kp, ki, kd);
     }
 }
 
 void MashController::startTemperatureControl() {
+    if (_temperatureController != NULL) {
+        LOG("Temperature control is already active");
+        return;
+    }
+
     if (_heater != NULL) {
         // create temperature controller
-        _temperatureController = new PID(&_te)
-    
-        this->setAutoTemperatureControl(true);
+        LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
+        _temperatureController = new PID(&_meanTemperatureC, &_temperatureControlOutput, &_setpointC, _config.kp, _config.ki, _config.kd, DIRECT);
+        this->setAutoTemperatureControl(_config.autoControl);
+
     } else {
         LOG("Cannot start temperature control since the heater is not configured");
     }
@@ -135,10 +162,21 @@ void MashController::startTemperatureControl() {
 
 void MashController::stopTemperatureControl() {
     // delete temperature controller
+    if (_temperatureController != NULL) {
+        LOG("Stopping/deleting temperature controller");
+        
+        delete _temperatureController;
+        _temperatureController = NULL;
+    }
 }
 
 void MashController::setAutoTemperatureControl(bool isAuto) {
+    _config.autoControl = isAuto;
+
     // Set temperature controller to auto or manual
+    if (_temperatureController != NULL) {
+        _temperatureController->SetMode(isAuto ? AUTOMATIC : MANUAL);
+    }
 }
 
 void MashController::update() {
