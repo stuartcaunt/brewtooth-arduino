@@ -4,17 +4,7 @@
 #include "Relay.h"
 #include <service/GPIOService.h>
 #include <utils/Log.h>
-
-MashController::MashController(const MashControllerConfig & config) :
-    _config(config),
-    _heater(NULL),
-    _agitator(NULL) {
-}
-
-MashController::~MashController() {
-    this->deleteHeater();
-    this->deleteAgitator();
-}
+#include <PID_v1.h>
 
 void MashController::setHeater(Relay * heater) {
     this->deleteHeater();
@@ -92,25 +82,6 @@ void MashController::deleteAgitator() {
     }
 }
 
-float MashController::getMeanTemperatureC() const {
-    float temperature = 0.0;
-    int count = 0;
-    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
-        ThermometerWire * thermometerWire = *it;
-        if (thermometerWire->isValid()) {
-            temperature += thermometerWire->getMeanTemperatureC();
-            count++;
-        }
-    }
-
-    if (count > 0) {
-        temperature /= count;
-    }
-    LOG("Got average temperature of %d with %d valid thermometerWires", (int)temperature, count);
-
-    return temperature;
-}
-
 ThermometerWireData MashController::getThermometerData() const {
     ThermometerWireData data;
 
@@ -146,16 +117,20 @@ void MashController::setTunings(float kp, float ki, float kd) {
     _config.kd = kd;
 
     // Set PIDs in temperatureController
-}
-
-void MashController::setSetpointC(float setpointC) {
-
+    if (_temperatureController != NULL) {
+        _temperatureController->setTunings(kp, ki, kd);
+    }
 }
 
 void MashController::startTemperatureControl() {
-    // create temperature controller
-
-    // _temperatureController = new PID()
+    if (_heater != NULL) {
+        // create temperature controller
+        _temperatureController = new PID(&_te)
+    
+        this->setAutoTemperatureControl(true);
+    } else {
+        LOG("Cannot start temperature control since the heater is not configured");
+    }
 }
 
 void MashController::stopTemperatureControl() {
@@ -168,5 +143,20 @@ void MashController::setAutoTemperatureControl(bool isAuto) {
 
 void MashController::update() {
     // Get mean temperature from thermometer wires
+    _meanTemperatureC = 0.0;
+    int count = 0;
+    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
+        ThermometerWire * thermometerWire = *it;
+        if (thermometerWire->isValid()) {
+            _meanTemperatureC += thermometerWire->getMeanTemperatureC();
+            count++;
+        }
+    }
+
+    if (count > 0) {
+        _meanTemperatureC /= count;
+    }
+    LOG("Got average temperature of %d with %d valid thermometerWires", (int)_meanTemperatureC, count);
+
 }
 
