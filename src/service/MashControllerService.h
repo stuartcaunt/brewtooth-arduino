@@ -23,6 +23,8 @@ public:
     Relay * updateHeater(unsigned int mashControllerId, const RelayConfig & relayConfig);
     Relay * updateAgitator(unsigned int mashControllerId, const RelayConfig & relayConfig);
     
+    void updateControllers();
+        
 private:
     MashControllerService();
     static MashControllerService * instance;

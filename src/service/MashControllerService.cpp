@@ -116,7 +116,7 @@ MashController * MashControllerService::update(const MashControllerConfig & mash
     MashController * mashController = *it;
 
     // Copy data
-    mashController->setName(mashControllerConfig.name);
+    mashController->copyBasic(mashControllerConfig);
 
     // Temperature readers : clear current ones and add new ones
     mashController->clearThermometers();
@@ -303,4 +303,11 @@ void MashControllerService::save() {
     Configuration::properties.mashControllers = mashControllerConfigs;
 
     Configuration::save();
+}
+
+void MashControllerService::updateControllers() {
+    for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+        MashController * mashController = *it;
+        mashController->update();
+    }
 }

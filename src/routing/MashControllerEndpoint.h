@@ -27,6 +27,8 @@ private:
     void getAgitator(int id);
     void updateAgitator(int id);
     void setAgitatorActive(int id, bool active);
+
+    void getControllerState(int id);
 };
 
 #endif /*MASHCONTROLLERENDPOINT_H*/

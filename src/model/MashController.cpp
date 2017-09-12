@@ -10,11 +10,14 @@ MashController::MashController(const MashControllerConfig & config) :
     _config(config),
     _heater(NULL),
     _agitator(NULL),
-    _temperatureController(NULL),
-    _meanTemperatureC(0.0),
-    _setpointC(0.0),
-    _temperatureControlOutput(0.0) {
+    _temperatureController(NULL) {
 
+    _windowStartTimeMs = _lastTimeMs = millis();
+    _state.windowSizeMs = _config.windowSizeMs;
+    _state.kp = _config.kp;
+    _state.ki = _config.ki;
+    _state.kd = _config.kd;
+    _state.sampleTimeMs = 100;
 }
 
 MashController::~MashController() {
@@ -65,6 +68,15 @@ void MashController::deleteHeater() {
     }
 }
 
+bool MashController::setHeaterActive(bool active) {
+    if (_heater != NULL) {
+        LOG("Setting heater active %s", active ? "true" : "false");
+        return _heater->setActive(active);
+    }
+
+    return false;
+}
+
 void MashController::setAgitator(Relay * agitator) {
     this->deleteAgitator();
     _agitator = agitator;
@@ -103,6 +115,15 @@ void MashController::deleteAgitator() {
     }
 }
 
+bool MashController::setAgitatorActive(bool active) {
+    if (_agitator != NULL) {
+        LOG("Setting agitator active %s", active ? "true" : "false");
+        return _agitator->setActive(active);
+    }
+
+    return false;
+}
+
 ThermometerWireData MashController::getThermometerData() const {
     ThermometerWireData data;
 
@@ -128,14 +149,10 @@ ThermometerWireData MashController::getThermometerData() const {
     return data;
 }
 
-void MashController::autoTune() {
-
-}
-
 void MashController::setTunings(double kp, double ki, double kd) {
-    _config.kp = kp;
-    _config.ki = ki;
-    _config.kd = kd;
+    _config.kp = _state.kp = kp;
+    _config.ki = _state.ki = ki;
+    _config.kd = _state.kd = kd;
 
     // Set PIDs in temperatureController
     if (_temperatureController != NULL) {
@@ -152,8 +169,12 @@ void MashController::startTemperatureControl() {
     if (_heater != NULL) {
         // create temperature controller
         LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
-        _temperatureController = new PID(&_meanTemperatureC, &_temperatureControlOutput, &_setpointC, _config.kp, _config.ki, _config.kd, DIRECT);
+        _state.controllerOutput = 0.0;
+        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.kp, _config.ki, _config.kd, DIRECT);
         this->setAutoTemperatureControl(_config.autoControl);
+
+        _state.running = true;
+        _temperatureController->SetSampleTime(_state.sampleTimeMs);
 
     } else {
         LOG("Cannot start temperature control since the heater is not configured");
@@ -164,14 +185,17 @@ void MashController::stopTemperatureControl() {
     // delete temperature controller
     if (_temperatureController != NULL) {
         LOG("Stopping/deleting temperature controller");
+        _state.controllerOutput = 0.0;
         
         delete _temperatureController;
         _temperatureController = NULL;
     }
+
+    _state.running = false;
 }
 
 void MashController::setAutoTemperatureControl(bool isAuto) {
-    _config.autoControl = isAuto;
+    _config.autoControl = _state.autoControl = isAuto;
 
     // Set temperature controller to auto or manual
     if (_temperatureController != NULL) {
@@ -180,21 +204,40 @@ void MashController::setAutoTemperatureControl(bool isAuto) {
 }
 
 void MashController::update() {
+    // Update loop timing
+    unsigned long timeMs = millis();
+    _state.loopMs = timeMs - _lastTimeMs;
+    _lastTimeMs = timeMs;
+
     // Get mean temperature from thermometer wires
-    _meanTemperatureC = 0.0;
+    _state.temperatureC = 0.0;
     int count = 0;
     for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
         ThermometerWire * thermometerWire = *it;
         if (thermometerWire->isValid()) {
-            _meanTemperatureC += thermometerWire->getMeanTemperatureC();
+            _state.temperatureC += thermometerWire->getMeanTemperatureC();
             count++;
         }
     }
 
     if (count > 0) {
-        _meanTemperatureC /= count;
+        _state.temperatureC /= count;
     }
-    LOG("Got average temperature of %d with %d valid thermometerWires", (int)_meanTemperatureC, count);
+    DEBUG("Got average temperature of %d with %d valid thermometerWires", (int)_state.temperatureC, count);
 
+    // Update temperate control
+    if (_temperatureController != NULL) {
+        _temperatureController->Compute();
+
+        // Shift relay window
+        if (timeMs - _windowStartTimeMs > _config.windowSizeMs) {
+            _windowStartTimeMs += _config.windowSizeMs;
+        }
+        // Activate heater depending on controller output
+        bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));
+        this->setHeaterActive(activeHeater);
+
+        DEBUG("Setting heater active : %s, controllerOutput = %d", activeHeater ? "true" : "false", (int)_state.controllerOutput);
+    }
 }
 

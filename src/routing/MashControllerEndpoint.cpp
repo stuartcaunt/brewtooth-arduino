@@ -28,6 +28,8 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateAgitator, this, _1));
     _server->onPathParam<int>("/controllers/{id}/agitator/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
+
+    _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getControllerState, this, _1));
 }
     
 void MashControllerEndpoint::addMashController() {
@@ -204,10 +206,8 @@ void MashControllerEndpoint::setHeaterActive(int id, bool active) {
     
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
-        Relay * heater = mashController->getHeater();
-
-        if (heater->setActive(active)) {
-            _server->send(200, "application/json", JsonStringBuilder::jsonString(heater).c_str());
+        if (mashController->setHeaterActive(active)) {
+            _server->send(200, "application/json", JsonStringBuilder::jsonString(mashController->getHeater()).c_str());
             
         } else {
             WARN("Cannot activate/deactivate heater for mashController with Id = %d", id);
@@ -275,10 +275,8 @@ void MashControllerEndpoint::setAgitatorActive(int id, bool active) {
     
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
-        Relay * agitator = mashController->getAgitator();
-
-        if (agitator->setActive(active)) {
-            _server->send(200, "application/json", JsonStringBuilder::jsonString(agitator).c_str());
+        if (mashController->setAgitatorActive(active)) {
+            _server->send(200, "application/json", JsonStringBuilder::jsonString(mashController->getAgitator()).c_str());
             
         } else {
             WARN("Cannot activate/deactivate agitator for mashController with Id = %d", id);
@@ -287,6 +285,20 @@ void MashControllerEndpoint::setAgitatorActive(int id, bool active) {
 
     } else {
         WARN("Cannot get mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::getControllerState(int id) {
+    LOG("Getting control state from mashController id = %d", id);
+    
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        const TemperatureControlState state = mashController->getTemperatureControlState();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+        
+    } else {
+        WARN("Cannot get state from mashController : mashController with Id = %d does not exist", id);
         _server->send(404, "text/plain", "MashController not found");
     }
 }

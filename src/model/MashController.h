@@ -3,6 +3,7 @@
 
 #include "MashControllerConfig.h"
 #include "ThermometerWireData.h"
+#include "TemperatureControlState.h"
 
 class ThermometerWire;
 class Relay;
@@ -13,6 +14,10 @@ class MashController : public Jsonable {
 public:
     MashController(const MashControllerConfig & config);
     virtual ~MashController();
+
+    void copyBasic(const MashControllerConfig & config) {
+        _config.copyBasic(config);
+    }
 
     const MashControllerConfig * getConfig() const {
         return &_config;
@@ -34,6 +39,34 @@ public:
         _config.name = name;
     }
 
+    void setTunings(double kp, double ki, double kd);
+
+    double getKp() const {
+        return _config.kp;
+    }
+
+    double getKi() const {
+        return _config.ki;
+    }
+
+    double getKd() const {
+        return _config.kd;
+    }
+    
+    void setAutoTemperatureControl(bool isAuto);
+
+    bool isAutoTemperatureControl() const {
+        return _config.autoControl;
+    }
+
+    void setWindowSizeMs(int windowSizeMs) {
+        _config.windowSizeMs = _state.windowSizeMs = windowSizeMs;
+    }
+
+    int getWindowSizeMs() const {
+        return _config.windowSizeMs;
+    }
+
     void addThermometer(ThermometerWire * thermometerWire) {
         _thermometerWires.push_back(thermometerWire);
     }
@@ -45,10 +78,6 @@ public:
     void clearThermometers() {
         _thermometerWires.clear();
     }
-    
-    virtual void convertToJson(JsonObject & json) const {
-        _config.convertToJson(json);
-    }
 
     Relay * getHeater() const {
         return _heater;
@@ -56,51 +85,49 @@ public:
     void setHeater(Relay * heater);
     void deleteHeater();
 
+    bool setHeaterActive(bool active);
+    bool isHeaterActive() const {
+        return _state.heaterActive;
+    }
+
     Relay * getAgitator() const {
         return _agitator;
     }
     void setAgitator(Relay * agitator);
     void deleteAgitator();
 
-    float getMeanTemperatureC() const {
-        return _meanTemperatureC;
+    bool setAgitatorActive(bool active);
+    bool isAgitatorActive() const {
+        return _state.agitatorActive;
+    }
+
+    float getTemperatureC() const {
+        return _state.temperatureC;
     }
 
     ThermometerWireData getThermometerData() const;
 
-    void autoTune();
-    void setTunings(double kp, double ki, double kd);
-    
+    const TemperatureControlState & getTemperatureControlState() const {
+        return _state;
+    }
+
     void setSetpointC(double setpointC) {
-        _setpointC = setpointC;
+        _state.setpointC = setpointC;
     }
     
     double getSetpointC() const {
-        return _setpointC;
-    }
-
-    double getKp() const {
-        return _config.kp;
-    }
-    
-    double getKi() const {
-        return _config.ki;
-    }
-    
-    double getKd() const {
-        return _config.kd;
+        return _state.setpointC;
     }
 
     void startTemperatureControl();
     void stopTemperatureControl();
-    
-    void setAutoTemperatureControl(bool isAuto);
-    bool isAutoTemperatureControl() const {
-        return _config.autoControl;
-    }
 
     void update();
-        
+          
+    virtual void convertToJson(JsonObject & json) const {
+        _config.convertToJson(json);
+    }
+  
 private:
     MashControllerConfig _config;
     std::vector<ThermometerWire *> _thermometerWires;
@@ -109,9 +136,9 @@ private:
 
     PID * _temperatureController;
 
-    double _meanTemperatureC;
-    double _setpointC;
-    double _temperatureControlOutput;
+    TemperatureControlState _state;
+    unsigned long _lastTimeMs;
+    unsigned long _windowStartTimeMs;
 };
 
 #endif /*MASHCONTROLLER_H*/

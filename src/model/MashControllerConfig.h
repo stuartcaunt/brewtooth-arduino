@@ -12,7 +12,8 @@ struct MashControllerConfig : public Jsonable {
         kp(1.0),
         ki(1.0),
         kd(1.0),
-        autoControl(true) {}
+        autoControl(true),
+        windowSizeMs(5000) {}
 
     MashControllerConfig(const JsonObject & json) :
         id(json["id"]),
@@ -20,7 +21,8 @@ struct MashControllerConfig : public Jsonable {
         kp(json["kp"]),
         ki(json["ki"]),
         kd(json["kd"]),
-        autoControl(json["autoControl"]) {
+        autoControl(json["autoControl"]),
+        windowSizeMs(json["windowSizeMs"]) {
 
         // Thermometers
         JsonArray & thermometerIds = json["thermometerIds"];
@@ -38,6 +40,15 @@ struct MashControllerConfig : public Jsonable {
         this->agitator = RelayConfig(agitatorJson);
     }
 
+    void copyBasic(const MashControllerConfig & config) {
+        name = config.name;
+        kp = config.kp;
+        ki = config.ki;
+        kd = config.kd;
+        autoControl = config.autoControl;
+        windowSizeMs = config.windowSizeMs;
+    }
+
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["name"] = name;
@@ -45,6 +56,7 @@ struct MashControllerConfig : public Jsonable {
         json["ki"] = ki;
         json["kd"] = kd;
         json["autoControl"] = autoControl;
+        json["windowSizeMs"] = windowSizeMs;
 
         // Thermometers
         JsonArray & thermometerIds = json.createNestedArray("thermometerIds");
@@ -68,6 +80,7 @@ struct MashControllerConfig : public Jsonable {
     double ki;
     double kd;
     bool autoControl;
+    int windowSizeMs;
     std::vector<unsigned int> thermometerIds;
     RelayConfig heater;
     RelayConfig agitator;

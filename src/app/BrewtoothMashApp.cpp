@@ -33,5 +33,8 @@ void BrewtoothMashApp::loop() {
     // Update temperature readers
     ThermometerService::_()->readTemperatures();
 
+    // Update mash controllers
+    MashControllerService::_()->updateControllers();
+
     _server->handleClient();
 }
