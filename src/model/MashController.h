@@ -2,6 +2,8 @@
 #define MASHCONTROLLER_H
 
 #include "MashControllerConfig.h"
+#include "ThermometerWireData.h"
+
 class ThermometerWire;
 class Relay;
 
@@ -66,6 +68,8 @@ public:
     void deleteAgitator();
 
     float getMeanTemperatureC() const;
+
+    ThermometerWireData getThermometerData() const;
 
 private:
     MashControllerConfig _config;

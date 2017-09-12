@@ -140,11 +140,8 @@ void MashControllerEndpoint::getTemperature(int id) {
 
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
-        String output(mashController->getMeanTemperatureC());
-        _server->send(200, "text/plain", output.c_str());
-
-
-        _server->send(200, "text/plain", "OK");
+        ThermometerWireData thermometerWireData = mashController->getThermometerData();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&thermometerWireData).c_str());
 
     } else {
         WARN("Cannot get mashController : mashController with Id = %d does not exist", id);

@@ -1,5 +1,6 @@
 #include "MashController.h"
 #include "ThermometerWire.h"
+#include "ThermometerWireData.h"
 #include "Relay.h"
 #include <service/GPIOService.h>
 #include <utils/Log.h>
@@ -99,3 +100,29 @@ float MashController::getMeanTemperatureC() const {
 
     return temperature;
 }
+
+ThermometerWireData MashController::getThermometerData() const {
+    ThermometerWireData data;
+
+    data.meanTemperatureC = 0.0;
+    int count = 0;
+    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
+        ThermometerWire * thermometerWire = *it;
+        if (thermometerWire->isValid()) {
+            const ThermometerWireData wireData = thermometerWire->getData();
+
+            data.meanTemperatureC += wireData.meanTemperatureC;
+
+            for (std::vector<Thermometer>::const_iterator it2 = wireData.thermometers.begin(); it2 != wireData.thermometers.end(); it2++) {
+                data.thermometers.push_back(*it2);
+            }
+
+            count++;
+        }
+    }
+
+    data.meanTemperatureC /= count;
+
+    return data;
+}
+

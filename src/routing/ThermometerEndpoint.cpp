@@ -10,14 +10,14 @@ void ThermometerEndpoint::buildPaths() {
     LOG("Building paths for ThermometerEndpoint");
     using namespace std::placeholders;
     
-    _server->on("/thermometerWires", HTTPMethod::HTTP_POST, std::bind(&ThermometerEndpoint::addThermometer, this));
-    _server->on("/thermometerWires", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometers, this));
-    _server->onPathParam<int>("/thermometerWires/{id}", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometer, this, _1));
-    _server->onPathParam<int>("/thermometerWires/{id}", HTTPMethod::HTTP_DELETE, std::bind(&ThermometerEndpoint::deleteThermometer, this, _1));
-    _server->onPathParam<int>("/thermometerWires/{id}", HTTPMethod::HTTP_PUT, std::bind(&ThermometerEndpoint::updateThermometer, this, _1));
+    _server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&ThermometerEndpoint::addThermometer, this));
+    _server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometers, this));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometer, this, _1));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&ThermometerEndpoint::deleteThermometer, this, _1));
+    _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_PUT, std::bind(&ThermometerEndpoint::updateThermometer, this, _1));
 
-    _server->onPathParam<int>("/thermometerWires/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometerTemperature, this, _1));
-    _server->on("/thermometerWires/temperature", std::bind(&ThermometerEndpoint::getMeanTemperature, this));
+    _server->onPathParam<int>("/thermometers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometerTemperature, this, _1));
+    _server->on("/thermometers/temperature", std::bind(&ThermometerEndpoint::getMeanTemperature, this));
 }
     
 void ThermometerEndpoint::addThermometer() {
@@ -65,6 +65,7 @@ void ThermometerEndpoint::getThermometer(int id) {
     ThermometerWire * thermometerWire = ThermometerService::_()->get(id);
     if (thermometerWire != NULL) {
         _server->send(200, "application/json", JsonStringBuilder::jsonString(thermometerWire).c_str());
+
     } else {
         WARN("Cannot get thermometerWire : reader with Id = %d does not exist", id);
         _server->send(404, "text/plain", "Thermometer not found");
@@ -131,8 +132,9 @@ void ThermometerEndpoint::getThermometerTemperature(int id) {
 
     ThermometerWire * thermometerWire = ThermometerService::_()->get(id);
     if (thermometerWire != NULL) {
-        String output(thermometerWire->getMeanTemperatureC());
-        _server->send(200, "text/plain", output.c_str());
+        const ThermometerWireData & thermometerWireData = thermometerWire->getData();
+
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&thermometerWireData).c_str());
 
     } else {
         WARN("Cannot get thermometerWire : reader with Id = %d does not exist", id);

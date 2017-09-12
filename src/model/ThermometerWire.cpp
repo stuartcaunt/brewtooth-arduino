@@ -30,7 +30,7 @@ void ThermometerWire::init() {
                 Thermometer thermometer;
                 _sensors->getAddress(thermometer.deviceAddress, i);
 
-                _thermometers.push_back(thermometer);
+                _data.thermometers.push_back(thermometer);
             }
 
         } else {
@@ -51,15 +51,15 @@ void ThermometerWire::readTemperature() {
             if (_sensors->isConversionComplete()) {
                 _temperatureReading = false;
                 // Read all temperatures
-                _meanTemperatureC = 0.0;
-                for (std::vector<Thermometer>::iterator it = _thermometers.begin(); it != _thermometers.end(); it++) {
+                _data.meanTemperatureC = 0.0;
+                for (std::vector<Thermometer>::iterator it = _data.thermometers.begin(); it != _data.thermometers.end(); it++) {
                     Thermometer & thermometer = *it;
                     thermometer.temperatureC = _sensors->getTempC(thermometer.deviceAddress);
-                    _meanTemperatureC += thermometer.temperatureC ;
+                    _data.meanTemperatureC += thermometer.temperatureC ;
                 }
 
                 // get average temperature
-                _meanTemperatureC = _meanTemperatureC / _thermometers.size();
+                _data.meanTemperatureC = _data.meanTemperatureC / _data.thermometers.size();
                 DEBUG("Temperature conversion complete. Got temperature %d", (int)_meanTemperatureC);
             
             } else {

@@ -2,23 +2,17 @@
 #define THERMOMETERWIRE_H
 
 #include "ThermometerWireConfig.h"
+#include "ThermometerWireData.h"
 #include <vector>
 
 class OneWire;
 class DallasTemperature;
-typedef uint8_t DeviceAddress[8];
-
-struct Thermometer {
-    DeviceAddress deviceAddress;
-    float temperatureC;
-};
 
 class ThermometerWire : public Jsonable {
 public:
     ThermometerWire(const ThermometerWireConfig & config) :
         _config(config),
         _temperatureReading(false),
-        _meanTemperatureC(0.0),
         _oneWire(NULL),
         _sensors(NULL),
         _devicesAvailable(false) {}
@@ -63,11 +57,11 @@ public:
     }
     
     float getMeanTemperatureC() const {
-        return _meanTemperatureC;
+        return _data.meanTemperatureC;
     }
 
-    const std::vector<Thermometer> & getThermometers() const {
-        return _thermometers;
+    const ThermometerWireData & getData() const {
+        return _data;
     }
 
     void readTemperature();
@@ -83,12 +77,12 @@ public:
 private:
     ThermometerWireConfig _config;
     bool _temperatureReading;
-    float _meanTemperatureC;
 
     OneWire * _oneWire;
     DallasTemperature * _sensors;
     bool _devicesAvailable;
-    std::vector<Thermometer> _thermometers;
+
+    ThermometerWireData _data;
 };
 
-#endif /*THERMOMETER_HWIRE*/
+#endif /*THERMOMETERWIRE_H*/
