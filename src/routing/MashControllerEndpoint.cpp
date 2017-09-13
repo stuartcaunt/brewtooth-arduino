@@ -32,7 +32,12 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/agitator/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
 
-    _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getControllerState, this, _1));
+     _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getControllerState, this, _1));
+    // _server->onPathParam<int>("/controllers/{id}/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, true));
+    // _server->onPathParam<int>("/controllers/{id}/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, false));
+    // _server->onPathParam<int>("/controllers/{id}/automatic", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, true));
+    // _server->onPathParam<int>("/controllers/{id}/manual", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, false));
+    // _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1));
 }
     
 void MashControllerEndpoint::addMashController() {
