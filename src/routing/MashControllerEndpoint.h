@@ -32,6 +32,8 @@ private:
     void setAgitatorActive(int id, bool active);
 
     void getTemperatureControlState(int id);
+    void setTemperatureControlActive(int id, bool active);
+    void setTemperatureControlAutomatic(int id, bool automatic);
     void getTemperatureControlSetpoint(int id);
     void setTemperatureControlSetpoint(int id, float setpointC);
 

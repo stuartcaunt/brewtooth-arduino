@@ -69,7 +69,7 @@ void MashController::deleteHeater() {
 }
 
 bool MashController::setHeaterActive(bool active) {
-    if (_heater != NULL) {
+    if (_heater != NULL && _heater->isActive() != active) {
         LOG("Setting heater active %s", active ? "true" : "false");
         return _heater->setActive(active);
     }
@@ -116,7 +116,7 @@ void MashController::deleteAgitator() {
 }
 
 bool MashController::setAgitatorActive(bool active) {
-    if (_agitator != NULL) {
+    if (_agitator != NULL && _agitator->isActive() != active) {
         LOG("Setting agitator active %s", active ? "true" : "false");
         return _agitator->setActive(active);
     }
@@ -248,11 +248,11 @@ void MashController::update() {
         if (timeMs - _windowStartTimeMs > _config.pidParams.windowSizeMs) {
             _windowStartTimeMs += _config.pidParams.windowSizeMs;
         }
-        // Activate heater depending on controller output
-        bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));
-        this->setHeaterActive(activeHeater);
-
-        DEBUG("Setting heater active : %s, controllerOutput = %d", activeHeater ? "true" : "false", (int)_state.controllerOutput);
+        if (_config.autoControl) {
+            // Activate heater depending on controller output
+            bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));
+            this->setHeaterActive(activeHeater);
+        }
     }
 }
 
