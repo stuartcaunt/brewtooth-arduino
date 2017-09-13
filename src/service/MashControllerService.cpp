@@ -187,6 +187,32 @@ bool MashControllerService::erase(unsigned int id) {
     return true;
 }
 
+const PIDParams * MashControllerService::updatePIDParams(int id, const PIDParams & pidParams) {
+    LOG("Updating PID params for mash controller id = %d", id);
+    
+    // Check if it exist
+    std::vector<MashController *>::iterator it = _mashControllers.begin();
+    while (it != _mashControllers.end() && ((*it)->getId() != id)) {
+        it++;
+    }
+
+    if (it == _mashControllers.end()) {
+        WARN("Unable to update PID params for mash controller with Id %d as it does not exist", id);
+        return NULL;
+    }
+
+    // Obtain current mash controller
+    MashController * mashController = *it;
+
+    // set PID params
+    mashController->setPIDParams(pidParams);
+
+    // Save current mashControllers
+    this->save();
+
+    return &(mashController->getPIDParams());
+}
+
 Relay * MashControllerService::updateHeater(unsigned int mashControllerId, const RelayConfig & relayConfig) {
     LOG("Updating heater for mash controller with Id %d", mashControllerId);
     

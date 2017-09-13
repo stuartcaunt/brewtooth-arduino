@@ -17,6 +17,9 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&MashControllerEndpoint::deleteMashController, this, _1));
     _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateMashController, this, _1));
 
+    _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getPIDParams, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updatePIDParams, this, _1));
+
     _server->onPathParam<int>("/controllers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperature, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getHeater, this, _1));
@@ -135,6 +138,54 @@ void MashControllerEndpoint::deleteMashController(int id) {
         WARN("Cannot delete mashController : mashController with Id = %d does not exist", id);
         _server->send(404, "text/plain", "MashController not deleted : not found");
     }
+}
+
+void MashControllerEndpoint::getPIDParams(int id) {
+    LOG("Getting PID params for mashController id = %d", id);
+    
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&mashController->getPIDParams()).c_str());
+    
+    } else {
+        WARN("Cannot get PID params for mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::updatePIDParams(int id) {
+    LOG("Updating mashController id = %d", id);
+    
+    if (_server->hasArg("plain")) {
+        String jsonText = _server->arg("plain");
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & json = jsonBuffer.parseObject(jsonText);
+
+        if (json.success()) {
+            // Build PID params
+            PIDParams pidParams(json);
+            
+            const PIDParams *  validatedParams = MashControllerService::_()->updatePIDParams(id, pidParams);
+            if (validatedParams != NULL) {
+                // Send json response
+                _server->send(200, "application/json", JsonStringBuilder::jsonString(validatedParams).c_str());
+            
+            } else {
+                ERROR("Failed to update PID Params of mashController with Id %d", id);
+                _server->send(400, "text/plain", String("Failed to update PID params of mashController with Id ") + id);
+            }
+
+        } else {
+            ERROR("Failed to parse JSON data");
+            _server->send(400, "text/plain", "Failed to parse JSON data");
+        }
+
+    } else {
+        ERROR("Body not received");
+        _server->send(400, "text/plain", "Body not received");
+        return;
+    }
+
 }
 
 void MashControllerEndpoint::getTemperature(int id) {

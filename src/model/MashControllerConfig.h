@@ -3,26 +3,19 @@
 
 #include "RelayConfig.h"
 #include "Jsonable.h"
+#include "PIDParams.h"
 #include <vector>
 
 struct MashControllerConfig : public Jsonable {
     MashControllerConfig() :
         id(0),
         name(""),
-        kp(1.0),
-        ki(1.0),
-        kd(1.0),
-        autoControl(true),
-        windowSizeMs(5000) {}
+        autoControl(true) {}
 
     MashControllerConfig(const JsonObject & json) :
         id(json["id"]),
         name(json["name"].as<String>()),
-        kp(json["kp"]),
-        ki(json["ki"]),
-        kd(json["kd"]),
-        autoControl(json["autoControl"]),
-        windowSizeMs(json["windowSizeMs"]) {
+        autoControl(json["autoControl"]) {
 
         // Thermometers
         JsonArray & thermometerIds = json["thermometerIds"];
@@ -31,6 +24,10 @@ struct MashControllerConfig : public Jsonable {
             this->thermometerIds.push_back(readerId);
         }
 
+        // PID Params
+        JsonObject & pidJson = json["pidParams"];
+        this->pidParams = PIDParams(pidJson);
+        
         // Heater
         JsonObject & heaterJson = json["heater"];
         this->heater = RelayConfig(heaterJson);
@@ -42,21 +39,14 @@ struct MashControllerConfig : public Jsonable {
 
     void copyBasic(const MashControllerConfig & config) {
         name = config.name;
-        kp = config.kp;
-        ki = config.ki;
-        kd = config.kd;
         autoControl = config.autoControl;
-        windowSizeMs = config.windowSizeMs;
+        pidParams = PIDParams(config.pidParams);
     }
 
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["name"] = name;
-        json["kp"] = kp;
-        json["ki"] = ki;
-        json["kd"] = kd;
         json["autoControl"] = autoControl;
-        json["windowSizeMs"] = windowSizeMs;
 
         // Thermometers
         JsonArray & thermometerIds = json.createNestedArray("thermometerIds");
@@ -64,6 +54,10 @@ struct MashControllerConfig : public Jsonable {
             unsigned int thermometerId = *it;
             thermometerIds.add(thermometerId);
         }
+
+        // PID
+        JsonObject & pidJson = json.createNestedObject("pidParams");
+        pidParams.convertToJson(pidJson);
 
         // Heater
         JsonObject & heaterJson = json.createNestedObject("heater");
@@ -76,11 +70,8 @@ struct MashControllerConfig : public Jsonable {
 
     unsigned int id;
     String name;
-    double kp;
-    double ki;
-    double kd;
     bool autoControl;
-    int windowSizeMs;
+    PIDParams pidParams;
     std::vector<unsigned int> thermometerIds;
     RelayConfig heater;
     RelayConfig agitator;

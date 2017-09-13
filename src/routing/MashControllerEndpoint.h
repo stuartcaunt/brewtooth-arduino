@@ -17,6 +17,9 @@ private:
     void getMashController(int id);
     void deleteMashController(int id);
     void updateMashController(int id);
+
+    void getPIDParams(int id);
+    void updatePIDParams(int id);
         
     void getTemperature(int id);
     

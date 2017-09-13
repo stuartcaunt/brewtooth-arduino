@@ -13,10 +13,10 @@ MashController::MashController(const MashControllerConfig & config) :
     _temperatureController(NULL) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
-    _state.windowSizeMs = _config.windowSizeMs;
-    _state.kp = _config.kp;
-    _state.ki = _config.ki;
-    _state.kd = _config.kd;
+    _state.windowSizeMs = _config.pidParams.windowSizeMs;
+    _state.kp = _config.pidParams.kp;
+    _state.ki = _config.pidParams.ki;
+    _state.kd = _config.pidParams.kd;
     _state.sampleTimeMs = 100;
 }
 
@@ -150,14 +150,28 @@ ThermometerWireData MashController::getThermometerData() const {
 }
 
 void MashController::setTunings(double kp, double ki, double kd) {
-    _config.kp = _state.kp = kp;
-    _config.ki = _state.ki = ki;
-    _config.kd = _state.kd = kd;
+    _config.pidParams.kp = _state.kp = kp;
+    _config.pidParams.ki = _state.ki = ki;
+    _config.pidParams.kd = _state.kd = kd;
 
     // Set PIDs in temperatureController
     if (_temperatureController != NULL) {
         _temperatureController->SetTunings(kp, ki, kd);
     }
+}
+
+void MashController::setWindowSizeMs(int windowSizeMs) {
+    _config.pidParams.windowSizeMs = _state.windowSizeMs = windowSizeMs;
+
+    // Modify output limits in temperature controller
+    if (_temperatureController != NULL) {
+        _temperatureController->SetOutputLimits(0.0, windowSizeMs);
+    }
+}
+
+void MashController::setPIDParams(const PIDParams & pidParams) {
+    this->setWindowSizeMs(pidParams.windowSizeMs);
+    this->setTunings(pidParams.kp, pidParams.ki, pidParams.kd);
 }
 
 void MashController::startTemperatureControl() {
@@ -170,7 +184,8 @@ void MashController::startTemperatureControl() {
         // create temperature controller
         LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
         _state.controllerOutput = 0.0;
-        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.kp, _config.ki, _config.kd, DIRECT);
+        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
+        _temperatureController->SetOutputLimits(0.0, _config.pidParams.windowSizeMs);
         this->setAutoTemperatureControl(_config.autoControl);
 
         _state.running = true;
@@ -230,8 +245,8 @@ void MashController::update() {
         _temperatureController->Compute();
 
         // Shift relay window
-        if (timeMs - _windowStartTimeMs > _config.windowSizeMs) {
-            _windowStartTimeMs += _config.windowSizeMs;
+        if (timeMs - _windowStartTimeMs > _config.pidParams.windowSizeMs) {
+            _windowStartTimeMs += _config.pidParams.windowSizeMs;
         }
         // Activate heater depending on controller output
         bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));

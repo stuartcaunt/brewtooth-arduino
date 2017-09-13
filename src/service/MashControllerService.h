@@ -20,6 +20,8 @@ public:
     const std::vector<MashController *> & getAll() const;
     bool erase(unsigned int id);
 
+    const PIDParams * updatePIDParams(int id, const PIDParams & pidParams);
+
     Relay * updateHeater(unsigned int mashControllerId, const RelayConfig & relayConfig);
     Relay * updateAgitator(unsigned int mashControllerId, const RelayConfig & relayConfig);
     

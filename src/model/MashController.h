@@ -42,31 +42,35 @@ public:
     void setTunings(double kp, double ki, double kd);
 
     double getKp() const {
-        return _config.kp;
+        return _config.pidParams.kp;
     }
 
     double getKi() const {
-        return _config.ki;
+        return _config.pidParams.ki;
     }
 
     double getKd() const {
-        return _config.kd;
-    }
-    
-    void setAutoTemperatureControl(bool isAuto);
-
-    bool isAutoTemperatureControl() const {
-        return _config.autoControl;
+        return _config.pidParams.kd;
     }
 
-    void setWindowSizeMs(int windowSizeMs) {
-        _config.windowSizeMs = _state.windowSizeMs = windowSizeMs;
-    }
+    void setWindowSizeMs(int windowSizeMs);
 
     int getWindowSizeMs() const {
-        return _config.windowSizeMs;
+        return _config.pidParams.windowSizeMs;
+    }
+    
+    const PIDParams & getPIDParams() const {
+        return _config.pidParams;
     }
 
+    void setPIDParams(const PIDParams & pidParams);
+
+    void setAutoTemperatureControl(bool isAuto);
+    
+        bool isAutoTemperatureControl() const {
+            return _config.autoControl;
+        }
+    
     void addThermometer(ThermometerWire * thermometerWire) {
         _thermometerWires.push_back(thermometerWire);
     }
