@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
 #include "PathParameterFunctionRequestHandler.h"
+#include "DoublePathParameterFunctionRequestHandler.h"
 
 class BrewtoothWebServer : public ESP8266WebServer {
 public:
@@ -16,6 +17,11 @@ public:
     template<typename T>
     void onPathParam(const char* uri, HTTPMethod method, std::function<void(T)> fn) {
         _addRequestHandler(new PathParameterFunctionRequestHandler<T>(fn, uri, method));
+    }
+
+    template<typename ParamA, typename ParamB>
+    void onPathParam(const char* uri, HTTPMethod method, std::function<void(ParamA, ParamB)> fn) {
+        _addRequestHandler(new DoublePathParameterFunctionRequestHandler<ParamA, ParamB>(fn, uri, method));
     }
     
 private:

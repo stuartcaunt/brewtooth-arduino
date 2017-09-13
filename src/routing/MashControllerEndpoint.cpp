@@ -32,12 +32,13 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/agitator/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
 
-     _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getControllerState, this, _1));
+     _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlState, this, _1));
     // _server->onPathParam<int>("/controllers/{id}/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, true));
     // _server->onPathParam<int>("/controllers/{id}/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, false));
     // _server->onPathParam<int>("/controllers/{id}/automatic", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, true));
     // _server->onPathParam<int>("/controllers/{id}/manual", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, false));
-    // _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlSetpoint, this, _1));
+    _server->onPathParam<int, float>("/controllers/{id}/setpoint/{setpoint}", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlSetpoint, this, _1, _2));
 }
     
 void MashControllerEndpoint::addMashController() {
@@ -345,7 +346,7 @@ void MashControllerEndpoint::setAgitatorActive(int id, bool active) {
     }
 }
 
-void MashControllerEndpoint::getControllerState(int id) {
+void MashControllerEndpoint::getTemperatureControlState(int id) {
     LOG("Getting control state from mashController id = %d", id);
     
     MashController * mashController = MashControllerService::_()->get(id);
@@ -358,3 +359,33 @@ void MashControllerEndpoint::getControllerState(int id) {
         _server->send(404, "text/plain", "MashController not found");
     }
 }
+
+void MashControllerEndpoint::getTemperatureControlSetpoint(int id) {
+    LOG("Getting setpoint from mashController id = %d", id);
+
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        float setpointC = mashController->getSetpointC();
+        _server->send(200, "text/plain", String(setpointC).c_str());
+
+    } else {
+        WARN("Cannot get mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::setTemperatureControlSetpoint(int id, float setpointC) {
+    LOG("Setting setpoint for mashController id = %d: setpoint = %d", id, (int)setpointC);
+
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        mashController->setSetpointC(setpointC);
+        setpointC = mashController->getSetpointC();
+        _server->send(200, "text/plain", String(setpointC).c_str());
+
+    } else {
+        WARN("Cannot get mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+    

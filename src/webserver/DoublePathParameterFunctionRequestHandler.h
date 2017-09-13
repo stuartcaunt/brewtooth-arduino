@@ -1,5 +1,5 @@
-#ifndef PATHPARAMETERFUNCTIONREQUESTHANDLER_H
-#define PATHPARAMETERFUNCTIONREQUESTHANDLER_H
+#ifndef DOUBLEPATHPARAMETERFUNCTIONREQUESTHANDLER_H
+#define DOUBLEPATHPARAMETERFUNCTIONREQUESTHANDLER_H
 
 #include "PathPart.h"
 #include <Arduino.h>
@@ -9,14 +9,15 @@
 #include <utils/StringFunctions.h>
 #include <utils/Converter.h>
 
-
-template<typename T>
-class PathParameterFunctionRequestHandler : public RequestHandler {
+template<typename ParamA, typename ParamB>
+class DoublePathParameterFunctionRequestHandler : public RequestHandler {
 public:
-    PathParameterFunctionRequestHandler(std::function<void(T)> fn, const char* uri, HTTPMethod method) :
+    DoublePathParameterFunctionRequestHandler(std::function<void(ParamA, ParamB)> fn, const char* uri, HTTPMethod method) :
         _fn(fn),
         _uri(uri),
-        _method(method) {
+        _method(method),
+        _paramIndexA(-1),
+        _paramIndexB(-1) {
         std::vector<std::string> pathTexts = split(uri, "/");
 
         for (int index = 0; index < pathTexts.size(); index++) {
@@ -25,14 +26,19 @@ public:
                 pathText = replace_all(pathText, "{", "");
                 pathText = replace_all(pathText, "}", "");
                 _pathParts.push_back(PathPart(pathText, true));
-                _paramIndex = index;
+
+                if (_paramIndexA == -1) {
+                    _paramIndexA = index;
+                } else {
+                    _paramIndexB = index;
+                }
 
             } else {
                 _pathParts.push_back(PathPart(pathText));
             }
         }
     }
-    virtual ~PathParameterFunctionRequestHandler() {
+    virtual ~DoublePathParameterFunctionRequestHandler() {
     }
 
     virtual bool canHandle(HTTPMethod requestMethod, String requestUri) {
@@ -67,36 +73,37 @@ public:
     }
 
     virtual bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
-        std::string paramValueString;
-        if (_lastRequestUri == requestUri) {
-            paramValueString = _pathParts[_paramIndex].lastParamValue;
-        
-        } else {
+        std::string paramValueStringA;
+        std::string paramValueStringB;
+        if (_lastRequestUri != requestUri) {
             // re-obtain paramValue string
             if (!canHandle(requestMethod, requestUri)) {
                 return false;
             }
 
-            paramValueString = _pathParts[_paramIndex].lastParamValue;
         }
+        paramValueStringA = _pathParts[_paramIndexA].lastParamValue;
+        paramValueStringB = _pathParts[_paramIndexB].lastParamValue;
 
         // Get param from path
-        T paramValue = Converter<T>::convert(paramValueString);
+        ParamA paramValueA = Converter<ParamA>::convert(paramValueStringA);
+        ParamB paramValueB = Converter<ParamB>::convert(paramValueStringB);
 
         // Call function
-        _fn(paramValue);
+        _fn(paramValueA, paramValueB);
 
         return true;
     }
     
 private:
-    std::function<void(T)> _fn;
+    std::function<void(ParamA, ParamB)> _fn;
     String _uri;
     HTTPMethod _method;
     std::vector<PathPart> _pathParts;
     
-    int _paramIndex;
+    int _paramIndexA;
+    int _paramIndexB;
     String _lastRequestUri;
 };
 
-#endif /*PATHPARAMETERFUNCTIONREQUESTHANDLER_H*/
+#endif /*DOUBLEPATHPARAMETERFUNCTIONREQUESTHANDLER_H*/

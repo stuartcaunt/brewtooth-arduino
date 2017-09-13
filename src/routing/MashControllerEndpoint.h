@@ -31,7 +31,10 @@ private:
     void updateAgitator(int id);
     void setAgitatorActive(int id, bool active);
 
-    void getControllerState(int id);
+    void getTemperatureControlState(int id);
+    void getTemperatureControlSetpoint(int id);
+    void setTemperatureControlSetpoint(int id, float setpointC);
+
 };
 
 #endif /*MASHCONTROLLERENDPOINT_H*/
