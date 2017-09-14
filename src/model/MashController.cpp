@@ -13,6 +13,7 @@ MashController::MashController(const MashControllerConfig & config) :
     _temperatureController(NULL) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
+    _state.runTimeMs = 0;
     _state.windowSizeMs = _config.pidParams.windowSizeMs;
     _state.kp = _config.pidParams.kp;
     _state.ki = _config.pidParams.ki;
@@ -149,6 +150,24 @@ ThermometerWireData MashController::getThermometerData() const {
     return data;
 }
 
+float MashController::getMeanTemperatureC() const {
+    float temperatureC = 0.0;
+    int count = 0;
+    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
+        ThermometerWire * thermometerWire = *it;
+        if (thermometerWire->isValid()) {
+            temperatureC += thermometerWire->getMeanTemperatureC();
+            count++;
+        }
+    }
+
+    if (count > 0) {
+        temperatureC /= count;
+    }
+
+    return temperatureC;
+}
+
 void MashController::setTunings(double kp, double ki, double kd) {
     _config.pidParams.kp = _state.kp = kp;
     _config.pidParams.ki = _state.ki = ki;
@@ -189,6 +208,8 @@ void MashController::startTemperatureControl() {
         this->setAutoTemperatureControl(_config.autoControl);
 
         _state.running = true;
+        _startTimeMs = millis();
+        _state.runTimeMs = 0;
         _temperatureController->SetSampleTime(_state.sampleTimeMs);
 
     } else {
@@ -225,19 +246,7 @@ void MashController::update() {
     _lastTimeMs = timeMs;
 
     // Get mean temperature from thermometer wires
-    _state.temperatureC = 0.0;
-    int count = 0;
-    for (std::vector<ThermometerWire *>::const_iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
-        ThermometerWire * thermometerWire = *it;
-        if (thermometerWire->isValid()) {
-            _state.temperatureC += thermometerWire->getMeanTemperatureC();
-            count++;
-        }
-    }
-
-    if (count > 0) {
-        _state.temperatureC /= count;
-    }
+    _state.temperatureC = this->getMeanTemperatureC();
     DEBUG("Got average temperature of %d with %d valid thermometerWires", (int)_state.temperatureC, count);
 
     // Update temperate control
@@ -253,6 +262,9 @@ void MashController::update() {
             bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));
             this->setHeaterActive(activeHeater);
         }
+
+        // Update runtime
+        _state.runTimeMs = timeMs - _startTimeMs;
     }
 }
 

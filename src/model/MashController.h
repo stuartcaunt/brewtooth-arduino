@@ -110,6 +110,7 @@ public:
     }
 
     ThermometerWireData getThermometerData() const;
+    float getMeanTemperatureC() const;
 
     const TemperatureControlState & getTemperatureControlState() const {
         return _state;
@@ -142,6 +143,7 @@ private:
 
     TemperatureControlState _state;
     unsigned long _lastTimeMs;
+    unsigned long _startTimeMs;
     unsigned long _windowStartTimeMs;
 };
 

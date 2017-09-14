@@ -7,6 +7,7 @@ class TemperatureControlState : public Jsonable {
 public:
     TemperatureControlState() :
         running(false),
+        runTimeMs(0.0),
         temperatureC(0.0),
         setpointC(0.0),
         controllerOutput(0.0),
@@ -22,6 +23,7 @@ public:
 
     virtual void convertToJson(JsonObject & json) const {
         json["running"] = running;
+        json["runTimeMs"] = runTimeMs;
         json["temperatureC"] = temperatureC;
         json["setpointC"] = setpointC;
         json["controllerOutput"] = controllerOutput;
@@ -38,6 +40,7 @@ public:
     
 public:
     bool running;
+    unsigned long runTimeMs;
     double temperatureC;
     double setpointC;
     double controllerOutput;
