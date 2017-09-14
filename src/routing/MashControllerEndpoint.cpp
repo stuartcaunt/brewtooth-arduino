@@ -35,6 +35,8 @@ void MashControllerEndpoint::buildPaths() {
      _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlState, this, _1));
     _server->onPathParam<int>("/controllers/{id}/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, false));
+    _server->onPathParam<int>("/controllers/{id}/autotune/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAutoTuneActive, this, _1, true));
+    _server->onPathParam<int>("/controllers/{id}/autotune/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAutoTuneActive, this, _1, false));
     _server->onPathParam<int>("/controllers/{id}/automatic", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/manual", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, false));
     _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlSetpoint, this, _1));
@@ -377,6 +379,27 @@ void MashControllerEndpoint::setTemperatureControlActive(int id, bool active) {
         
     } else {
         WARN("Cannot start/stop temperature control for mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::setAutoTuneActive(int id, bool active) {
+    LOG("Setting auto tune active = %s for mashController id = %d", active ? "true" : "false", id);
+    
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        if (active) {
+            mashController->startAutoTune();
+
+        } else {
+            mashController->stopAutoTune();
+        }
+
+        const TemperatureControlState state = mashController->getTemperatureControlState();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+        
+    } else {
+        WARN("Cannot start/stop auto tune for mashController : mashController with Id = %d does not exist", id);
         _server->send(404, "text/plain", "MashController not found");
     }
 }

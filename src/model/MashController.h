@@ -8,6 +8,7 @@
 class ThermometerWire;
 class Relay;
 class PID;
+class PID_ATune;
 
 class MashController : public Jsonable {
 
@@ -127,6 +128,9 @@ public:
     void startTemperatureControl();
     void stopTemperatureControl();
 
+    void startAutoTune();
+    void stopAutoTune();
+
     void update();
           
     virtual void convertToJson(JsonObject & json) const {
@@ -140,6 +144,8 @@ private:
     Relay * _agitator;
 
     PID * _temperatureController;
+    PID_ATune * _autoTune;
+    bool _isAutoTuning;
 
     TemperatureControlState _state;
     unsigned long _lastTimeMs;

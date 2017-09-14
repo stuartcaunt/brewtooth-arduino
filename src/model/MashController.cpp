@@ -5,12 +5,15 @@
 #include <service/GPIOService.h>
 #include <utils/Log.h>
 #include <PID_v1.h>
+#include <PID_AutoTune_v0.h>
 
 MashController::MashController(const MashControllerConfig & config) :
     _config(config),
     _heater(NULL),
     _agitator(NULL),
-    _temperatureController(NULL) {
+    _temperatureController(NULL),
+    _autoTune(NULL),
+    _isAutoTuning(false) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
     _state.runTimeMs = 0;
@@ -28,6 +31,11 @@ MashController::~MashController() {
     if (_temperatureController != NULL) {
         delete _temperatureController;
         _temperatureController = NULL;
+    }
+
+    if (_autoTune != NULL) {
+        delete _autoTune;
+        _autoTune = NULL;
     }
 }
 
@@ -194,6 +202,11 @@ void MashController::setPIDParams(const PIDParams & pidParams) {
 }
 
 void MashController::startTemperatureControl() {
+    if (_state.autoTuning) {
+        LOG("Cannot start temperature control when autotuning is in progress");
+        return;
+    }
+
     if (_temperatureController != NULL) {
         LOG("Temperature control is already active");
         return;
@@ -228,6 +241,7 @@ void MashController::stopTemperatureControl() {
     }
 
     _state.running = false;
+    _state.runTimeMs = 0;
 }
 
 void MashController::setAutoTemperatureControl(bool isAuto) {
@@ -237,6 +251,60 @@ void MashController::setAutoTemperatureControl(bool isAuto) {
     if (_temperatureController != NULL) {
         _temperatureController->SetMode(isAuto ? AUTOMATIC : MANUAL);
     }
+}
+
+void MashController::startAutoTune() {
+    if (_state.running) {
+        LOG("Cannot run autotune when temperature control is active");
+    }
+
+    if (_temperatureController != NULL) {
+        LOG("Auto tunining is already active");
+        return;
+    }
+
+    if (_heater != NULL) {
+        // Set output to half max
+        _state.controllerOutput = 0.5 * _config.pidParams.outputMax;
+
+        // create temperature controller
+        LOG("Creating new temperature controller for autotuning");
+        _state.controllerOutput = 0.0;
+        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
+        _temperatureController->SetOutputLimits(0.0, _config.pidParams.outputMax);
+        _temperatureController->SetMode(AUTOMATIC);
+        
+        _state.autoTuning = true;
+        _startTimeMs = millis();
+        _state.runTimeMs = 0;
+        _temperatureController->SetSampleTime(_state.sampleTimeMs);
+
+        // Create auto tuner
+        _autoTune = new PID_ATune(&_state.temperatureC, &_state.controllerOutput);
+        _autoTune->SetControlType(1); // PID (not PI)
+        _autoTune->SetNoiseBand(0.2); // Noise on line -> less that 0.2° ?
+        _autoTune->SetOutputStep(0.5 * _config.pidParams.outputMax); // Step above and below initital output value
+        _autoTune->SetLookbackSec(60); // How far to look back
+
+    } else {
+        LOG("Cannot start autotune since the heater is not configured");
+    }
+}
+
+void MashController::stopAutoTune() {
+    // delete autotuner and temperature controller
+    if (_autoTune != NULL) {
+        LOG("Stopping/deleting autotuner and temperature controller");
+        _state.controllerOutput = 0.0;
+    
+        delete _autoTune;
+        _autoTune = NULL;
+        delete _temperatureController;
+        _temperatureController = NULL;
+    }
+
+    _state.autoTuning = false;
+    _state.runTimeMs = 0;
 }
 
 void MashController::update() {
@@ -251,23 +319,44 @@ void MashController::update() {
 
     // Update temperate control
     if (_temperatureController != NULL) {
-        _temperatureController->Compute();
 
         // Shift relay window
         while (timeMs - _windowStartTimeMs > _config.windowSizeMs) {
             _windowStartTimeMs += _config.windowSizeMs;
         }
-        if (_config.autoControl) {
-            // Activate heater depending on controller output
-            float windowFactor = (timeMs - _windowStartTimeMs) / _config.windowSizeMs;
-            float outputFactor = _state.controllerOutput / _config.pidParams.outputMax;
+        
+        if (_state.running && _config.autoControl) {
+            _temperatureController->Compute();
+        
+            // Update runtime
+            _state.runTimeMs = timeMs - _startTimeMs;
+        
+        } else if (_state.autoTuning) {
+            // Update the autotune
+            int  retVal = _autoTune->Runtime();
+            if (retVal != 0) {
+                // Finished
+                double kp = _autoTune->GetKp();
+                double ki = _autoTune->GetKi();
+                double kd = _autoTune->GetKd();
 
-            bool activeHeater = outputFactor > windowFactor;
-            this->setHeaterActive(activeHeater);
+                LOG("Finished autotuning");
+                
+                this->setTunings(kp, ki, kd);
+
+                // Stop autotune
+                _autoTune->Cancel();
+
+                // And let`s kill it too
+                this->stopAutoTune();
+            }
         }
 
-        // Update runtime
-        _state.runTimeMs = timeMs - _startTimeMs;
+        // Activate heater depending on controller output
+        float windowFactor = (timeMs - _windowStartTimeMs) / _config.windowSizeMs;
+        float outputFactor = _state.controllerOutput / _config.pidParams.outputMax;
+
+        bool activeHeater = outputFactor > windowFactor;
+        this->setHeaterActive(activeHeater);
     }
 }
-
