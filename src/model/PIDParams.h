@@ -8,33 +8,33 @@ struct PIDParams : public Jsonable {
         kp(1.0),
         ki(1.0),
         kd(1.0),
-        windowSizeMs(5000) {}
+        outputMax(100) {}
 
     PIDParams(const JsonObject & json) :
         kp(json["kp"]),
         ki(json["ki"]),
         kd(json["kd"]),
-        windowSizeMs(json["windowSizeMs"]) {
+        outputMax(json["outputMax"]) {
     }
 
     PIDParams & operator=(const PIDParams & rhs) {
         kp = rhs.kp;
         ki = rhs.ki;
         kd = rhs.kd;
-        windowSizeMs = rhs.windowSizeMs;
+        outputMax = rhs.outputMax;
     }
 
     virtual void convertToJson(JsonObject & json) const {
         json["kp"] = kp;
         json["ki"] = ki;
         json["kd"] = kd;
-        json["windowSizeMs"] = windowSizeMs;
+        json["outputMax"] = outputMax;
     }
 
     double kp;
     double ki;
     double kd;
-    int windowSizeMs;
+    int outputMax;
 };
 
 #endif /*PIDPARAMS_H*/

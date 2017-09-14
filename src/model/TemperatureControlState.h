@@ -19,6 +19,7 @@ public:
         kd(0.0),
         loopMs(0.0),
         sampleTimeMs(0.0),
+        outputMax(0.0),
         windowSizeMs(0) {}
 
     virtual void convertToJson(JsonObject & json) const {
@@ -35,6 +36,7 @@ public:
         json["kd"] = kd;
         json["loopMs"] = loopMs;
         json["sampleTimeMs"] = sampleTimeMs;
+        json["outputMax"] = outputMax;
         json["windowSizeMs"] = windowSizeMs;
     }
     
@@ -52,6 +54,7 @@ public:
     double kd;
     unsigned long loopMs;
     unsigned long sampleTimeMs;
+    unsigned int outputMax;
     unsigned int windowSizeMs;
 };
 

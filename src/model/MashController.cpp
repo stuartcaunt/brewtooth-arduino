@@ -14,7 +14,7 @@ MashController::MashController(const MashControllerConfig & config) :
 
     _windowStartTimeMs = _lastTimeMs = millis();
     _state.runTimeMs = 0;
-    _state.windowSizeMs = _config.pidParams.windowSizeMs;
+    _state.outputMax = _config.pidParams.outputMax;
     _state.kp = _config.pidParams.kp;
     _state.ki = _config.pidParams.ki;
     _state.kd = _config.pidParams.kd;
@@ -179,17 +179,17 @@ void MashController::setTunings(double kp, double ki, double kd) {
     }
 }
 
-void MashController::setWindowSizeMs(int windowSizeMs) {
-    _config.pidParams.windowSizeMs = _state.windowSizeMs = windowSizeMs;
+void MashController::setOutputMax(int outputMax) {
+    _config.pidParams.outputMax = _state.outputMax = outputMax;
 
     // Modify output limits in temperature controller
     if (_temperatureController != NULL) {
-        _temperatureController->SetOutputLimits(0.0, windowSizeMs);
+        _temperatureController->SetOutputLimits(0.0, outputMax);
     }
 }
 
 void MashController::setPIDParams(const PIDParams & pidParams) {
-    this->setWindowSizeMs(pidParams.windowSizeMs);
+    this->setOutputMax(pidParams.outputMax);
     this->setTunings(pidParams.kp, pidParams.ki, pidParams.kd);
 }
 
@@ -204,7 +204,7 @@ void MashController::startTemperatureControl() {
         LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
         _state.controllerOutput = 0.0;
         _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
-        _temperatureController->SetOutputLimits(0.0, _config.pidParams.windowSizeMs);
+        _temperatureController->SetOutputLimits(0.0, _config.pidParams.outputMax);
         this->setAutoTemperatureControl(_config.autoControl);
 
         _state.running = true;
@@ -254,12 +254,15 @@ void MashController::update() {
         _temperatureController->Compute();
 
         // Shift relay window
-        if (timeMs - _windowStartTimeMs > _config.pidParams.windowSizeMs) {
-            _windowStartTimeMs += _config.pidParams.windowSizeMs;
+        while (timeMs - _windowStartTimeMs > _config.windowSizeMs) {
+            _windowStartTimeMs += _config.windowSizeMs;
         }
         if (_config.autoControl) {
             // Activate heater depending on controller output
-            bool activeHeater = (_state.controllerOutput < (timeMs - _windowStartTimeMs));
+            float windowFactor = (timeMs - _windowStartTimeMs) / _config.windowSizeMs;
+            float outputFactor = _state.controllerOutput / _config.pidParams.outputMax;
+
+            bool activeHeater = outputFactor > windowFactor;
             this->setHeaterActive(activeHeater);
         }
 

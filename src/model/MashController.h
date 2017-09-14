@@ -53,10 +53,10 @@ public:
         return _config.pidParams.kd;
     }
 
-    void setWindowSizeMs(int windowSizeMs);
+    void setOutputMax(int outputMax);
 
-    int getWindowSizeMs() const {
-        return _config.pidParams.windowSizeMs;
+    int getOutputMax() const {
+        return _config.pidParams.outputMax;
     }
     
     const PIDParams & getPIDParams() const {
