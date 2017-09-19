@@ -17,42 +17,42 @@ x  GET to read temperature
 x  Save Thermometers to Configuration file
 x  rename to Thermometer and ThermometerService
 x  Endpoint to get average temperature ?
- - get structure of temperatures
+x  get structure of temperatures
 
 x Thermometer
 x   initialised with a single reader
 x   configured with a port  
 x     can be modified
 x  read temperature
- - Get temperatures structure
+x  Get temperatures structure
 
-OneWire
-  Modify object model to take into account multiple thermometers on single onewire
+x OneWire
+x   Modify object model to take into account multiple thermometers on single onewire
 
-- MashController
- - get/set PID
+x MashController
+x  get/set PID
 x  get average temperature
- - get structure of temperatures 
+x  get structure of temperatures 
 x  add heater
 x   GPIO service
 x  add agitator
 x   GPIO service
- - control temperature
- - get status
-   - temperature temp+available, agitator on+available, heater on+available
+x  control temperature
+x  get status
+x    temperature temp+available, agitator on+available, heater on+available
 
-- MashControllerEndpoint
+x MashControllerEndpoint
 x  get/set heater on/off
- - get/set PID
+x  get/set PID
 x  get mean temperature
- - get temperature structure
- - get structure of temperatures 
- - get status (temperatures, heater & agitator)
- - start/stop temperature control
+x  get temperature structure
+x  get structure of temperatures 
+x  get status (temperatures, heater & agitator)
+x  start/stop temperature control
 x  PUT to update heater/agitator
 
-- App
+x App
 x  update all temperature reading during loop
- - update all temperature setting during loop
+x  update all temperature setting during loop
 
 

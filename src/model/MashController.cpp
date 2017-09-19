@@ -61,6 +61,9 @@ void MashController::setHeater(Relay * heater) {
 
         // Update config
         _config.heater = *(_heater->getConfig());
+
+        // Update state
+        _state.heaterActive = _heater->isActive();
     }
 }
 
@@ -80,6 +83,7 @@ void MashController::deleteHeater() {
 bool MashController::setHeaterActive(bool active) {
     if (_heater != NULL && _heater->isActive() != active) {
         LOG("Setting heater active %s", active ? "true" : "false");
+        _state.heaterActive = active;
         return _heater->setActive(active);
     }
 
@@ -108,6 +112,9 @@ void MashController::setAgitator(Relay * agitator) {
 
         // Update config
         _config.agitator = *(_agitator->getConfig());
+
+        // Update state
+        _state.agitatorActive = _agitator->isActive();
     }
 }
 
@@ -127,6 +134,7 @@ void MashController::deleteAgitator() {
 bool MashController::setAgitatorActive(bool active) {
     if (_agitator != NULL && _agitator->isActive() != active) {
         LOG("Setting agitator active %s", active ? "true" : "false");
+        _state.agitatorActive = active;
         return _agitator->setActive(active);
     }
 
@@ -328,9 +336,6 @@ void MashController::update() {
         if (_state.running && _config.autoControl) {
             _temperatureController->Compute();
         
-            // Update runtime
-            _state.runTimeMs = timeMs - _startTimeMs;
-        
         } else if (_state.autoTuning) {
             // Update the autotune
             int  retVal = _autoTune->Runtime();
@@ -352,11 +357,19 @@ void MashController::update() {
             }
         }
 
+        // Update runtime
+        _state.runTimeMs = timeMs - _startTimeMs;
+        _state.windowSizeMs = _config.windowSizeMs;
+    
         // Activate heater depending on controller output
-        float windowFactor = (timeMs - _windowStartTimeMs) / _config.windowSizeMs;
-        float outputFactor = _state.controllerOutput / _config.pidParams.outputMax;
+        float windowFactor = float(timeMs - _windowStartTimeMs) / _config.windowSizeMs;
+        float outputFactor = float(_state.controllerOutput) / _config.pidParams.outputMax;
 
         bool activeHeater = outputFactor > windowFactor;
-        this->setHeaterActive(activeHeater);
+        if (this->isHeaterActive() != activeHeater) {
+            LOG("Changing heater state to %s, wf = %d, of = %d", activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
+            this->setHeaterActive(activeHeater);
+        }
+
     }
 }

@@ -12,12 +12,12 @@ void ThermometerEndpoint::buildPaths() {
     
     _server->on("/thermometers", HTTPMethod::HTTP_POST, std::bind(&ThermometerEndpoint::addThermometer, this));
     _server->on("/thermometers", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometers, this));
+    _server->on("/thermometers/temperature", std::bind(&ThermometerEndpoint::getMeanTemperature, this));
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometer, this, _1));
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&ThermometerEndpoint::deleteThermometer, this, _1));
     _server->onPathParam<int>("/thermometers/{id}", HTTPMethod::HTTP_PUT, std::bind(&ThermometerEndpoint::updateThermometer, this, _1));
 
     _server->onPathParam<int>("/thermometers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&ThermometerEndpoint::getThermometerTemperature, this, _1));
-    _server->on("/thermometers/temperature", std::bind(&ThermometerEndpoint::getMeanTemperature, this));
 }
     
 void ThermometerEndpoint::addThermometer() {
