@@ -248,6 +248,7 @@ void MashController::stopTemperatureControl() {
         _temperatureController = NULL;
     }
 
+    this->setHeaterActive(false);
     _state.running = false;
     _state.runTimeMs = 0;
 }
@@ -272,12 +273,14 @@ void MashController::startAutoTune() {
     }
 
     if (_heater != NULL) {
-        // Set output to half max
-        _state.controllerOutput = 0.5 * _config.pidParams.outputMax;
 
         // create temperature controller
         LOG("Creating new temperature controller for autotuning");
-        _state.controllerOutput = 0.0;
+        // Set output to half max
+        _state.controllerOutput = 0.5 * _config.pidParams.outputMax;
+        
+        this->setTunings(2.0, 0.5, 2.0);
+
         _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
         _temperatureController->SetOutputLimits(0.0, _config.pidParams.outputMax);
         _temperatureController->SetMode(AUTOMATIC);
@@ -290,9 +293,9 @@ void MashController::startAutoTune() {
         // Create auto tuner
         _autoTune = new PID_ATune(&_state.temperatureC, &_state.controllerOutput);
         _autoTune->SetControlType(1); // PID (not PI)
-        _autoTune->SetNoiseBand(0.2); // Noise on line -> less that 0.2° ?
+        _autoTune->SetNoiseBand(0.1); // Noise on line : ignore noise less than this
         _autoTune->SetOutputStep(0.5 * _config.pidParams.outputMax); // Step above and below initital output value
-        _autoTune->SetLookbackSec(60); // How far to look back
+        _autoTune->SetLookbackSec(30); // How far to look back
 
     } else {
         LOG("Cannot start autotune since the heater is not configured");
@@ -311,6 +314,7 @@ void MashController::stopAutoTune() {
         _temperatureController = NULL;
     }
 
+    this->setHeaterActive(false);
     _state.autoTuning = false;
     _state.runTimeMs = 0;
 }
@@ -365,9 +369,9 @@ void MashController::update() {
         float windowFactor = float(timeMs - _windowStartTimeMs) / _config.windowSizeMs;
         float outputFactor = float(_state.controllerOutput) / _config.pidParams.outputMax;
 
-        bool activeHeater = outputFactor > windowFactor;
+        bool activeHeater = outputFactor >= windowFactor;
         if (this->isHeaterActive() != activeHeater) {
-            LOG("Changing heater state to %s, wf = %d, of = %d", activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
+            LOG("%d : Changing heater state to %s, wf = %d, of = %d", _state.runTimeMs, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
 
