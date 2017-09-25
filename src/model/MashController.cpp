@@ -4,8 +4,8 @@
 #include "Relay.h"
 #include <service/GPIOService.h>
 #include <utils/Log.h>
-#include <PID_v1.h>
-#include <PID_AutoTune_v0.h>
+#include <utils/PID.h>
+#include <utils/PID_AutoTune_v0.h>
 
 MashController::MashController(const MashControllerConfig & config) :
     _config(config),
@@ -21,7 +21,8 @@ MashController::MashController(const MashControllerConfig & config) :
     _state.kp = _config.pidParams.kp;
     _state.ki = _config.pidParams.ki;
     _state.kd = _config.pidParams.kd;
-    _state.sampleTimeMs = 100;
+    _state.windowSizeMs = _config.windowSizeMs;
+    _state.sampleTimeMs = 0.25 * _config.windowSizeMs;
 }
 
 MashController::~MashController() {
@@ -191,7 +192,7 @@ void MashController::setTunings(double kp, double ki, double kd) {
 
     // Set PIDs in temperatureController
     if (_temperatureController != NULL) {
-        _temperatureController->SetTunings(kp, ki, kd);
+        _temperatureController->setTunings(kp, ki, kd);
     }
 }
 
@@ -200,7 +201,7 @@ void MashController::setOutputMax(int outputMax) {
 
     // Modify output limits in temperature controller
     if (_temperatureController != NULL) {
-        _temperatureController->SetOutputLimits(0.0, outputMax);
+        _temperatureController->setOutputLimits(0.0, outputMax);
     }
 }
 
@@ -224,14 +225,14 @@ void MashController::startTemperatureControl() {
         // create temperature controller
         LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
         _state.controllerOutput = 0.0;
-        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
-        _temperatureController->SetOutputLimits(0.0, _config.pidParams.outputMax);
+        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd);
+        _temperatureController->setOutputLimits(0.0, _config.pidParams.outputMax);
         this->setAutoTemperatureControl(_config.autoControl);
 
         _state.running = true;
         _startTimeMs = millis();
         _state.runTimeMs = 0;
-        _temperatureController->SetSampleTime(_state.sampleTimeMs);
+        _temperatureController->setSampleTime(_state.sampleTimeMs);
 
     } else {
         LOG("Cannot start temperature control since the heater is not configured");
@@ -258,7 +259,7 @@ void MashController::setAutoTemperatureControl(bool isAuto) {
 
     // Set temperature controller to auto or manual
     if (_temperatureController != NULL) {
-        _temperatureController->SetMode(isAuto ? AUTOMATIC : MANUAL);
+        _temperatureController->setMode(isAuto ? AUTOMATIC : MANUAL);
     }
 }
 
@@ -281,17 +282,17 @@ void MashController::startAutoTune() {
         
         this->setTunings(2.0, 0.5, 2.0);
 
-        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd, DIRECT);
-        _temperatureController->SetOutputLimits(0.0, _config.pidParams.outputMax);
-        _temperatureController->SetMode(AUTOMATIC);
+        _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd);
+        _temperatureController->setOutputLimits(0.0, _config.pidParams.outputMax);
+        _temperatureController->setMode(AUTOMATIC);
         
         _state.autoTuning = true;
         _startTimeMs = millis();
         _state.runTimeMs = 0;
-        _temperatureController->SetSampleTime(_state.sampleTimeMs);
+        _temperatureController->setSampleTime(_state.sampleTimeMs);
 
         // Create auto tuner
-        _autoTune = new PID_ATune(&_state.temperatureC, &_state.controllerOutput);
+        _autoTune = new PID_ATune((double *)&_state.temperatureC, (double *)&_state.controllerOutput);
         _autoTune->SetControlType(1); // PID (not PI)
         _autoTune->SetNoiseBand(0.1); // Noise on line : ignore noise less than this
         _autoTune->SetOutputStep(0.5 * _config.pidParams.outputMax); // Step above and below initital output value
@@ -338,7 +339,7 @@ void MashController::update() {
         }
         
         if (_state.running && _config.autoControl) {
-            _temperatureController->Compute();
+            _temperatureController->compute();
         
         } else if (_state.autoTuning) {
             // Update the autotune

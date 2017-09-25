@@ -18,6 +18,11 @@ public:
 
     void copyBasic(const MashControllerConfig & config) {
         _config.copyBasic(config);
+        _state.windowSizeMs = _config.windowSizeMs;
+        _state.sampleTimeMs = 0.25 * _config.windowSizeMs;
+        _state.kp = _config.pidParams.kp;
+        _state.ki = _config.pidParams.ki;
+        _state.kd = _config.pidParams.kd;
     }
 
     const MashControllerConfig * getConfig() const {

@@ -31,9 +31,9 @@ struct PIDParams : public Jsonable {
         json["outputMax"] = outputMax;
     }
 
-    double kp;
-    double ki;
-    double kd;
+    float kp;
+    float ki;
+    float kd;
     int outputMax;
 };
 
