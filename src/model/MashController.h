@@ -10,6 +10,8 @@ class Relay;
 class PID;
 class PID_ATune;
 
+#define WINDOW_SAMPLE_TIME_RATION 0.25
+
 class MashController : public Jsonable {
 
 public:
@@ -19,7 +21,7 @@ public:
     void copyBasic(const MashControllerConfig & config) {
         _config.copyBasic(config);
         _state.windowSizeMs = _config.windowSizeMs;
-        _state.sampleTimeMs = 0.25 * _config.windowSizeMs;
+        _state.sampleTimeMs = WINDOW_SAMPLE_TIME_RATION * _config.windowSizeMs;
         _state.kp = _config.pidParams.kp;
         _state.ki = _config.pidParams.ki;
         _state.kd = _config.pidParams.kd;

@@ -22,7 +22,7 @@ MashController::MashController(const MashControllerConfig & config) :
     _state.ki = _config.pidParams.ki;
     _state.kd = _config.pidParams.kd;
     _state.windowSizeMs = _config.windowSizeMs;
-    _state.sampleTimeMs = 0.25 * _config.windowSizeMs;
+    _state.sampleTimeMs = WINDOW_SAMPLE_TIME_RATION * _config.windowSizeMs;
 }
 
 MashController::~MashController() {

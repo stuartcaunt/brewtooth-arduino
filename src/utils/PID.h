@@ -1,6 +1,8 @@
 #ifndef PID_H
 #define PID_H
 
+#include <deque>
+
 #define AUTOMATIC	1
 #define MANUAL	0
 
@@ -14,23 +16,24 @@ public:
     void setTunings(float, float, float);
     void setSampleTime(int);
 										  
-    float getKp() {
+    float getKp() const {
         return _dispKp;
     }
-    float getKi() {
+    float getKi() const {
         return _dispKi;
     }
-    float getKd() {
+    float getKd() const {
         return _dispKd;
     }
 
-    int getMode() {
+    int getMode() const {
         return _inAuto ? AUTOMATIC : MANUAL;
     }
 
 private:
     void initialize();
-	
+    float calculateDerivative() const;
+      
     float _kp;
     float _ki;
     float _kd;
@@ -45,7 +48,7 @@ private:
 			  
   	unsigned long _lastTime;
     float _iTerm;
-    float _lastInput;
+    std::deque<float> _lastInputs;
 
   	unsigned long _sampleTime;
     float _outMin;
