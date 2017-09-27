@@ -11,7 +11,7 @@ struct MashControllerConfig : public Jsonable {
         id(0),
         name(""),
         autoControl(true),
-        windowSizeMs(10000) {}
+        windowSizeMs(20000) {}
 
     MashControllerConfig(const JsonObject & json) :
         id(json["id"]),

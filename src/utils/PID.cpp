@@ -1,6 +1,6 @@
 
 #include "PID.h"
-#include <arduino.h>
+#include <Arduino.h>
 
 PID::PID(float * input, float * output, float * setpoint, float Kp, float Ki, float Kd) :
     _output(output),
@@ -41,7 +41,7 @@ bool PID::compute() {
         }
         float dInput = this->calculateDerivative();
     
-        Serial.println("kp = " + String(_kp * error) + ", ki = " + String(_iTerm) + ", kd = " + String(-_kd * dInput));
+        //Serial.println("kp = " + String(_kp * error) + ", ki = " + String(_iTerm) + ", kd = " + String(-_kd * dInput));
 
         float output = _kp * error + _iTerm - _kd * dInput;
         
