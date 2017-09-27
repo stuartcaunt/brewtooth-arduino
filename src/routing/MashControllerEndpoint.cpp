@@ -33,8 +33,9 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
 
      _server->onPathParam<int>("/controllers/{id}/state", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlState, this, _1));
-    _server->onPathParam<int>("/controllers/{id}/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, true));
-    _server->onPathParam<int>("/controllers/{id}/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlActive, this, _1, false));
+    _server->onPathParam<int, float>("/controllers/{id}/start/{setpoint}", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::startTemperatureControlWithSetpoint, this, _1, _2));
+    _server->onPathParam<int>("/controllers/{id}/start", HTTPMethod::HTTP_POST, std::bind(&MashControllerEndpoint::startTemperatureControlWithProfile, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::stopTemperatureControl, this, _1));
     _server->onPathParam<int>("/controllers/{id}/autotune/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAutoTuneActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/autotune/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAutoTuneActive, this, _1, false));
     _server->onPathParam<int>("/controllers/{id}/automatic", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, true));
@@ -362,23 +363,73 @@ void MashControllerEndpoint::getTemperatureControlState(int id) {
     }
 }
 
-void MashControllerEndpoint::setTemperatureControlActive(int id, bool active) {
-    LOG("Setting temperature control active = %s for mashController id = %d", active ? "true" : "false", id);
+void MashControllerEndpoint::startTemperatureControlWithSetpoint(int id, float setpointC) {
+    LOG("Starting temperature control for mashController id = %d: setpoint = %d", id, int(setpointC));
     
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
-        if (active) {
-            mashController->startTemperatureControl();
-
-        } else {
-            mashController->stopTemperatureControl();
-        }
+        mashController->setSetpointC(setpointC);
+        mashController->startTemperatureControl(ControlType::Setpoint);
 
         const TemperatureControlState state = mashController->getTemperatureControlState();
         _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
         
     } else {
-        WARN("Cannot start/stop temperature control for mashController : mashController with Id = %d does not exist", id);
+        WARN("Cannot start temperature control for mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::startTemperatureControlWithProfile(int id) {
+    LOG("Starting temperature control for mashController id = %d with profile", id);
+    
+    if (_server->hasArg("plain")) {
+        String jsonText = _server->arg("plain");
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & json = jsonBuffer.parseObject(jsonText);
+
+        if (json.success()) {
+            MashController * mashController = MashControllerService::_()->get(id);
+            if (mashController != NULL) {
+
+                // Convert json to Temperature profile
+                TemperatureProfile temperatureProfile(json);
+
+                mashController->setTemperatureProfile(temperatureProfile);
+                mashController->startTemperatureControl(ControlType::Profile);
+        
+                const TemperatureControlState state = mashController->getTemperatureControlState();
+                _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+                
+            } else {
+                WARN("Cannot start temperature control for mashController : mashController with Id = %d does not exist", id);
+                _server->send(404, "text/plain", "MashController not found");
+            }
+        
+        } else {
+            ERROR("Failed to parse JSON data");
+            _server->send(400, "text/plain", "Failed to parse JSON data");
+        }
+
+    } else {
+        ERROR("Body not received");
+        _server->send(400, "text/plain", "Body not received");
+        return;
+    }
+}
+
+void MashControllerEndpoint::stopTemperatureControl(int id) {
+    LOG("Stopping temperature control for mashController id = %d", id);
+    
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        mashController->stopTemperatureControl();
+
+        const TemperatureControlState state = mashController->getTemperatureControlState();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+        
+    } else {
+        WARN("Cannot stop temperature control for mashController : mashController with Id = %d does not exist", id);
         _server->send(404, "text/plain", "MashController not found");
     }
 }

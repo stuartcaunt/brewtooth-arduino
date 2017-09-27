@@ -132,7 +132,15 @@ public:
         return _state.setpointC;
     }
 
-    void startTemperatureControl();
+    void setTemperatureProfile(TemperatureProfile temperatureProfile) {
+        _state.temperatureProfile = temperatureProfile;
+    }
+    
+    TemperatureProfile getTemperatureProfile() const {
+        return _state.temperatureProfile;
+    }
+
+    void startTemperatureControl(ControlType controlType);
     void stopTemperatureControl();
 
     void startAutoTune();

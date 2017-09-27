@@ -210,7 +210,7 @@ void MashController::setPIDParams(const PIDParams & pidParams) {
     this->setTunings(pidParams.kp, pidParams.ki, pidParams.kd);
 }
 
-void MashController::startTemperatureControl() {
+void MashController::startTemperatureControl(ControlType controlType) {
     if (_state.autoTuning) {
         LOG("Cannot start temperature control when autotuning is in progress");
         return;
@@ -223,7 +223,8 @@ void MashController::startTemperatureControl() {
 
     if (_heater != NULL) {
         // create temperature controller
-        LOG("Creating new temperature controller with control mode = %s", _config.autoControl ? "AUTOMATIC" : "MANUAL");
+        LOG("Starting temperature control with control mode = %s and control type %s", _config.autoControl ? "AUTOMATIC" : "MANUAL", toString(controlType).c_str());
+        _state.setControlType(controlType);
         _state.controllerOutput = 0.0;
         _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd);
         _temperatureController->setOutputLimits(0.0, _config.pidParams.outputMax);
@@ -232,6 +233,12 @@ void MashController::startTemperatureControl() {
         _state.running = true;
         _startTimeMs = millis();
         _state.runTimeMs = 0;
+
+        // start the profile
+        if (controlType == ControlType::Profile) {
+            _state.temperatureC = _state.temperatureProfile.start(_startTimeMs, _state.temperatureC);
+        }
+
         _temperatureController->setSampleTime(_state.sampleTimeMs);
 
     } else {
@@ -252,6 +259,11 @@ void MashController::stopTemperatureControl() {
     this->setHeaterActive(false);
     _state.running = false;
     _state.runTimeMs = 0;
+
+    // stop the profile
+    if (_state.controlType == ControlType::Profile) {
+        _state.temperatureProfile.stop();
+    }
 }
 
 void MashController::setAutoTemperatureControl(bool isAuto) {
@@ -289,6 +301,7 @@ void MashController::startAutoTune() {
         _state.autoTuning = true;
         _startTimeMs = millis();
         _state.runTimeMs = 0;
+        _state.controlType = ControlType::Setpoint;
         _temperatureController->setSampleTime(_state.sampleTimeMs);
 
         // Create auto tuner
@@ -338,9 +351,16 @@ void MashController::update() {
             _windowStartTimeMs += _config.windowSizeMs;
         }
         
-        if (_state.running && _config.autoControl) {
-            _temperatureController->compute();
-        
+        if (_state.running) {
+            // Update the profile
+            if (_state.controlType == ControlType::Profile) {
+                _state.setpointC = _state.temperatureProfile.update(timeMs, _state.temperatureC);
+            }
+
+            if (_config.autoControl) {
+                _temperatureController->compute();
+            }
+
         } else if (_state.autoTuning) {
             // Update the autotune
             int  retVal = _autoTune->Runtime();
