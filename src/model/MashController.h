@@ -8,7 +8,7 @@
 class ThermometerWire;
 class Relay;
 class PID;
-class PID_ATune;
+class PIDAutoTune;
 
 #define WINDOW_SAMPLE_TIME_RATION 0.25
 
@@ -75,9 +75,9 @@ public:
 
     void setAutoTemperatureControl(bool isAuto);
     
-        bool isAutoTemperatureControl() const {
-            return _config.autoControl;
-        }
+    bool isAutoTemperatureControl() const {
+        return _config.autoControl;
+    }
     
     void addThermometer(ThermometerWire * thermometerWire) {
         _thermometerWires.push_back(thermometerWire);
@@ -159,7 +159,7 @@ private:
     Relay * _agitator;
 
     PID * _temperatureController;
-    PID_ATune * _autoTune;
+    PIDAutoTune * _autoTune;
     bool _isAutoTuning;
 
     TemperatureControlState _state;

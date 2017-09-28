@@ -2,6 +2,8 @@
 #include "PID.h"
 #include <Arduino.h>
 
+#define MAX_POINTS_FOR_DERIVATIVE 4
+
 PID::PID(float * input, float * output, float * setpoint, float Kp, float Ki, float Kd) :
     _output(output),
     _input(input),
@@ -36,7 +38,7 @@ bool PID::compute() {
         }
 
         _lastInputs.push_back(input);
-        while (_lastInputs.size() > 5) {
+        while (_lastInputs.size() > MAX_POINTS_FOR_DERIVATIVE) {
             _lastInputs.pop_front();
         }
         float dInput = this->calculateDerivative();

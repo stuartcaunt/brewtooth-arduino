@@ -5,7 +5,7 @@
 #include <service/GPIOService.h>
 #include <utils/Log.h>
 #include <utils/PID.h>
-#include <utils/PID_AutoTune_v0.h>
+#include <utils/PIDAutoTune.h>
 
 MashController::MashController(const MashControllerConfig & config) :
     _config(config),
@@ -305,11 +305,11 @@ void MashController::startAutoTune() {
         _temperatureController->setSampleTime(_state.sampleTimeMs);
 
         // Create auto tuner
-        _autoTune = new PID_ATune((double *)&_state.temperatureC, (double *)&_state.controllerOutput);
-        _autoTune->SetControlType(1); // PID (not PI)
-        _autoTune->SetNoiseBand(0.1); // Noise on line : ignore noise less than this
-        _autoTune->SetOutputStep(0.5 * _config.pidParams.outputMax); // Step above and below initital output value
-        _autoTune->SetLookbackSec(30); // How far to look back
+        _autoTune = new PIDAutoTune(&_state.temperatureC, &_state.controllerOutput);
+        _autoTune->setControlType(1); // PID (not PI)
+        _autoTune->setNoiseBand(0.1); // Noise on line : ignore noise less than this
+        _autoTune->setOutputStep(0.5 * _config.pidParams.outputMax); // Step above and below initital output value
+        _autoTune->setLookbackSec(30); // How far to look back
 
     } else {
         LOG("Cannot start autotune since the heater is not configured");
@@ -357,25 +357,23 @@ void MashController::update() {
                 _state.setpointC = _state.temperatureProfile.update(0.001 * timeMs, _state.temperatureC);
             }
 
-            if (_config.autoControl) {
-                _temperatureController->compute();
-            }
+            _temperatureController->compute();
 
         } else if (_state.autoTuning) {
             // Update the autotune
-            int  retVal = _autoTune->Runtime();
+            int  retVal = _autoTune->runtime();
             if (retVal != 0) {
                 // Finished
-                double kp = _autoTune->GetKp();
-                double ki = _autoTune->GetKi();
-                double kd = _autoTune->GetKd();
+                float kp = _autoTune->getKp();
+                float ki = _autoTune->getKi();
+                float kd = _autoTune->getKd();
 
                 LOG("Finished autotuning");
                 
                 this->setTunings(kp, ki, kd);
 
                 // Stop autotune
-                _autoTune->Cancel();
+                _autoTune->cancel();
 
                 // And let`s kill it too
                 this->stopAutoTune();
@@ -391,7 +389,7 @@ void MashController::update() {
         float outputFactor = float(_state.controllerOutput) / _config.pidParams.outputMax;
 
         bool activeHeater = outputFactor >= windowFactor;
-        if (this->isHeaterActive() != activeHeater) {
+        if (this->isHeaterActive() != activeHeater && _config.autoControl) {
             LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
