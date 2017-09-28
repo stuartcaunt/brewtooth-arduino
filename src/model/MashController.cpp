@@ -16,7 +16,7 @@ MashController::MashController(const MashControllerConfig & config) :
     _isAutoTuning(false) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
-    _state.runTimeMs = 0;
+    _state.runTimeS = 0.0;
     _state.outputMax = _config.pidParams.outputMax;
     _state.kp = _config.pidParams.kp;
     _state.ki = _config.pidParams.ki;
@@ -232,11 +232,11 @@ void MashController::startTemperatureControl(ControlType controlType) {
 
         _state.running = true;
         _startTimeMs = millis();
-        _state.runTimeMs = 0;
+        _state.runTimeS = 0.0;
 
         // start the profile
         if (controlType == ControlType::Profile) {
-            _state.temperatureC = _state.temperatureProfile.start(_startTimeMs, _state.temperatureC);
+            _state.temperatureC = _state.temperatureProfile.start(0.001 * _startTimeMs, _state.temperatureC);
         }
 
         _temperatureController->setSampleTime(_state.sampleTimeMs);
@@ -258,7 +258,7 @@ void MashController::stopTemperatureControl() {
 
     this->setHeaterActive(false);
     _state.running = false;
-    _state.runTimeMs = 0;
+    _state.runTimeS = 0.0;
 
     // stop the profile
     if (_state.controlType == ControlType::Profile) {
@@ -300,7 +300,7 @@ void MashController::startAutoTune() {
         
         _state.autoTuning = true;
         _startTimeMs = millis();
-        _state.runTimeMs = 0;
+        _state.runTimeS = 0.0;
         _state.controlType = ControlType::Setpoint;
         _temperatureController->setSampleTime(_state.sampleTimeMs);
 
@@ -330,7 +330,7 @@ void MashController::stopAutoTune() {
 
     this->setHeaterActive(false);
     _state.autoTuning = false;
-    _state.runTimeMs = 0;
+    _state.runTimeS = 0.0;
 }
 
 void MashController::update() {
@@ -354,7 +354,7 @@ void MashController::update() {
         if (_state.running) {
             // Update the profile
             if (_state.controlType == ControlType::Profile) {
-                _state.setpointC = _state.temperatureProfile.update(timeMs, _state.temperatureC);
+                _state.setpointC = _state.temperatureProfile.update(0.001 * timeMs, _state.temperatureC);
             }
 
             if (_config.autoControl) {
@@ -383,7 +383,7 @@ void MashController::update() {
         }
 
         // Update runtime
-        _state.runTimeMs = timeMs - _startTimeMs;
+        _state.runTimeS = float(timeMs - _startTimeMs) * 0.001;
         _state.windowSizeMs = _config.windowSizeMs;
     
         // Activate heater depending on controller output
@@ -392,7 +392,7 @@ void MashController::update() {
 
         bool activeHeater = outputFactor >= windowFactor;
         if (this->isHeaterActive() != activeHeater) {
-            LOG("%d : Changing heater state to %s, wf = %d, of = %d", _state.runTimeMs, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
+            LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
 

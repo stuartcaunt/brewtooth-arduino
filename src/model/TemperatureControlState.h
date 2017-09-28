@@ -21,7 +21,7 @@ public:
     TemperatureControlState() :
         running(false),
         autoTuning(false),
-        runTimeMs(0.0),
+        runTimeS(0.0),
         temperatureC(0.0),
         controlType(ControlType::Setpoint),
         setpointC(0.0),
@@ -41,9 +41,9 @@ public:
         this->controlType = controlType;
     }
 
-    void start(unsigned int timeMs, float temperatureC) {
+    void start(float timeS, float temperatureC) {
         if (controlType == ControlType::Profile) {
-            this->setpointC = temperatureProfile.start(timeMs, temperatureC);
+            this->setpointC = temperatureProfile.start(timeS, temperatureC);
         }
     }
 
@@ -53,21 +53,20 @@ public:
         }
     }
 
-    void update(unsigned int timeMs, float temperatureC) {
+    void update(float timeS, float temperatureC) {
         if (controlType == ControlType::Profile) {
-            this->setpointC = temperatureProfile.update(timeMs, temperatureC);
+            this->setpointC = temperatureProfile.update(timeS, temperatureC);
         }
     }
 
     virtual void convertToJson(JsonObject & json) const {
         json["running"] = running;
         json["autoTuning"] = autoTuning;
-        json["runTimeMs"] = runTimeMs;
+        json["runTimeS"] = runTimeS;
         json["temperatureC"] = temperatureC;
         json["controlType"] = toString(controlType);
-        if (controlType == ControlType::Setpoint) {
-            json["setpointC"] = setpointC;
-        } else {
+        json["setpointC"] = setpointC;
+        if (controlType == ControlType::Profile) {
             JsonObject & profileJson = json.createNestedObject("temperatureProfile");
             temperatureProfile.convertToJson(profileJson);
         }
@@ -87,7 +86,7 @@ public:
 public:
     bool running;
     bool autoTuning;
-    unsigned long runTimeMs;
+    float runTimeS;
     float temperatureC;
     ControlType controlType;
     float setpointC;

@@ -24,37 +24,37 @@ struct TemperatureLevel : public Jsonable {
         setpointC(0.0),
         durationS(0),
         timerS(0.0),
-        startTimeMs(0),
+        startTimeS(0),
         state(ProfileState::Inactive) {}
 
     TemperatureLevel(const JsonObject & json) :
         setpointC(json["setpointC"]),
         durationS(json["durationS"]),
         timerS(0.0),
-        startTimeMs(0),
+        startTimeS(0),
         state(ProfileState::Inactive) {}
 
     TemperatureLevel & operator=(const TemperatureLevel & rhs) {
         setpointC = rhs.setpointC;
         durationS = rhs.durationS;
         timerS = rhs.timerS;
-        startTimeMs = rhs.startTimeMs;
+        startTimeS = rhs.startTimeS;
         state = rhs.state;
     }
 
     void init() {
         timerS = 0.0;
-        startTimeMs = 0;
+        startTimeS = 0;
         state = ProfileState::Inactive;
     }
 
-    void start(unsigned int timeMs, float temperatureC) {
+    void start(float timeS, float temperatureC) {
         if (state == ProfileState::Inactive) {
             if (temperatureC < setpointC) {
                 state = ProfileState::Pending;
 
             } else {
-                startTimeMs = timeMs;
+                startTimeS = timeS;
                 state = ProfileState::Active;
             }
         }
@@ -64,15 +64,15 @@ struct TemperatureLevel : public Jsonable {
         state = ProfileState::Inactive;
     }
 
-    void update(unsigned int timeMs, float temperatureC) {
+    void update(float timeS, float temperatureC) {
         if (state == ProfileState::Pending) {
             if (temperatureC >= setpointC) {
                 state = ProfileState::Active;
-                startTimeMs = timeMs;
+                startTimeS = timeS;
             }
 
         } else if (state == ProfileState::Active) {
-            timerS = float(timeMs - startTimeMs) * 0.001;
+            timerS = timeS - startTimeS;
             if (timerS >= durationS) {
                 state = ProfileState::Terminated;
             }
@@ -83,28 +83,26 @@ struct TemperatureLevel : public Jsonable {
         json["setpointC"] = setpointC;
         json["durationS"] =durationS;
         json["timerS"] = timerS;
-        json["startTimeMs"] = startTimeMs;
+        json["startTimeS"] = startTimeS;
         json["state"] = toString(state);
     }
 
     float setpointC;
     float durationS;
     float timerS;
-    unsigned int startTimeMs;
+    float startTimeS;
     ProfileState state;
 };
     
 
 struct TemperatureProfile : public Jsonable {
     TemperatureProfile() :
-        startTimeMs(0),
-        currentTimeMs(0),
+        startTimeS(0),
+        currentTimeS(0),
         state(ProfileState::Inactive),
         activeLevel(-1) {}
 
     TemperatureProfile(const JsonObject & json) :
-        startTimeMs(json["startTimeMs"]),
-        currentTimeMs(json["currentTimeMs"]),
         state(ProfileState::Inactive),
         activeLevel(-1) {
 
@@ -118,13 +116,13 @@ struct TemperatureProfile : public Jsonable {
     }
 
     TemperatureProfile & operator=(const TemperatureProfile & rhs) {
-        startTimeMs = rhs.startTimeMs;
-        currentTimeMs = rhs.currentTimeMs;
+        startTimeS = rhs.startTimeS;
+        currentTimeS = rhs.currentTimeS;
         state = rhs.state;
         levels = rhs.levels;
     }
 
-    float start(unsigned int timeMs, float temperatureC) {
+    float start(float timeS, float temperatureC) {
         if (state != ProfileState::Inactive) {
             if (activeLevel >=0) {
                 TemperatureLevel & level = levels[activeLevel];
@@ -141,11 +139,11 @@ struct TemperatureProfile : public Jsonable {
 
         // Start first level
         state = ProfileState::Active;
-        startTimeMs = timeMs;
+        startTimeS = timeS;
 
         TemperatureLevel & level = levels[0];
         activeLevel = 0;
-        level.start(timeMs, temperatureC);
+        level.start(timeS, temperatureC);
         return level.setpointC;
     }
 
@@ -160,37 +158,42 @@ struct TemperatureProfile : public Jsonable {
         state = ProfileState::Inactive;
     }
 
-    float update(unsigned int timeMs, float temperatureC) {
+    float update(float timeS, float temperatureC) {
         if (activeLevel >= 0 && state != ProfileState::Terminated) {
-            currentTimeMs = timeMs;
+            currentTimeS = timeS;
 
-            TemperatureLevel & level = levels[activeLevel];
-            level.update(timeMs, temperatureC);
+            TemperatureLevel * level = &levels[activeLevel];
+            level->update(timeS, temperatureC);
 
             // Go to next state
-            if (level.state == ProfileState::Terminated) {
+            if (level->state == ProfileState::Terminated) {
                 activeLevel++;
 
                 if (activeLevel >= levels.size()) {
                     state = ProfileState::Terminated;
-                    activeLevel = levels.size() -1;
+                    activeLevel = levels.size() - 1;
 
                 } else {
-                    level = levels[activeLevel];
-                    level.start(timeMs, temperatureC);
+                    level = &levels[activeLevel];
+                    level->start(timeS, temperatureC);
                 }
             }
 
-            return level.setpointC;
-        } 
+            return level->setpointC;
+
+        } else if (activeLevel >= 0 && state == ProfileState::Terminated) {
+            // Return setpoint of last active level
+            TemperatureLevel * level = &levels[activeLevel];
+            return level->setpointC;
+        }
         
         return 0.0;
     }
 
     virtual void convertToJson(JsonObject & json) const {
-        json["startTimeMs"] = startTimeMs;
-        json["currentTimeMs"] = currentTimeMs;
-        json["state"] = state;
+        json["startTimeS"] = startTimeS;
+        json["currentTimeS"] = currentTimeS;
+        json["state"] = toString(state);
         
         JsonArray & array = json.createNestedArray("levels");
         for (std::vector<TemperatureLevel>::const_iterator it = levels.begin(); it != levels.end(); it++) {
@@ -201,8 +204,8 @@ struct TemperatureProfile : public Jsonable {
         }
     }
 
-    unsigned int startTimeMs;
-    unsigned int currentTimeMs;
+    float startTimeS;
+    float currentTimeS;
     ProfileState state;
     std::vector<TemperatureLevel> levels;
     int activeLevel;
