@@ -10,7 +10,7 @@
 #define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0
 
-#define DEBUG_WIFI_CONNECTION 1
+#define DEBUG_WIFI_CONNECTION 0
 
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 BrewtoothMashApp * mashApp = 0;
@@ -26,11 +26,8 @@ void setup(void){
     SPIFFS.begin();
     
     // Initialise configuration (reset if double reset detector activated)
-    Configuration::init(doubleResetDetector.detectDoubleReset());
-
-    // Create and setup mash controller
-    mashApp = new BrewtoothMashApp();
-    mashApp->setup();    
+    bool isDoubleReset = doubleResetDetector.detectDoubleReset();
+    Configuration::init(isDoubleReset);
     
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
@@ -38,7 +35,7 @@ void setup(void){
 #else
     // reset saved settings when double reset occurs
     WiFiManager wiFiManager;
-    if (doubleResetDetector.detectDoubleReset()) {
+    if (isDoubleReset) {
         LOG("Double Reset Detected: resetting wifi manager");
         wiFiManager.resetSettings();
     }
@@ -62,6 +59,12 @@ void setup(void){
 #endif
     
     LOG("... wifi setup terminated");
+
+    // Create and setup mash controller
+    mashApp = new BrewtoothMashApp();
+    mashApp->setup();
+
+    LOG("App running");
 }
 
 void loop(void){
