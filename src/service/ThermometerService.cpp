@@ -125,6 +125,8 @@ ThermometerWire * ThermometerService::update(const ThermometerWireConfig & therm
     // Check/acquire GPIO port
     thermometerWire->setPortIsValid(GPIOService::_()->acquire(thermometerWireConfig.port));
     if (thermometerWire->getPortIsValid()) {
+        GPIOService::_()->setPinMode(thermometerWire->getPort(), INPUT);
+        
         thermometerWire->init();
     } else {
         WARN("Thermometer \"%s\" has an invalid GPIO port", thermometerWire->getName().c_str(), thermometerWire->getPort());
@@ -226,7 +228,7 @@ float ThermometerService::getMeanTemperatureC() const {
 void ThermometerService::createDefaultThermometer() {
     ThermometerWireConfig defaultConfig;
     defaultConfig.id = 1;
-    defaultConfig.port = 9;
+    defaultConfig.port = 5;
     defaultConfig.name = "thermometerWire 0";
 
     this->add(defaultConfig);

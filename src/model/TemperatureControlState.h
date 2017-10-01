@@ -21,6 +21,7 @@ public:
     TemperatureControlState() :
         running(false),
         autoTuning(false),
+        currentTimeS(0.0),
         runTimeS(0.0),
         temperatureC(0.0),
         controlType(ControlType::Setpoint),
@@ -62,6 +63,7 @@ public:
     virtual void convertToJson(JsonObject & json) const {
         json["running"] = running;
         json["autoTuning"] = autoTuning;
+        json["currentTimeS"] = currentTimeS;
         json["runTimeS"] = runTimeS;
         json["temperatureC"] = temperatureC;
         json["controlType"] = toString(controlType);
@@ -86,6 +88,7 @@ public:
 public:
     bool running;
     bool autoTuning;
+    float currentTimeS;
     float runTimeS;
     float temperatureC;
     ControlType controlType;

@@ -16,7 +16,7 @@ struct GPIOPinConfig {
     GPIOPinState state;
 };
 
-#define NUMBER_OF_GPIO_PINS 17
+#define NUMBER_OF_GPIO_PINS 16
 
 struct GPIOConfig {
     GPIOConfig() {

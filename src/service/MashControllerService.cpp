@@ -306,13 +306,13 @@ void MashControllerService::createDefaultMashController() {
     // Heater
     RelayConfig defaultHeater;
     defaultHeater.enabled = true;
-    defaultHeater.port = 4;
+    defaultHeater.port = 15;
     defaultConfig.heater = defaultHeater;
 
     // Agitator
     RelayConfig defaultAgitator;
-    defaultHeater.enabled = false;
-    defaultHeater.port = 5;
+    defaultAgitator.enabled = false;
+    defaultAgitator.port = 14;
     defaultConfig.agitator = defaultAgitator;
 
     this->add(defaultConfig);

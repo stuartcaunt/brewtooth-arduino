@@ -16,6 +16,7 @@ MashController::MashController(const MashControllerConfig & config) :
     _isAutoTuning(false) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
+    _state.currentTimeS = 0.0;
     _state.runTimeS = 0.0;
     _state.outputMax = _config.pidParams.outputMax;
     _state.kp = _config.pidParams.kp;
@@ -339,6 +340,8 @@ void MashController::update() {
     _state.loopMs = timeMs - _lastTimeMs;
     _lastTimeMs = timeMs;
 
+    _state.currentTimeS = 0.001 * timeMs;
+
     // Get mean temperature from thermometer wires
     _state.temperatureC = this->getMeanTemperatureC();
     DEBUG("Got average temperature of %d with %d valid thermometerWires", (int)_state.temperatureC, count);
@@ -393,6 +396,7 @@ void MashController::update() {
             LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
-
     }
+
+    // Write data to file
 }

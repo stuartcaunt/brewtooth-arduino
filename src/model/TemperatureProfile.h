@@ -103,14 +103,12 @@ struct TemperatureLevel : public Jsonable {
 struct TemperatureProfile : public Jsonable {
     TemperatureProfile() :
         startTimeS(0.0),
-        currentTimeS(0.0),
         toleranceC(0.0),
         state(ProfileState::Inactive),
         activeLevel(-1) {}
 
     TemperatureProfile(const JsonObject & json) :
         startTimeS(0.0),
-        currentTimeS(0.0),
         toleranceC(json["toleranceC"]),
         state(ProfileState::Inactive),
         activeLevel(-1) {
@@ -126,7 +124,6 @@ struct TemperatureProfile : public Jsonable {
 
     TemperatureProfile & operator=(const TemperatureProfile & rhs) {
         startTimeS = rhs.startTimeS;
-        currentTimeS = rhs.currentTimeS;
         toleranceC = rhs.toleranceC;
         state = rhs.state;
         levels = rhs.levels;
@@ -170,7 +167,6 @@ struct TemperatureProfile : public Jsonable {
 
     float update(float timeS, float temperatureC) {
         if (activeLevel >= 0 && state != ProfileState::Terminated) {
-            currentTimeS = timeS;
 
             TemperatureLevel * level = &levels[activeLevel];
             level->update(timeS, temperatureC);
@@ -202,7 +198,6 @@ struct TemperatureProfile : public Jsonable {
 
     virtual void convertToJson(JsonObject & json) const {
         json["startTimeS"] = startTimeS;
-        json["currentTimeS"] = currentTimeS;
         json["toleranceC"] = toleranceC;
         json["state"] = toString(state);
         
@@ -216,7 +211,6 @@ struct TemperatureProfile : public Jsonable {
     }
 
     float startTimeS;
-    float currentTimeS;
     float toleranceC;
     ProfileState state;
     std::vector<TemperatureLevel> levels;
