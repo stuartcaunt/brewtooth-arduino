@@ -263,7 +263,7 @@ Relay * MashControllerService::updateAgitator(unsigned int mashControllerId, con
     // Save current mashControllers
     this->save();
 
-    return mashController->getHeater();;
+    return mashController->getAgitator();;
 }
 
 void MashControllerService::addThermometers(MashController * mashController, const std::vector<unsigned int> & thermometerIds) {
@@ -312,7 +312,7 @@ void MashControllerService::createDefaultMashController() {
     // Agitator
     RelayConfig defaultAgitator;
     defaultAgitator.enabled = false;
-    defaultAgitator.port = 14;
+    defaultAgitator.port = 12;
     defaultConfig.agitator = defaultAgitator;
 
     this->add(defaultConfig);

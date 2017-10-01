@@ -54,6 +54,8 @@ void GPIOService::setPinMode(uint8_t port, uint8_t mode) {
     if (port < NUMBER_OF_GPIO_PINS) {
         pinMode(port, mode);
 
+        LOG("Setting GPIO port %d to %s", port, mode == INPUT ? "input" : "output");
+        
         GPIOPinConfig & config = _config.pins[port];
         config.state = (mode == OUTPUT) ? GPIOPinState::Output : GPIOPinState::Input;
     }

@@ -10,7 +10,7 @@
 #define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0
 
-#define DEBUG_WIFI_CONNECTION 0
+#define DEBUG_WIFI_CONNECTION 1
 
 DoubleResetDetector doubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 BrewtoothMashApp * mashApp = 0;
