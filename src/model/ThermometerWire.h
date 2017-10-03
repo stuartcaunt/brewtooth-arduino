@@ -40,11 +40,11 @@ public:
         _config.name = name;
     }
 
-    unsigned int getPort() const {
+    uint8_t getPort() const {
         return _config.port;
     }
 
-    void setPort(unsigned int port) {
+    void setPort(uint8_t port) {
         _config.port = port;
     }
 

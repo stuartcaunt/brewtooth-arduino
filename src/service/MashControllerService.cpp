@@ -283,14 +283,14 @@ void MashControllerService::addThermometers(MashController * mashController, con
 }
 
 void MashControllerService::setHeater(MashController * mashController, const RelayConfig & heater) {
-    LOG("Creating heater: enabled %s, port %d", heater.enabled ? "true" : "false", heater.port);
+    LOG("Creating heater: enabled %s, port %u", heater.enabled ? "true" : "false", heater.port);
     Relay * relay = new Relay(heater);
     LOG("Adding heater with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
     mashController->setHeater(relay);
 }
 
 void MashControllerService::setAgitator(MashController * mashController, const RelayConfig & agitator) {
-    LOG("Creating agitator: enabled %s, port %d", agitator.enabled ? "true" : "false", agitator.port);
+    LOG("Creating agitator: enabled %s, port %u", agitator.enabled ? "true" : "false", agitator.port);
     Relay * relay = new Relay(agitator);
     LOG("Adding agitator with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
     mashController->setAgitator(relay);

@@ -45,7 +45,7 @@ ThermometerService * ThermometerService::_() {
 }
 
 ThermometerWire * ThermometerService::add(const ThermometerWireConfig & thermometerWireConfig, bool save) {
-    LOG("Adding thermometerWire \"%s\", id = %d, port = %d ", thermometerWireConfig.name.c_str(), thermometerWireConfig.id, thermometerWireConfig.port);
+    LOG("Adding thermometerWire \"%s\", id = %d, port = %u ", thermometerWireConfig.name.c_str(), thermometerWireConfig.id, thermometerWireConfig.port);
     
     // Create a new Thermometer
     ThermometerWire * thermometerWire = new ThermometerWire(thermometerWireConfig);
@@ -99,7 +99,7 @@ ThermometerWire * ThermometerService::add(const ThermometerWireConfig & thermome
 }
 
 ThermometerWire * ThermometerService::update(const ThermometerWireConfig & thermometerWireConfig) {
-    LOG("Updating thermometerWire \"%s\", id = %d, port = %d ", thermometerWireConfig.name.c_str(), thermometerWireConfig.id, thermometerWireConfig.port);
+    LOG("Updating thermometerWire \"%s\", id = %d, port = %u", thermometerWireConfig.name.c_str(), thermometerWireConfig.id, thermometerWireConfig.port);
     
     // Check if it exist
     std::vector<ThermometerWire *>::iterator it = _thermometerWires.begin();
@@ -153,7 +153,7 @@ ThermometerWire * ThermometerService::get(unsigned int id) const {
     }
 
     ThermometerWire * temperatureReader = *it;
-    DEBUG("Got thermometerWire \"%s\", id = %d, port = %d ", temperatureReader->getName().c_str(), temperatureReader->getId(), temperatureReader->getPort());
+    DEBUG("Got thermometerWire \"%s\", id = %d, port = %u", temperatureReader->getName().c_str(), temperatureReader->getId(), temperatureReader->getPort());
     
     return temperatureReader;
 }

@@ -4,7 +4,7 @@
 bool Relay::setActive(bool active) {
     if (this->isEnabled() && this->getPortIsValid()) {
         if (_config.active != active) {
-            LOG("%s relay with port %d", active ? "Activating" : "Deactivating", this->getPort());
+            LOG("%s relay with port %u", active ? "Activating" : "Deactivating", this->getPort());
     
             digitalWrite(this->getPort(), active ? 1 : 0);
             _config.active = active;
@@ -13,6 +13,6 @@ bool Relay::setActive(bool active) {
         return true;
     }
 
-    LOG("Cannot activate/deactivate relay with port %d: enabled = %s, portValid = %s", this->getPort(), this->isEnabled() ? "true" : "false", this->getPortIsValid() ? "true" : "false");
+    LOG("Cannot activate/deactivate relay with port %u: enabled = %s, portValid = %s", this->getPort(), this->isEnabled() ? "true" : "false", this->getPortIsValid() ? "true" : "false");
     return false;
 }

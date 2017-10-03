@@ -31,7 +31,7 @@ void setup(void){
     
     // Create and setup mash controller
     mashApp = new BrewtoothMashApp();
-    mashApp->setup();    
+    mashApp->setup();
 
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");

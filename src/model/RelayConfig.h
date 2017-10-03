@@ -18,7 +18,6 @@ public:
         isPortValid(json["isValid"]) {}
 
     RelayConfig & operator=(const RelayConfig & rhs) {
-        Serial.println("copied relay");
         enabled = rhs.enabled;
         active = rhs.active;
         port = rhs.port;
@@ -35,7 +34,7 @@ public:
 public:
     bool enabled;
     bool active;
-    unsigned int port;
+    uint8_t port;
     bool isPortValid;
 };
 

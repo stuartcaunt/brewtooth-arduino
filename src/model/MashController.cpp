@@ -57,7 +57,7 @@ void MashController::setHeater(Relay * heater) {
                 _heater->setActive(false);
                 
             } else {
-                WARN("Heater for Mash Controller \"%s\" has an invalid GPIO port %d", this->getName().c_str(), _heater->getPort());
+                WARN("Heater for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _heater->getPort());
             }
         }
 
@@ -108,7 +108,7 @@ void MashController::setAgitator(Relay * agitator) {
                 _agitator->setActive(false);
 
             } else {
-                WARN("Agitator for Mash Controller \"%s\" has an invalid GPIO port %d", this->getName().c_str(), _agitator->getPort());
+                WARN("Agitator for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _agitator->getPort());
             }
         }
 

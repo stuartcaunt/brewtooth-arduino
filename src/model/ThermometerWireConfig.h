@@ -33,7 +33,7 @@ public:
     
 public:
     unsigned int id;
-    unsigned int port;
+    uint8_t port;
     String name;
     bool isPortValid;
 };

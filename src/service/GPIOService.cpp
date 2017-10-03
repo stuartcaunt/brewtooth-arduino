@@ -1,6 +1,6 @@
 #include "GPIOService.h"
-#include <utils/Log.h>
 #include <Arduino.h>
+#include <utils/Log.h>
 
 GPIOService * GPIOService::instance = 0;
 
@@ -54,7 +54,7 @@ void GPIOService::setPinMode(uint8_t port, uint8_t mode) {
     if (port < NUMBER_OF_GPIO_PINS) {
         pinMode(port, mode);
 
-        LOG("Setting GPIO port %d to %s", port, mode == INPUT ? "input" : "output");
+        LOG("Setting GPIO port");
         
         GPIOPinConfig & config = _config.pins[port];
         config.state = (mode == OUTPUT) ? GPIOPinState::Output : GPIOPinState::Input;
