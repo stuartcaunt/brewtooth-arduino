@@ -39,6 +39,23 @@ struct MashControllerConfig : public Jsonable {
         this->agitator = RelayConfig(agitatorJson);
     }
 
+    MashControllerConfig & operator=(const MashControllerConfig & rhs) {
+        Serial.println("Copying MashControllerConfig");
+        id = rhs.id;
+        name = rhs.name;
+        autoControl = rhs.autoControl;
+        windowSizeMs = rhs.windowSizeMs;
+
+        thermometerIds.clear();
+        for (std::vector<unsigned int>::const_iterator it = rhs.thermometerIds.begin(); it != rhs.thermometerIds.end(); it++) {
+            thermometerIds.push_back(*it);
+        }
+
+        pidParams = rhs.pidParams;
+        heater = rhs.heater;
+        agitator = rhs.agitator;
+    }
+
     void copyBasic(const MashControllerConfig & config) {
         name = config.name;
         autoControl = config.autoControl;

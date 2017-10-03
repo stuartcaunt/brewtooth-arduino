@@ -17,6 +17,14 @@ public:
         port(json["port"]),
         isPortValid(json["isValid"]) {}
 
+    RelayConfig & operator=(const RelayConfig & rhs) {
+        Serial.println("copied relay");
+        enabled = rhs.enabled;
+        active = rhs.active;
+        port = rhs.port;
+        isPortValid = rhs.isPortValid;
+    }
+
     virtual void convertToJson(JsonObject & json) const {
         json["enabled"] = enabled;
         json["active"] = active;

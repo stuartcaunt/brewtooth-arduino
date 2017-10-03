@@ -15,28 +15,6 @@ struct Properties {
     std::vector<MashControllerConfig> mashControllers;
 };
 
-// https://bblanchon.github.io/ArduinoJson/assistant/
-// {
-//     "thermometers": [
-//         {
-//             "id": 0,
-//             "port": 6,
-//             "name": "XXXXXXXXXXXXXXXXXXXX"
-//         },
-//         {
-//             "id": 1,
-//             "port": 1,
-//             "name": "XXXXXXXXXXXXXXXXXXXX"
-//         }
-//     ],
-//     "mashControllers": [
-//         {
-//             "id": 0,
-//             "name": "XXXXXXXXXXXXXXXXXXXX",
-//             "temperatureReaderIds": [0, 1]
-//         }
-//     ]
-// }
 #define PROPERTIES_FILE_NAME "application.properties"
 
 

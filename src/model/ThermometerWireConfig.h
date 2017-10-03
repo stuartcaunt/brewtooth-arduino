@@ -17,6 +17,13 @@ public:
         name(json["name"].as<String>()),
         isPortValid(json["isValid"]) {}
 
+    ThermometerWireConfig & operator=(const ThermometerWireConfig & rhs) {
+        id = rhs.id;
+        port = rhs.port;
+        name = rhs.name;
+        isPortValid = rhs.isPortValid;
+    }
+
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["port"] = port;

@@ -19,13 +19,12 @@ BrewtoothMashApp::~BrewtoothMashApp() {
 void BrewtoothMashApp::setup() {
     // Initialise mash controller service
     MashControllerService::init();
-
+    
     // Build server routes
     _router->buildRoutes();
     
     // start the server
     _server->begin();
-#include <utils/Log.h>
     LOG("HTTP server started");
 }
 

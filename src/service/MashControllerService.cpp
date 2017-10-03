@@ -86,7 +86,7 @@ MashController * MashControllerService::add(const MashControllerConfig & mashCon
     // Iterate over thermometers
     this->addThermometers(mashController, mashControllerConfig.thermometerIds);
 
-    // Handle heater and agitator
+    // // Handle heater and agitator
     this->setHeater(mashController, mashControllerConfig.heater);
     this->setAgitator(mashController, mashControllerConfig.agitator);
 
@@ -257,7 +257,7 @@ Relay * MashControllerService::updateAgitator(unsigned int mashControllerId, con
     // Obtain current mash controller
     MashController * mashController = *it;
 
-    // Set new heater
+    // Set new agitator
     this->setAgitator(mashController, relayConfig);
 
     // Save current mashControllers
@@ -323,7 +323,12 @@ void MashControllerService::save() {
 
     std::vector<MashControllerConfig> mashControllerConfigs;
     for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
-        mashControllerConfigs.push_back(*((*it)->getConfig()));
+        const MashControllerConfig * config = (*it)->getConfig();
+        // Copy 1 ?
+        MashControllerConfig copiedConfig;
+        copiedConfig = *config;
+        // COPY 2 ?
+        mashControllerConfigs.push_back(copiedConfig);
     }
 
     Configuration::properties.mashControllers = mashControllerConfigs;

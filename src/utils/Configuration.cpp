@@ -105,6 +105,9 @@ void Configuration::deserialize(char * json) {
         // Set first use to false
         properties.isFirstUse = false;
 
+        root.printTo(Serial);
+        
+
         // Deserialize temperature readers
         if (root.containsKey("thermometers")) {
             JsonArray & thermometerConfigs = root["thermometers"];
