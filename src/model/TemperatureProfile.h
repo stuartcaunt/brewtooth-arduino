@@ -28,6 +28,14 @@ struct TemperatureLevel : public Jsonable {
         startTimeS(0),
         state(ProfileState::Inactive) {}
 
+    TemperatureLevel(const TemperatureLevel & obj) :
+        setpointC(obj.setpointC),
+        toleranceC(obj.toleranceC),
+        durationS(obj.durationS),
+        timerS(obj.timerS),
+        startTimeS(obj.startTimeS),
+        state(obj.state) {}
+
     TemperatureLevel(const JsonObject & json) :
         setpointC(json["setpointC"]),
         toleranceC(0.0),
@@ -106,6 +114,18 @@ struct TemperatureProfile : public Jsonable {
         toleranceC(0.0),
         state(ProfileState::Inactive),
         activeLevel(-1) {}
+
+    TemperatureProfile(const TemperatureProfile & obj) :
+        startTimeS(obj.startTimeS),
+        toleranceC(obj.toleranceC),
+        state(obj.state),
+        activeLevel(obj.activeLevel) {
+        for (std::vector<TemperatureLevel>::const_iterator it = obj.levels.begin(); it != obj.levels.end(); it++) {
+            const TemperatureLevel & objLevel = *it;
+            TemperatureLevel level(objLevel);
+            levels.push_back(level);
+        }    
+    }
 
     TemperatureProfile(const JsonObject & json) :
         startTimeS(0.0),

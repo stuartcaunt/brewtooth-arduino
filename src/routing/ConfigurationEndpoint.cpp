@@ -10,7 +10,7 @@ void ConfigurationEndpoint::buildPaths() {
 }
 
 void ConfigurationEndpoint::getProperties() {
-    String jsonString  = Configuration::getPropertiesJsonString();
+    String jsonString  = Configuration::_()->getPropertiesJsonString();
 
     _server->send(200, "application/json", jsonString);
 }

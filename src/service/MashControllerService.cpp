@@ -28,8 +28,8 @@ void MashControllerService::init() {
 
         LOG("Initialising Mash Controller Service");
 
-        const std::vector<MashControllerConfig> & mashControllers = Configuration::properties.mashControllers;
-        bool isFirstUse = Configuration::properties.isFirstUse;
+        const std::vector<MashControllerConfig> & mashControllers = Configuration::_()->getProperties()->mashControllers;
+        bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
     
         if (isFirstUse) {
             LOG("Creating default mash controller");
@@ -324,16 +324,12 @@ void MashControllerService::save() {
     std::vector<MashControllerConfig> mashControllerConfigs;
     for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
         const MashControllerConfig * config = (*it)->getConfig();
-        // Copy 1 ?
-        MashControllerConfig copiedConfig;
-        copiedConfig = *config;
-        // COPY 2 ?
-        mashControllerConfigs.push_back(copiedConfig);
+        mashControllerConfigs.push_back(*config);
     }
 
-    Configuration::properties.mashControllers = mashControllerConfigs;
+    Configuration::_()->getProperties()->mashControllers = mashControllerConfigs;
 
-    Configuration::save();
+    Configuration::_()->save();
 }
 
 void MashControllerService::updateControllers() {

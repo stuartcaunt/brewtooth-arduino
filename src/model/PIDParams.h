@@ -10,6 +10,12 @@ struct PIDParams : public Jsonable {
         kd(1.0),
         outputMax(100) {}
 
+    PIDParams(const PIDParams & obj) :
+        kp(obj.kp),
+        ki(obj.ki),
+        kd(obj.kd),
+        outputMax(obj.outputMax) {}
+
     PIDParams(const JsonObject & json) :
         kp(json["kp"]),
         ki(json["ki"]),
@@ -22,6 +28,13 @@ struct PIDParams : public Jsonable {
         ki = rhs.ki;
         kd = rhs.kd;
         outputMax = rhs.outputMax;
+    }
+
+    void copyFromJson(const JsonObject & json)  {
+        kp = json["kp"];
+        ki = json["ki"];
+        kd =json["kd"];
+        outputMax =json["outputMax"];
     }
 
     virtual void convertToJson(JsonObject & json) const {

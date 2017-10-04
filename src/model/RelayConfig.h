@@ -11,6 +11,12 @@ public:
         port(0),
         isPortValid(false) {}
 
+    RelayConfig(const RelayConfig & obj) :
+        enabled(obj.enabled),
+        active(obj.active),
+        port(obj.port),
+        isPortValid(obj.isPortValid) {}
+
     RelayConfig(const JsonObject & json) :
         enabled(json["enabled"]),
         active(json["active"]),
@@ -24,6 +30,13 @@ public:
         isPortValid = rhs.isPortValid;
     }
 
+    void copyFromJson(const JsonObject & json) {
+        enabled = json["enabled"];
+        active = json["active"];
+        port = json["port"];
+        isPortValid = json["isValid"];
+    }
+    
     virtual void convertToJson(JsonObject & json) const {
         json["enabled"] = enabled;
         json["active"] = active;

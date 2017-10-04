@@ -3,10 +3,20 @@
 #include "Log.h"
 #include <FS.h>
 
-Properties Configuration::properties = Properties();
+Configuration * Configuration::_instance = NULL;
+
+void Configuration::initInstance(bool reset) {
+    if (_instance == NULL) {
+        _instance = new Configuration();
+        _instance->init(reset);
+    }
+}
+    
+Configuration * Configuration::_() {
+    return _instance;
+}
 
 void Configuration::init(bool reset) {
-    
     if (reset) {
         LOG("Resetting configuration");
         makeDefaultConfiguration();
@@ -66,7 +76,7 @@ void Configuration::convertPropertiesToJson(JsonObject & json) {
     JsonArray & thermometerConfigs = json.createNestedArray("thermometers");
     
     // iteratuer over temperature readers
-    for (std::vector<ThermometerWireConfig>::iterator it = properties.thermometers.begin(); it != properties.thermometers.end(); it++) {
+    for (std::vector<ThermometerWireConfig>::iterator it = _properties->thermometers.begin(); it != _properties->thermometers.end(); it++) {
         ThermometerWireConfig thermometerConfig = *it;
 
         LOG("Saving temperature reader \"%s\", id = %d, port = %d ", thermometerConfig.name.c_str(), thermometerConfig.id, thermometerConfig.port);
@@ -78,7 +88,7 @@ void Configuration::convertPropertiesToJson(JsonObject & json) {
     JsonArray & mashControllerConfigs = json.createNestedArray("mashControllers");
     
     // Iterate over mash controllers
-    for (std::vector<MashControllerConfig>::iterator it = properties.mashControllers.begin(); it != properties.mashControllers.end(); it++) {
+    for (std::vector<MashControllerConfig>::iterator it = _properties->mashControllers.begin(); it != _properties->mashControllers.end(); it++) {
         MashControllerConfig mashControllerConfig = *it;
 
         LOG("Saving mash controller \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
@@ -89,7 +99,10 @@ void Configuration::convertPropertiesToJson(JsonObject & json) {
 
 void Configuration::makeDefaultConfiguration() {
     LOG("Making defaut configuration");
-    properties = Properties();
+    if (_properties != NULL) {
+        delete _properties;
+    }
+    _properties = new Properties();
 
     save();
 }
@@ -102,8 +115,13 @@ void Configuration::deserialize(char * json) {
         ERROR("Failed to read JSON data");
 
     } else {
+        if (_properties != NULL) {
+            delete _properties;
+        }
+        _properties = new Properties();
+        
         // Set first use to false
-        properties.isFirstUse = false;
+        _properties->isFirstUse = false;
 
         root.printTo(Serial);
         
@@ -120,7 +138,7 @@ void Configuration::deserialize(char * json) {
                 ThermometerWireConfig thermometerConfig(thermometerConfigJson);
                 
                 // Add to vector of temperature readers
-                properties.thermometers.push_back(thermometerConfig);
+                _properties->thermometers.push_back(thermometerConfig);
 
                 LOG("Read temperature reader config \"%s\", id = %d, port = %d", thermometerConfig.name.c_str(), thermometerConfig.id, thermometerConfig.port);
             }
@@ -138,7 +156,7 @@ void Configuration::deserialize(char * json) {
                 MashControllerConfig mashControllerConfig(mashControllerConfigJson);
                 
                 // Add to vector of temperature readers
-                properties.mashControllers.push_back(mashControllerConfig);
+                _properties->mashControllers.push_back(mashControllerConfig);
                 
                 LOG("Read mash controller config \"%s\", id = %d", mashControllerConfig.name.c_str(), mashControllerConfig.id);
             }

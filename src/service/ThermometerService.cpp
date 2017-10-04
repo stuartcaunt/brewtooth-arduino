@@ -22,8 +22,8 @@ void ThermometerService::init() {
     if (instance == 0) {
         instance = new ThermometerService();
 
-        const std::vector<ThermometerWireConfig> & thermometerWires = Configuration::properties.thermometers;
-        bool isFirstUse = Configuration::properties.isFirstUse;
+        const std::vector<ThermometerWireConfig> & thermometerWires = Configuration::_()->getProperties()->thermometers;
+        bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
     
         LOG("Initialising Thermometer Service");
 
@@ -241,9 +241,9 @@ void ThermometerService::save() {
         thermometerWireConfigs.push_back(*((*it)->getConfig()));
     }
 
-    Configuration::properties.thermometers = thermometerWireConfigs;
+    Configuration::_()->getProperties()->thermometers = thermometerWireConfigs;
 
-    Configuration::save();
+    Configuration::_()->save();
 }
 
 void ThermometerService::readTemperatures() {

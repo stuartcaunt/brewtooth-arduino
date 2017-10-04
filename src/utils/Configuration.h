@@ -17,20 +17,33 @@ struct Properties {
 
 #define PROPERTIES_FILE_NAME "application.properties"
 
-
 class Configuration {
 public:
-    static void init(bool reset = false);
-    static void save();
-    static String getPropertiesJsonString();
-    
-    static Properties properties;
+    Configuration() :
+        _properties(new Properties()) {
+    }
+    virtual ~Configuration() {
+        delete _properties;
+        _properties = NULL;
+    }
+    static Configuration * _();
+    static void initInstance(bool reset = false);
+    void save();
+    String getPropertiesJsonString();
+
+    Properties * getProperties() const {
+        return _properties;
+    }
 
 private:
-    static void convertPropertiesToJson(JsonObject & json);
-    static void makeDefaultConfiguration();
-    static void deserialize(char * jsonBuffer);
-
+    void init(bool reset = false);
+    void convertPropertiesToJson(JsonObject & json);
+    void makeDefaultConfiguration();
+    void deserialize(char * jsonBuffer);
+    
+    static Configuration * _instance;
+    Properties * _properties;
+    
 };
 
 #endif /*CONFIGURATION_H*/

@@ -27,7 +27,7 @@ void setup(void){
     
     // Initialise configuration (reset if double reset detector activated)
     bool isDoubleReset = doubleResetDetector.detectDoubleReset();
-    Configuration::init(isDoubleReset);
+    Configuration::initInstance(isDoubleReset);
     
     // Create and setup mash controller
     mashApp = new BrewtoothMashApp();

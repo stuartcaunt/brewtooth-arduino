@@ -13,6 +13,19 @@ struct MashControllerConfig : public Jsonable {
         autoControl(true),
         windowSizeMs(20000) {}
 
+    MashControllerConfig(const MashControllerConfig & obj) :
+        id(obj.id),
+        name(obj.name),
+        autoControl(obj.autoControl),
+        windowSizeMs(obj.windowSizeMs),
+        pidParams(obj.pidParams),
+        heater(obj.heater),
+        agitator(obj.agitator) {
+            for (std::vector<unsigned int>::const_iterator it = obj.thermometerIds.begin(); it != obj.thermometerIds.end(); it++) {
+                thermometerIds.push_back(*it);
+            }
+        }
+
     MashControllerConfig(const JsonObject & json) :
         id(json["id"]),
         name(json["name"].as<String>()),
@@ -20,23 +33,23 @@ struct MashControllerConfig : public Jsonable {
         windowSizeMs(json["windowSizeMs"]) {
 
         // Thermometers
-        JsonArray & thermometerIds = json["thermometerIds"];
-        for (JsonArray::iterator it = thermometerIds.begin(); it != thermometerIds.end(); ++it) {
+        JsonArray & thermometerIdsJson = json["thermometerIds"];
+        for (JsonArray::iterator it = thermometerIdsJson.begin(); it != thermometerIdsJson.end(); ++it) {
             unsigned int readerId = *it;
-            this->thermometerIds.push_back(readerId);
+            thermometerIds.push_back(readerId);
         }
-
+        
         // PID Params
         JsonObject & pidJson = json["pidParams"];
-        this->pidParams = PIDParams(pidJson);
+        pidParams.copyFromJson(pidJson);
         
         // Heater
         JsonObject & heaterJson = json["heater"];
-        this->heater = RelayConfig(heaterJson);
-
+        agitator = RelayConfig(heaterJson);
+        
         // Agitator
         JsonObject & agitatorJson = json["agitator"];
-        this->agitator = RelayConfig(agitatorJson);
+        agitator = RelayConfig(agitatorJson);
     }
 
     MashControllerConfig & operator=(const MashControllerConfig & rhs) {

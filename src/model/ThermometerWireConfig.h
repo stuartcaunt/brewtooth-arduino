@@ -11,6 +11,12 @@ public:
         name(""),
         isPortValid(false) {}
 
+    ThermometerWireConfig(const ThermometerWireConfig & obj) :
+        id(obj.id),
+        port(obj.port),
+        name(obj.name),
+        isPortValid(obj.isPortValid) {}
+
     ThermometerWireConfig(const JsonObject & json) :
         id(json["id"]),
         port(json["port"]),
