@@ -1,7 +1,7 @@
 #include "ThermometerService.h"
 #include "GPIOService.h"
 #include <model/ThermometerWire.h>
-#include <utils/Configuration.h>
+// #include <utils/Configuration.h>
 #include <utils/Log.h>
 
 ThermometerService * ThermometerService::instance = 0;
@@ -22,21 +22,23 @@ void ThermometerService::init() {
     if (instance == 0) {
         instance = new ThermometerService();
 
-        const std::vector<ThermometerWireConfig> & thermometerWires = Configuration::_()->getProperties()->thermometers;
-        bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
+        instance->createDefaultThermometer();
+        
+        // const std::vector<ThermometerWireConfig> & thermometerWires = Configuration::_()->getProperties()->thermometers;
+        // bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
     
-        LOG("Initialising Thermometer Service");
+        // LOG("Initialising Thermometer Service");
 
-        if (isFirstUse) {
-            LOG("Creating default thermometerWire");
-            instance->createDefaultThermometer();
+        // if (isFirstUse) {
+        //     LOG("Creating default thermometerWire");
+        //     instance->createDefaultThermometer();
 
-        } else {
-            LOG("Adding configured thermometerWires");
-            for (std::vector<ThermometerWireConfig>::const_iterator it = thermometerWires.begin(); it != thermometerWires.end(); it++) {
-                instance->add(*it, false);
-            }
-        }
+        // } else {
+        //     LOG("Adding configured thermometerWires");
+        //     for (std::vector<ThermometerWireConfig>::const_iterator it = thermometerWires.begin(); it != thermometerWires.end(); it++) {
+        //         instance->add(*it, false);
+        //     }
+        // }
     }
 }
 
@@ -235,15 +237,15 @@ void ThermometerService::createDefaultThermometer() {
 }
 
 void ThermometerService::save() {
-    LOG("Saving configuration with current thermometerWires");
-    std::vector<ThermometerWireConfig> thermometerWireConfigs;
-    for (std::vector<ThermometerWire *>::iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
-        thermometerWireConfigs.push_back(*((*it)->getConfig()));
-    }
+    // LOG("Saving configuration with current thermometerWires");
+    // std::vector<ThermometerWireConfig> thermometerWireConfigs;
+    // for (std::vector<ThermometerWire *>::iterator it = _thermometerWires.begin(); it != _thermometerWires.end(); it++) {
+    //     thermometerWireConfigs.push_back(*((*it)->getConfig()));
+    // }
 
-    Configuration::_()->getProperties()->thermometers = thermometerWireConfigs;
+    // Configuration::_()->getProperties()->thermometers = thermometerWireConfigs;
 
-    Configuration::_()->save();
+    // Configuration::_()->save();
 }
 
 void ThermometerService::readTemperatures() {

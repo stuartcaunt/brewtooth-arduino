@@ -2,7 +2,7 @@
 #include "ThermometerService.h"
 #include <model/MashController.h>
 #include <model/Relay.h>
-#include <utils/Configuration.h>
+// #include <utils/Configuration.h>
 #include <utils/Log.h>
 
 MashControllerService * MashControllerService::instance = 0;
@@ -27,20 +27,21 @@ void MashControllerService::init() {
         instance = new MashControllerService();
 
         LOG("Initialising Mash Controller Service");
-
-        const std::vector<MashControllerConfig> & mashControllers = Configuration::_()->getProperties()->mashControllers;
-        bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
+        instance->createDefaultMashController();
+        
+        // const std::vector<MashControllerConfig> & mashControllers = Configuration::_()->getProperties()->mashControllers;
+        // bool isFirstUse = Configuration::_()->getProperties()->isFirstUse;
     
-        if (isFirstUse) {
-            LOG("Creating default mash controller");
-            instance->createDefaultMashController();
+        // if (isFirstUse) {
+        //     LOG("Creating default mash controller");
+        //     instance->createDefaultMashController();
 
-        } else {
-            LOG("Adding configured mash controllers");
-            for (std::vector<MashControllerConfig>::const_iterator it = mashControllers.begin(); it != mashControllers.end(); it++) {
-                instance->add(*it, false);
-            }
-        }
+        // } else {
+        //     LOG("Adding configured mash controllers");
+        //     for (std::vector<MashControllerConfig>::const_iterator it = mashControllers.begin(); it != mashControllers.end(); it++) {
+        //         instance->add(*it, false);
+        //     }
+        // }
     }
 }
 
@@ -283,14 +284,14 @@ void MashControllerService::addThermometers(MashController * mashController, con
 }
 
 void MashControllerService::setHeater(MashController * mashController, const RelayConfig & heater) {
-    LOG("Creating heater: enabled %s, port %u", heater.enabled ? "true" : "false", heater.port);
+    LOG("Creating heater: port %u", heater.port);
     Relay * relay = new Relay(heater);
     LOG("Adding heater with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
     mashController->setHeater(relay);
 }
 
 void MashControllerService::setAgitator(MashController * mashController, const RelayConfig & agitator) {
-    LOG("Creating agitator: enabled %s, port %u", agitator.enabled ? "true" : "false", agitator.port);
+    LOG("Creating agitator: port %u", agitator.port);
     Relay * relay = new Relay(agitator);
     LOG("Adding agitator with to mash controller \"%s\", id = %d", mashController->getName().c_str(), mashController->getId());
     mashController->setAgitator(relay);
@@ -305,31 +306,37 @@ void MashControllerService::createDefaultMashController() {
 
     // Heater
     RelayConfig defaultHeater;
-    defaultHeater.enabled = true;
     defaultHeater.port = 15;
     defaultConfig.heater = defaultHeater;
 
     // Agitator
     RelayConfig defaultAgitator;
-    defaultAgitator.enabled = false;
     defaultAgitator.port = 12;
     defaultConfig.agitator = defaultAgitator;
+
+    // PID Params
+    PIDParams pidParams;
+    pidParams.kp = 25;
+    pidParams.ki = 0.0001;
+    pidParams.kd = 1000.0;
+    pidParams.outputMax = 100.0;
+    defaultConfig.pidParams = pidParams;
 
     this->add(defaultConfig);
 }
 
 void MashControllerService::save() {
-    LOG("Saving configuration with current mash controllers");
+    // LOG("Saving configuration with current mash controllers");
 
-    std::vector<MashControllerConfig> mashControllerConfigs;
-    for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
-        const MashControllerConfig * config = (*it)->getConfig();
-        mashControllerConfigs.push_back(*config);
-    }
+    // std::vector<MashControllerConfig> mashControllerConfigs;
+    // for (std::vector<MashController *>::iterator it = _mashControllers.begin(); it != _mashControllers.end(); it++) {
+    //     const MashControllerConfig * config = (*it)->getConfig();
+    //     mashControllerConfigs.push_back(*config);
+    // }
 
-    Configuration::_()->getProperties()->mashControllers = mashControllerConfigs;
+    // Configuration::_()->getProperties()->mashControllers = mashControllerConfigs;
 
-    Configuration::_()->save();
+    // Configuration::_()->save();
 }
 
 void MashControllerService::updateControllers() {

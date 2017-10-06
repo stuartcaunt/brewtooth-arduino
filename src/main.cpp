@@ -4,7 +4,7 @@
 #include <DoubleResetDetector.h>
 #include <app/BrewtoothMashApp.h>
 #include <utils/WifiConnector.h>
-#include <utils/Configuration.h>
+// #include <utils/Configuration.h>
 #include <utils/Log.h>
 
 #define DRD_TIMEOUT 10
@@ -27,7 +27,7 @@ void setup(void){
     
     // Initialise configuration (reset if double reset detector activated)
     bool isDoubleReset = doubleResetDetector.detectDoubleReset();
-    Configuration::initInstance(isDoubleReset);
+    // Configuration::initInstance(isDoubleReset);
     
     // Create and setup mash controller
     mashApp = new BrewtoothMashApp();

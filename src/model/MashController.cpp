@@ -48,17 +48,15 @@ void MashController::setHeater(Relay * heater) {
     if (_heater != NULL) {
         
         // Try to get GPIO 
-        if (_heater->isEnabled()) {
-            _heater->setPortIsValid(GPIOService::_()->acquire(_heater->getPort()));
-            if (_heater->getPortIsValid()) {
-                GPIOService::_()->setPinMode(_heater->getPort(), OUTPUT);
-        
-                // Make inactive initially
-                _heater->setActive(false);
-                
-            } else {
-                WARN("Heater for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _heater->getPort());
-            }
+        _heater->setPortIsValid(GPIOService::_()->acquire(_heater->getPort()));
+        if (_heater->getPortIsValid()) {
+            GPIOService::_()->setPinMode(_heater->getPort(), OUTPUT);
+    
+            // Make inactive initially
+            _heater->setActive(false);
+            
+        } else {
+            WARN("Heater for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _heater->getPort());
         }
 
         // Update config
@@ -72,10 +70,8 @@ void MashController::setHeater(Relay * heater) {
 void MashController::deleteHeater() {
     if (_heater != NULL) {
         // Release GPIO
-        if (_heater->isEnabled()) {
-            _heater->setActive(false);
-            GPIOService::_()->release(_heater->getPort());
-        }
+        _heater->setActive(false);
+        GPIOService::_()->release(_heater->getPort());
 
         delete _heater;
         _heater = NULL;
@@ -99,17 +95,15 @@ void MashController::setAgitator(Relay * agitator) {
     if (_agitator != NULL) {
         
         // Try to get GPIO 
-        if (_agitator->isEnabled()) {
-            _agitator->setPortIsValid(GPIOService::_()->acquire(_agitator->getPort()));
-            if (_agitator->getPortIsValid()) {
-                GPIOService::_()->setPinMode(_agitator->getPort(), OUTPUT);
+        _agitator->setPortIsValid(GPIOService::_()->acquire(_agitator->getPort()));
+        if (_agitator->getPortIsValid()) {
+            GPIOService::_()->setPinMode(_agitator->getPort(), OUTPUT);
 
-                // Make inactive initially
-                _agitator->setActive(false);
+            // Make inactive initially
+            _agitator->setActive(false);
 
-            } else {
-                WARN("Agitator for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _agitator->getPort());
-            }
+        } else {
+            WARN("Agitator for Mash Controller \"%s\" has an invalid GPIO port %u", this->getName().c_str(), _agitator->getPort());
         }
 
         // Update config
@@ -123,10 +117,8 @@ void MashController::setAgitator(Relay * agitator) {
 void MashController::deleteAgitator() {
     if (this->_agitator != NULL) {
         // Release GPIO
-        if (_agitator->isEnabled()) {
-            _agitator->setActive(false);
-            GPIOService::_()->release(_agitator->getPort());
-        }
+        _agitator->setActive(false);
+        GPIOService::_()->release(_agitator->getPort());
 
         delete _agitator;
         _agitator = NULL;

@@ -6,46 +6,39 @@
 class RelayConfig : public Jsonable {
 public:
     RelayConfig() :
-        enabled(false),
         active(false),
         port(0),
         isPortValid(false) {}
 
     RelayConfig(const RelayConfig & obj) :
-        enabled(obj.enabled),
         active(obj.active),
         port(obj.port),
         isPortValid(obj.isPortValid) {}
 
     RelayConfig(const JsonObject & json) :
-        enabled(json["enabled"]),
         active(json["active"]),
         port(json["port"]),
         isPortValid(json["isValid"]) {}
 
     RelayConfig & operator=(const RelayConfig & rhs) {
-        enabled = rhs.enabled;
         active = rhs.active;
         port = rhs.port;
         isPortValid = rhs.isPortValid;
     }
 
     void copyFromJson(const JsonObject & json) {
-        enabled = json["enabled"];
         active = json["active"];
         port = json["port"];
         isPortValid = json["isValid"];
     }
     
     virtual void convertToJson(JsonObject & json) const {
-        json["enabled"] = enabled;
         json["active"] = active;
         json["port"] = port;
         json["isValid"] = isPortValid;
     }
 
 public:
-    bool enabled;
     bool active;
     uint8_t port;
     bool isPortValid;

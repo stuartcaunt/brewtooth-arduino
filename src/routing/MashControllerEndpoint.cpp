@@ -11,11 +11,11 @@ void MashControllerEndpoint::buildPaths() {
     LOG("Building paths for MashControllerEndpoint");
     using namespace std::placeholders;
     
-    _server->on("/controllers", HTTPMethod::HTTP_POST, std::bind(&MashControllerEndpoint::addMashController, this));
+    // _server->on("/controllers", HTTPMethod::HTTP_POST, std::bind(&MashControllerEndpoint::addMashController, this));
     _server->on("/controllers", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getMashControllers, this));
     _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getMashController, this, _1));
-    _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&MashControllerEndpoint::deleteMashController, this, _1));
-    _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateMashController, this, _1));
+    // _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_DELETE, std::bind(&MashControllerEndpoint::deleteMashController, this, _1));
+    // _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateMashController, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getPIDParams, this, _1));
     _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updatePIDParams, this, _1));
@@ -23,12 +23,12 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperature, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getHeater, this, _1));
-    _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateHeater, this, _1));
+    // _server->onPathParam<int>("/controllers/{id}/heater", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateHeater, this, _1));
     _server->onPathParam<int>("/controllers/{id}/heater/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setHeaterActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/heater/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setHeaterActive, this, _1, false));
     
     _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getAgitator, this, _1));
-    _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateAgitator, this, _1));
+    // _server->onPathParam<int>("/controllers/{id}/agitator", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateAgitator, this, _1));
     _server->onPathParam<int>("/controllers/{id}/agitator/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, true));
     _server->onPathParam<int>("/controllers/{id}/agitator/stop", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setAgitatorActive, this, _1, false));
 

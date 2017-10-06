@@ -14,14 +14,6 @@ public:
         return &_config;
     }
 
-    bool isEnabled() const {
-        return _config.enabled;
-    }
-
-    void setEnabled(bool enabled) {
-        _config.enabled = enabled;
-    }
-
     uint8_t getPort() const {
         return _config.port;
     }
