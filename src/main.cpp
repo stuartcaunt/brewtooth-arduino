@@ -28,10 +28,6 @@ void setup(void){
     // Initialise configuration (reset if double reset detector activated)
     bool isDoubleReset = doubleResetDetector.detectDoubleReset();
     // Configuration::initInstance(isDoubleReset);
-    
-    // Create and setup mash controller
-    mashApp = new BrewtoothMashApp();
-    mashApp->setup();
 
 #if (DEBUG_WIFI_CONNECTION == 1)
     WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
@@ -62,7 +58,11 @@ void setup(void){
     }
 #endif
     
-    LOG("... wifi setup terminated");
+LOG("... wifi setup terminated");
+    
+    // Create and setup mash controller
+    mashApp = new BrewtoothMashApp();
+    mashApp->setup();
 
     LOG("App running");
 }

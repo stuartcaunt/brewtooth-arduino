@@ -23,8 +23,12 @@ public:
     void onPathParam(const char* uri, HTTPMethod method, std::function<void(ParamA, ParamB)> fn) {
         _addRequestHandler(new DoublePathParameterFunctionRequestHandler<ParamA, ParamB>(fn, uri, method));
     }
-    
+
+    bool serveFile(const String & path, const String & cacheHeader = "");
+        
 private:
+    String getContentType(const String & path);
+        
 };
 
 #endif /*BREWTOOTHWEBSERVER_H*/

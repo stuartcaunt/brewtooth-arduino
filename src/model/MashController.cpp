@@ -17,7 +17,8 @@ MashController::MashController(const MashControllerConfig & config) :
     _isAutoTuning(false),
     _lastHistoryWriteTimeS(0.0),
     _historyWritePeriodS(10.0),
-    _historyFileName("StateHistory-" + String(config.id)) {
+    _historyFileName("StateHistory-" + String(config.id) + ".json"),
+    _isFirstWrite(true) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
     _state.currentTimeS = 0.0;
@@ -396,18 +397,27 @@ void MashController::update() {
             LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
-
-        // Write data to file
-        this->writeHistoryToFile();
     }
+
+    // Write data to file
+    this->writeHistoryToFile();
 }
 
 void MashController::writeHistoryToFile() {
 
-    if (_lastHistoryWriteTimeS + _historyWritePeriodS < _state.currentTimeS) {
+    if (_lastHistoryWriteTimeS + _historyWritePeriodS < _state.currentTimeS && (int)_state.currentTimeS % (int)_historyWritePeriodS == 0) {
         // Create history
         StateHistory history(_state);
 
+        if (_isFirstWrite) {
+            _historyFile.println("[");
+            _isFirstWrite = false;
+        
+        } else {
+            // Go back one character
+            _historyFile.seek(-1, SeekCur);
+            _historyFile.println(",");
+        }
         // Convert to json
         DynamicJsonBuffer jsonBuffer;
         JsonObject & json = jsonBuffer.createObject();
@@ -415,7 +425,10 @@ void MashController::writeHistoryToFile() {
     
         // Write to file
         json.printTo(_historyFile);
-
+        json.printTo(Serial);
+        
+        _historyFile.print("\n]");
+        
         // Update write time
         _lastHistoryWriteTimeS = _state.currentTimeS;
     }

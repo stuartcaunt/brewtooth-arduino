@@ -41,6 +41,7 @@ private:
     void getTemperatureControlSetpoint(int id);
     void setTemperatureControlSetpoint(int id, float setpointC);
 
+    void serveHistoryFile(int id);
 };
 
 #endif /*MASHCONTROLLERENDPOINT_H*/

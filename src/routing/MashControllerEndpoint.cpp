@@ -42,6 +42,8 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/manual", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, false));
     _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlSetpoint, this, _1));
     _server->onPathParam<int, float>("/controllers/{id}/setpoint/{setpoint}", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlSetpoint, this, _1, _2));
+
+    _server->onPathParam<int>("/controllers/{id}/history", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::serveHistoryFile, this, _1));
 }
     
 void MashControllerEndpoint::addMashController() {
@@ -499,4 +501,18 @@ void MashControllerEndpoint::setTemperatureControlSetpoint(int id, float setpoin
         _server->send(404, "text/plain", "MashController not found");
     }
 }
-    
+
+void MashControllerEndpoint::serveHistoryFile(int id) {
+    LOG("Serving history file from mashController id = %d", id);
+
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        const String & fileName = mashController->getHistoryFileName();
+
+        _server->serveFile(fileName);
+
+    } else {
+        WARN("Cannot get mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}

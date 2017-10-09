@@ -149,6 +149,10 @@ public:
 
     void update();
           
+    const String & getHistoryFileName() const {
+        return _historyFileName;
+    }
+
     virtual void convertToJson(JsonObject & json) const {
         _config.convertToJson(json);
     }
@@ -175,6 +179,7 @@ private:
     float _historyWritePeriodS;
     File _historyFile;
     String _historyFileName;
+    bool _isFirstWrite;
 };
 
 #endif /*MASHCONTROLLER_H*/
