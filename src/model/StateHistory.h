@@ -2,9 +2,11 @@
 #define STATEHISTORY_H
 
 #include "Jsonable.h"
+#include "TemperatureControlState.h"
 
 struct StateHistory : public Jsonable {
     StateHistory() {}
+    StateHistory(const TemperatureControlState & state) {}
     StateHistory(const StateHistory & obj) {}
     StateHistory(const JsonObject & json) {}
 

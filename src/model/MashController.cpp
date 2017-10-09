@@ -1,6 +1,7 @@
 #include "MashController.h"
 #include "ThermometerWire.h"
 #include "ThermometerWireData.h"
+#include "StateHistory.h"
 #include "Relay.h"
 #include <service/GPIOService.h>
 #include <utils/Log.h>
@@ -13,7 +14,10 @@ MashController::MashController(const MashControllerConfig & config) :
     _agitator(NULL),
     _temperatureController(NULL),
     _autoTune(NULL),
-    _isAutoTuning(false) {
+    _isAutoTuning(false),
+    _lastHistoryWriteTimeS(0.0),
+    _historyWritePeriodS(10.0),
+    _historyFileName("StateHistory-" + String(config.id)) {
 
     _windowStartTimeMs = _lastTimeMs = millis();
     _state.currentTimeS = 0.0;
@@ -24,6 +28,8 @@ MashController::MashController(const MashControllerConfig & config) :
     _state.kd = _config.pidParams.kd;
     _state.windowSizeMs = _config.windowSizeMs;
     _state.sampleTimeMs = WINDOW_SAMPLE_TIME_RATION * _config.windowSizeMs;
+
+    _historyFile = SPIFFS.open(_historyFileName, "w");
 }
 
 MashController::~MashController() {
@@ -39,6 +45,8 @@ MashController::~MashController() {
         delete _autoTune;
         _autoTune = NULL;
     }
+
+    _historyFile.close();
 }
 
 void MashController::setHeater(Relay * heater) {
@@ -388,7 +396,28 @@ void MashController::update() {
             LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }
-    }
 
-    // Write data to file
+        // Write data to file
+        this->writeHistoryToFile();
+    }
 }
+
+void MashController::writeHistoryToFile() {
+
+    if (_lastHistoryWriteTimeS + _historyWritePeriodS < _state.currentTimeS) {
+        // Create history
+        StateHistory history(_state);
+
+        // Convert to json
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & json = jsonBuffer.createObject();
+        history.convertToJson(json);
+    
+        // Write to file
+        json.printTo(_historyFile);
+
+        // Update write time
+        _lastHistoryWriteTimeS = _state.currentTimeS;
+    }
+}
+

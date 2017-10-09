@@ -4,6 +4,7 @@
 #include "MashControllerConfig.h"
 #include "ThermometerWireData.h"
 #include "TemperatureControlState.h"
+#include <FS.h>
 
 class ThermometerWire;
 class Relay;
@@ -153,6 +154,9 @@ public:
     }
   
 private:
+    void writeHistoryToFile();
+
+private:
     MashControllerConfig _config;
     std::vector<ThermometerWire *> _thermometerWires;
     Relay * _heater;
@@ -166,6 +170,11 @@ private:
     unsigned long _lastTimeMs;
     unsigned long _startTimeMs;
     unsigned long _windowStartTimeMs;
+
+    float _lastHistoryWriteTimeS;
+    float _historyWritePeriodS;
+    File _historyFile;
+    String _historyFileName;
 };
 
 #endif /*MASHCONTROLLER_H*/
