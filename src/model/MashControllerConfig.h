@@ -53,7 +53,6 @@ struct MashControllerConfig : public Jsonable {
     }
 
     MashControllerConfig & operator=(const MashControllerConfig & rhs) {
-        Serial.println("Copying MashControllerConfig");
         id = rhs.id;
         name = rhs.name;
         autoControl = rhs.autoControl;
