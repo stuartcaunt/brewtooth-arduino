@@ -335,6 +335,21 @@ void MashController::stopAutoTune() {
     _state.runTimeS = 0.0;
 }
 
+void MashController::startTemperatureControlProfileLevel() {
+    if (_state.running && _state.controlType == ControlType::Profile) {
+        unsigned long timeMs = millis();
+        float currentTimeS = 0.001 * timeMs;
+    
+        _state.temperatureProfile.startPendingLevel(currentTimeS);
+    }
+}
+
+void MashController::skipTemperatureControlProfileLevel() {
+    if (_state.running && _state.controlType == ControlType::Profile) {
+        _state.temperatureProfile.terminateCurrentLevel();
+    }
+}
+
 void MashController::update() {
     // Update loop timing
     unsigned long timeMs = millis();
@@ -425,7 +440,6 @@ void MashController::writeHistoryToFile() {
     
         // Write to file
         json.printTo(_historyFile);
-        json.printTo(Serial);
         
         _historyFile.print("\n]");
         

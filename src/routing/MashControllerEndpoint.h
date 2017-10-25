@@ -41,6 +41,9 @@ private:
     void getTemperatureControlSetpoint(int id);
     void setTemperatureControlSetpoint(int id, float setpointC);
 
+    void startTemperatureControlProfileLevel(int id);
+    void skipTemperatureControlProfileLevel(int id);
+     
     void serveHistoryFile(int id);
 };
 

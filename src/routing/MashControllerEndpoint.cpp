@@ -42,7 +42,9 @@ void MashControllerEndpoint::buildPaths() {
     _server->onPathParam<int>("/controllers/{id}/manual", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlAutomatic, this, _1, false));
     _server->onPathParam<int>("/controllers/{id}/setpoint", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperatureControlSetpoint, this, _1));
     _server->onPathParam<int, float>("/controllers/{id}/setpoint/{setpoint}", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::setTemperatureControlSetpoint, this, _1, _2));
-
+    _server->onPathParam<int>("/controllers/{id}/profile/start", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::startTemperatureControlProfileLevel, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/profile/skip", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::skipTemperatureControlProfileLevel, this, _1));
+    
     _server->onPathParam<int>("/controllers/{id}/history", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::serveHistoryFile, this, _1));
 }
     
@@ -269,7 +271,8 @@ void MashControllerEndpoint::setHeaterActive(int id, bool active) {
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
         if (mashController->setHeaterActive(active)) {
-            _server->send(200, "application/json", JsonStringBuilder::jsonString(mashController->getHeater()).c_str());
+            const TemperatureControlState state = mashController->getTemperatureControlState();
+            _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
             
         } else {
             WARN("Cannot activate/deactivate heater for mashController with Id = %d", id);
@@ -338,7 +341,8 @@ void MashControllerEndpoint::setAgitatorActive(int id, bool active) {
     MashController * mashController = MashControllerService::_()->get(id);
     if (mashController != NULL) {
         if (mashController->setAgitatorActive(active)) {
-            _server->send(200, "application/json", JsonStringBuilder::jsonString(mashController->getAgitator()).c_str());
+            const TemperatureControlState state = mashController->getTemperatureControlState();
+            _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
             
         } else {
             WARN("Cannot activate/deactivate agitator for mashController with Id = %d", id);
@@ -513,6 +517,38 @@ void MashControllerEndpoint::serveHistoryFile(int id) {
 
     } else {
         WARN("Cannot get mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::startTemperatureControlProfileLevel(int id) {
+    LOG("start temperature profile level for mashController id = %d", id);
+       
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        mashController->startTemperatureControlProfileLevel();
+
+        const TemperatureControlState state = mashController->getTemperatureControlState();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+        
+    } else {
+        WARN("Cannot start temperature control profile level for mashController : mashController with Id = %d does not exist", id);
+        _server->send(404, "text/plain", "MashController not found");
+    }
+}
+
+void MashControllerEndpoint::skipTemperatureControlProfileLevel(int id) {
+    LOG("skip temperature profile level for mashController id = %d", id);
+       
+    MashController * mashController = MashControllerService::_()->get(id);
+    if (mashController != NULL) {
+        mashController->skipTemperatureControlProfileLevel();
+
+        const TemperatureControlState state = mashController->getTemperatureControlState();
+        _server->send(200, "application/json", JsonStringBuilder::jsonString(&state).c_str());
+        
+    } else {
+        WARN("Cannot start temperature control profile level for mashController : mashController with Id = %d does not exist", id);
         _server->send(404, "text/plain", "MashController not found");
     }
 }

@@ -21,6 +21,7 @@ inline String toString(ProfileState state) {
 
 struct TemperatureLevel : public Jsonable {
     TemperatureLevel() :
+        name(""),
         setpointC(0.0),
         toleranceC(0.0),
         durationS(0),
@@ -29,6 +30,7 @@ struct TemperatureLevel : public Jsonable {
         state(ProfileState::Inactive) {}
 
     TemperatureLevel(const TemperatureLevel & obj) :
+        name(obj.name),
         setpointC(obj.setpointC),
         toleranceC(obj.toleranceC),
         durationS(obj.durationS),
@@ -37,6 +39,7 @@ struct TemperatureLevel : public Jsonable {
         state(obj.state) {}
 
     TemperatureLevel(const JsonObject & json) :
+        name(json["name"].as<String>()),
         setpointC(json["setpointC"]),
         toleranceC(0.0),
         durationS(json["durationS"]),
@@ -45,6 +48,7 @@ struct TemperatureLevel : public Jsonable {
         state(ProfileState::Inactive) {}
 
     TemperatureLevel & operator=(const TemperatureLevel & rhs) {
+        name = rhs.name;
         setpointC = rhs.setpointC;
         toleranceC = rhs.toleranceC;
         durationS = rhs.durationS;
@@ -91,7 +95,19 @@ struct TemperatureLevel : public Jsonable {
         }
     }
 
+    void forceActiveIfPending(float timeS) {
+        if (state == ProfileState::Pending) {
+            state = ProfileState::Active;
+            startTimeS = timeS;
+        }
+    }
+
+    void forceTerminated() {
+        state = ProfileState::Terminated;
+    }
+        
     virtual void convertToJson(JsonObject & json) const {
+        json["name"] = name;
         json["setpointC"] = setpointC;
         json["durationS"] =durationS;
         json["timerS"] = timerS;
@@ -99,6 +115,7 @@ struct TemperatureLevel : public Jsonable {
         json["state"] = toString(state);
     }
 
+    String name;
     float setpointC;
     float toleranceC;
     float durationS;
@@ -185,6 +202,20 @@ struct TemperatureProfile : public Jsonable {
         state = ProfileState::Inactive;
     }
 
+    void startPendingLevel(float timeS) {
+        if (activeLevel >= 0 && state != ProfileState::Terminated) {
+            TemperatureLevel * level = &levels[activeLevel];
+            level->forceActiveIfPending(timeS);
+        }
+    }
+
+    void terminateCurrentLevel() {
+        if (activeLevel >= 0 && state != ProfileState::Terminated) {
+            TemperatureLevel * level = &levels[activeLevel];
+            level->forceTerminated();
+        }
+    }
+        
     float update(float timeS, float temperatureC) {
         if (activeLevel >= 0 && state != ProfileState::Terminated) {
 

@@ -147,6 +147,9 @@ public:
     void startAutoTune();
     void stopAutoTune();
 
+    void startTemperatureControlProfileLevel();
+    void skipTemperatureControlProfileLevel();
+
     void update();
           
     const String & getHistoryFileName() const {
