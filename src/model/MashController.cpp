@@ -225,12 +225,12 @@ void MashController::startTemperatureControl(ControlType controlType) {
 
     if (_heater != NULL) {
         // create temperature controller
-        LOG("Starting temperature control with control mode = %s and control type %s", _config.autoControl ? "AUTOMATIC" : "MANUAL", toString(controlType).c_str());
+        LOG("Starting temperature control with control type %s", toString(controlType).c_str());
         _state.setControlType(controlType);
         _state.controllerOutput = 0.0;
         _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd);
         _temperatureController->setOutputLimits(0.0, _config.pidParams.outputMax);
-        this->setAutoTemperatureControl(_config.autoControl);
+        this->setAutoTemperatureControl(true);
 
         _state.running = true;
         _startTimeMs = millis();
@@ -259,6 +259,7 @@ void MashController::stopTemperatureControl() {
     }
 
     this->setHeaterActive(false);
+    this->setAutoTemperatureControl(false);
     _state.running = false;
     _state.runTimeS = 0.0;
 
@@ -269,7 +270,7 @@ void MashController::stopTemperatureControl() {
 }
 
 void MashController::setAutoTemperatureControl(bool isAuto) {
-    _config.autoControl = _state.autoControl = isAuto;
+    _state.autoControl = isAuto;
 
     // Set temperature controller to auto or manual
     if (_temperatureController != NULL) {
@@ -408,7 +409,7 @@ void MashController::update() {
         float outputFactor = float(_state.controllerOutput) / _config.pidParams.outputMax;
 
         bool activeHeater = outputFactor >= windowFactor;
-        if (this->isHeaterActive() != activeHeater && _config.autoControl) {
+        if (this->isHeaterActive() != activeHeater && _state.autoControl) {
             LOG("%d : Changing heater state to %s, wf = %d, of = %d", (int)_state.runTimeS, activeHeater ? "active" : "inactive", (int)(windowFactor * 100), (int)(outputFactor * 100));
             this->setHeaterActive(activeHeater);
         }

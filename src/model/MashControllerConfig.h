@@ -10,13 +10,11 @@ struct MashControllerConfig : public Jsonable {
     MashControllerConfig() :
         id(0),
         name(""),
-        autoControl(true),
         windowSizeMs(20000) {}
 
     MashControllerConfig(const MashControllerConfig & obj) :
         id(obj.id),
         name(obj.name),
-        autoControl(obj.autoControl),
         windowSizeMs(obj.windowSizeMs),
         pidParams(obj.pidParams),
         heater(obj.heater),
@@ -29,7 +27,6 @@ struct MashControllerConfig : public Jsonable {
     MashControllerConfig(const JsonObject & json) :
         id(json["id"]),
         name(json["name"].as<String>()),
-        autoControl(json["autoControl"]),
         windowSizeMs(json["windowSizeMs"]) {
 
         // Thermometers
@@ -55,7 +52,6 @@ struct MashControllerConfig : public Jsonable {
     MashControllerConfig & operator=(const MashControllerConfig & rhs) {
         id = rhs.id;
         name = rhs.name;
-        autoControl = rhs.autoControl;
         windowSizeMs = rhs.windowSizeMs;
 
         thermometerIds.clear();
@@ -70,7 +66,6 @@ struct MashControllerConfig : public Jsonable {
 
     void copyBasic(const MashControllerConfig & config) {
         name = config.name;
-        autoControl = config.autoControl;
         windowSizeMs = config.windowSizeMs;
         pidParams = PIDParams(config.pidParams);
     }
@@ -78,7 +73,6 @@ struct MashControllerConfig : public Jsonable {
     virtual void convertToJson(JsonObject & json) const {
         json["id"] = id;
         json["name"] = name;
-        json["autoControl"] = autoControl;
         json["windowSizeMs"] = windowSizeMs;
 
         // Thermometers
@@ -103,7 +97,6 @@ struct MashControllerConfig : public Jsonable {
 
     unsigned int id;
     String name;
-    bool autoControl;
     int windowSizeMs;
     PIDParams pidParams;
     std::vector<unsigned int> thermometerIds;

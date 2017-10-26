@@ -77,7 +77,7 @@ public:
     void setAutoTemperatureControl(bool isAuto);
     
     bool isAutoTemperatureControl() const {
-        return _config.autoControl;
+        return _state.autoControl;
     }
     
     void addThermometer(ThermometerWire * thermometerWire) {
