@@ -202,17 +202,19 @@ struct TemperatureProfile : public Jsonable {
         state = ProfileState::Inactive;
     }
 
-    void startPendingLevel(float timeS) {
+    void startPendingLevel(float timeS, float temperatureC) {
         if (activeLevel >= 0 && state != ProfileState::Terminated) {
             TemperatureLevel * level = &levels[activeLevel];
             level->forceActiveIfPending(timeS);
+            this->update(timeS, temperatureC);
         }
     }
 
-    void terminateCurrentLevel() {
+    void terminateCurrentLevel(float timeS, float temperatureC) {
         if (activeLevel >= 0 && state != ProfileState::Terminated) {
             TemperatureLevel * level = &levels[activeLevel];
             level->forceTerminated();
+            this->update(timeS, temperatureC);
         }
     }
         

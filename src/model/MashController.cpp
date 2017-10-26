@@ -341,13 +341,16 @@ void MashController::startTemperatureControlProfileLevel() {
         unsigned long timeMs = millis();
         float currentTimeS = 0.001 * timeMs;
     
-        _state.temperatureProfile.startPendingLevel(currentTimeS);
+        _state.temperatureProfile.startPendingLevel(currentTimeS, _state.temperatureC);
     }
 }
 
 void MashController::skipTemperatureControlProfileLevel() {
     if (_state.running && _state.controlType == ControlType::Profile) {
-        _state.temperatureProfile.terminateCurrentLevel();
+        unsigned long timeMs = millis();
+        float currentTimeS = 0.001 * timeMs;
+
+        _state.temperatureProfile.terminateCurrentLevel(currentTimeS, _state.temperatureC);
     }
 }
 
