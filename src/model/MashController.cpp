@@ -238,7 +238,7 @@ void MashController::startTemperatureControl(ControlType controlType) {
 
         // start the profile
         if (controlType == ControlType::Profile) {
-            _state.temperatureC = _state.temperatureProfile.start(0.001 * _startTimeMs, _state.temperatureC);
+            _state.setpointC= _state.temperatureProfile.start(0.001 * _startTimeMs, _state.temperatureC);
         }
 
         _temperatureController->setSampleTime(_state.sampleTimeMs);
