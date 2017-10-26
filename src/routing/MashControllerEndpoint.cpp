@@ -18,7 +18,7 @@ void MashControllerEndpoint::buildPaths() {
     // _server->onPathParam<int>("/controllers/{id}", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updateMashController, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getPIDParams, this, _1));
-    _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_PUT, std::bind(&MashControllerEndpoint::updatePIDParams, this, _1));
+    _server->onPathParam<int>("/controllers/{id}/pid", HTTPMethod::HTTP_POST, std::bind(&MashControllerEndpoint::updatePIDParams, this, _1));
 
     _server->onPathParam<int>("/controllers/{id}/temperature", HTTPMethod::HTTP_GET, std::bind(&MashControllerEndpoint::getTemperature, this, _1));
 
