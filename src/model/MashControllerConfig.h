@@ -62,6 +62,7 @@ struct MashControllerConfig : public Jsonable {
         pidParams = rhs.pidParams;
         heater = rhs.heater;
         agitator = rhs.agitator;
+        return *this;
     }
 
     void copyBasic(const MashControllerConfig & config) {

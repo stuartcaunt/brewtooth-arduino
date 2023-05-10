@@ -24,6 +24,7 @@ public:
         active = rhs.active;
         port = rhs.port;
         isPortValid = rhs.isPortValid;
+        return *this;
     }
 
     void copyFromJson(const JsonObject & json) {

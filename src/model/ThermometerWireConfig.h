@@ -28,6 +28,7 @@ public:
         port = rhs.port;
         name = rhs.name;
         isPortValid = rhs.isPortValid;
+        return *this;
     }
 
     virtual void convertToJson(JsonObject & json) const {

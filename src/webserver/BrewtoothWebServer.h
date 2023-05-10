@@ -26,6 +26,9 @@ public:
 
     bool serveFile(const String & path, const String & cacheHeader = "");
         
+    void send(int code);
+    void send(int code, char* content_type, const String& content);
+
 private:
     String getContentType(const String & path);
         

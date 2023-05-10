@@ -36,6 +36,7 @@ struct StateHistory : public Jsonable {
         controllerOutputPercent = rhs.controllerOutputPercent;
         heaterActive = rhs.heaterActive;
         agitatorActive = rhs.agitatorActive;
+        return *this;
     }
 
     virtual void convertToJson(JsonObject & json) const {

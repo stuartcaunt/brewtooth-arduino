@@ -14,6 +14,7 @@ inline String toString(ControlType controlType) {
         case Setpoint: return "Setpoint";
         case Profile: return "Profile";
     }
+    return "";
 }
 
 class TemperatureControlState : public Jsonable {

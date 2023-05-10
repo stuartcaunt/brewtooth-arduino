@@ -17,6 +17,7 @@ inline String toString(ProfileState state) {
         case Active: return "Active";
         case Terminated: return "Terminated";
     }
+    return "";
 }
 
 struct TemperatureLevel : public Jsonable {
@@ -55,6 +56,7 @@ struct TemperatureLevel : public Jsonable {
         timerS = rhs.timerS;
         startTimeS = rhs.startTimeS;
         state = rhs.state;
+        return *this;
     }
 
     void init(float toleranceC) {
@@ -164,6 +166,7 @@ struct TemperatureProfile : public Jsonable {
         toleranceC = rhs.toleranceC;
         state = rhs.state;
         levels = rhs.levels;
+        return *this;
     }
 
     float start(float timeS, float temperatureC) {

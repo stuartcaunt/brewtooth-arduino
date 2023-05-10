@@ -28,6 +28,7 @@ struct PIDParams : public Jsonable {
         ki = rhs.ki;
         kd = rhs.kd;
         outputMax = rhs.outputMax;
+        return *this;
     }
 
     void copyFromJson(const JsonObject & json)  {

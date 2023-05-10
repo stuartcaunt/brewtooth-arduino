@@ -30,7 +30,7 @@ void setup(void){
     // Configuration::initInstance(isDoubleReset);
 
 #if (DEBUG_WIFI_CONNECTION == 1)
-    WifiConnector wifiConnector("NUMERICABLE-21EE", "kzPqS3jm3MdyIjhl");
+    WifiConnector wifiConnector("", "");
     wifiConnector.connect();
 #else
     // reset saved settings when double reset occurs

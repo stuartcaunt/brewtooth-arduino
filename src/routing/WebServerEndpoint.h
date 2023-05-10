@@ -4,7 +4,6 @@
 #include <Arduino.h>
 
 class BrewtoothWebServer;
-class ESP8266WebServer;
 
 class WebServerEndpoint {
 public:

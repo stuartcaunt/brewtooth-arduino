@@ -36,7 +36,7 @@ public:
         return _config.id;
     }
 
-    unsigned int setId(unsigned int id) {
+    void setId(unsigned int id) {
         _config.id = id;
     }
 
