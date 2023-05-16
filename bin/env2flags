@@ -1,0 +1,26 @@
+#!/bin/bash
+
+ENV_FILE=.env
+
+if [ ! -z $1 ]; then
+    ENV_FILE="$1"
+fi
+
+# Check if .env file exists
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Error: .env file not found."
+  exit 1
+fi
+
+BUILD_FLAGS=""
+# Read each line in the .env file
+while IFS='=' read -r key value
+do
+  # Remove leading/trailing whitespace from the value
+  value="$(echo -e "${value}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  
+  # Output the variable as a CMake build option
+  BUILD_FLAGS="$BUILD_FLAGS -D$key=\\\"$value\\\""
+done < "$ENV_FILE"
+
+echo $BUILD_FLAGS

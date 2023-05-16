@@ -68,20 +68,3 @@ String BrewtoothWebServer::getContentType(const String & path) {
     return "application/octet-stream";
 }
 
-void BrewtoothWebServer::send(int code) {
-    this->sendHeader("Access-Control-Allow-Origin", "*");
-    this->sendHeader("Access-Control-Max-Age", "10000");
-    this->sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
-    this->sendHeader("Access-Control-Allow-Headers", "*");
-
-    ESP8266WebServer::send(code);
-}
-
-void BrewtoothWebServer::send(int code, char* content_type, const String& content) {
-    this->sendHeader("Access-Control-Allow-Origin", "*");
-    this->sendHeader("Access-Control-Max-Age", "10000");
-    this->sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
-    this->sendHeader("Access-Control-Allow-Headers", "*");
-
-    ESP8266WebServer::send(code, content_type, content);
-}

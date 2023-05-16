@@ -24,6 +24,7 @@ void BrewtoothMashApp::setup() {
     _router->buildRoutes();
     
     // start the server
+    _server->enableCORS(true);
     _server->begin();
     LOG("HTTP server started");
 }

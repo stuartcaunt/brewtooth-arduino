@@ -41,7 +41,7 @@ public:
     virtual ~DoublePathParameterFunctionRequestHandler() {
     }
 
-    virtual bool canHandle(HTTPMethod requestMethod, String requestUri) {
+    virtual bool canHandle(HTTPMethod requestMethod, const String& requestUri) {
         _lastRequestUri = "";
 
         if (_method != HTTP_ANY && _method != requestMethod) {
@@ -72,7 +72,7 @@ public:
         return true;
     }
 
-    virtual bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
+    virtual bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, const String& requestUri) {
         std::string paramValueStringA;
         std::string paramValueStringB;
         if (_lastRequestUri != requestUri) {
